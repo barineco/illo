@@ -1,0 +1,1328 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// Instance Settings
+// ============================================
+
+enum InstanceMode {
+  PERSONAL        // 個人用: adminユーザーページがホーム
+  FEDERATION_ONLY // open-illustboard連合のみ
+  FULL_FEDIVERSE  // フルFediverse連合（将来用）
+}
+
+enum RemoteImageCacheStatus {
+  NOT_CACHED    // キャッシュなし
+  CACHING       // キャッシュ中
+  CACHED        // キャッシュ完了
+  CACHE_FAILED  // キャッシュ失敗
+  EXPIRED       // キャッシュ期限切れ
+}
+
+model InstanceSettings {
+  id              String       @id @default(cuid())
+  instanceName    String       @db.VarChar(100)
+  instanceMode    InstanceMode @default(PERSONAL)
+
+  // Setup status
+  isSetupComplete Boolean      @default(false)
+
+  // Instance admin
+  adminUserId     String?      @unique
+
+  // Federation settings
+  allowRegistration Boolean    @default(false)
+  requireApproval   Boolean    @default(true)
+  publicUrl        String?     @db.VarChar(500) // Public-facing URL (e.g., https://example.com)
+
+  // Federation control (for FEDERATION_ONLY mode)
+  federatedInstances String[] @default([])  // Allowed domain list for federation
+
+  // SEO settings
+  allowSearchEngineIndexing Boolean @default(false) @map("allow_search_engine_indexing")  // Allow search engines to index content (default: false for privacy)
+
+  // Instance description
+  description     String?      @db.Text
+
+  // Remote Image Cache settings
+  remoteImageCacheEnabled   Boolean @default(true)  @map("remote_image_cache_enabled")
+  remoteImageCacheTtlDays   Int     @default(30)    @map("remote_image_cache_ttl_days")
+  remoteImageAutoCache      Boolean @default(true)  @map("remote_image_auto_cache")
+
+  // Priority-based cache settings
+  cachePriorityEnabled      Boolean @default(true)  @map("cache_priority_enabled")
+  cachePriorityThreshold    Int     @default(100)   @map("cache_priority_threshold")
+  cacheTtlMultiplierTier1   Float   @default(1.5)   @map("cache_ttl_multiplier_tier1")
+  cacheTtlMultiplierTier2   Float   @default(2.0)   @map("cache_ttl_multiplier_tier2")
+  cacheTtlMultiplierTier3   Float   @default(3.0)   @map("cache_ttl_multiplier_tier3")
+  cacheLikeTier1            Int     @default(10)    @map("cache_like_tier1")
+  cacheLikeTier2            Int     @default(50)    @map("cache_like_tier2")
+  cacheLikeTier3            Int     @default(100)   @map("cache_like_tier3")
+
+  // Terms of Service settings (version tracking only - content is in source files)
+  tosVersion        Int       @default(1) @map("tos_version")       // ToS version number
+  tosUpdatedAt      DateTime? @map("tos_updated_at")                // Last ToS update
+
+  // Timestamps
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@map("instance_settings")
+}
+
+// ============================================
+// User Management
+// ============================================
+
+enum UserRole {
+  ADMIN
+  USER
+}
+
+enum SupporterTier {
+  NONE
+  TIER_1    // Basic supporter
+  TIER_2    // Advanced supporter (future)
+  TIER_3    // Premium supporter (future)
+}
+
+enum Visibility {
+  PUBLIC           // Public (federated)
+  UNLISTED         // Unlisted (federated but not in timelines)
+  FOLLOWERS_ONLY   // Followers only
+  PRIVATE          // Private (not federated)
+}
+
+model User {
+  id           String   @id @default(cuid())
+  username     String   @db.VarChar(30)
+  email        String?  @unique @db.VarChar(255) // Optional for OAuth-only users
+  passwordHash String   @db.VarChar(255)
+  displayName  String?  @db.VarChar(50)
+  bio          String?  @db.Text
+  avatarUrl    String?  @db.VarChar(500)
+  coverImageUrl String? @db.VarChar(500)
+
+  // Role
+  role         UserRole @default(USER)
+
+  // License and Storage settings
+  defaultLicense    String? @db.VarChar(200)        // Default license for artworks (e.g., "CC BY 4.0", "All Rights Reserved")
+  usedStorageBytes  BigInt  @default(0)             // Total storage used by this user (in bytes)
+  storageQuotaBytes BigInt  @default(1073741824)    // Storage quota (default: 1GB)
+
+  // ActivityPub federation
+  domain       String   @default("") @db.VarChar(255) // "" = local user, otherwise remote instance domain
+  actorUrl     String?  @unique @db.VarChar(500)
+  inbox        String?  @db.VarChar(500)
+  outbox       String?  @db.VarChar(500)
+  publicKey    String?  @db.Text
+  privateKey   String?  @db.Text
+
+  // ActivityPub collections
+  followersUrl String?  @db.VarChar(500) @map("followers_url")
+  followingUrl String?  @db.VarChar(500) @map("following_url")
+  sharedInbox  String?  @db.VarChar(500) @map("shared_inbox")
+
+  // Remote user metadata
+  summary      String?  @db.Text
+
+  // Cache metadata (for remote users)
+  lastFetchedAt   DateTime? @map("last_fetched_at")
+  fetchErrorCount Int       @default(0) @map("fetch_error_count")
+
+  // Avatar cache (for remote users)
+  avatarCacheStatus    RemoteImageCacheStatus? @map("avatar_cache_status")
+  avatarCachedAt       DateTime?               @map("avatar_cached_at")
+  avatarCacheExpiresAt DateTime?               @map("avatar_cache_expires_at")
+  cachedAvatarUrl      String?                 @db.VarChar(500) @map("cached_avatar_url")
+
+  // Federation settings (user-level)
+  federationEnabled Boolean    @default(true)   // Enable federation for this user
+  defaultVisibility Visibility @default(PUBLIC) // Default visibility for posts
+
+  // Account status
+  isActive     Boolean  @default(true)
+  isVerified   Boolean  @default(false)
+
+  // Email verification
+  isEmailVerified     Boolean  @default(false)
+  emailVerifyToken    String?  @unique @db.VarChar(255)
+  emailVerifyExpires  DateTime?
+
+  // Password reset
+  resetPasswordToken  String?  @unique @db.VarChar(255)
+  resetPasswordExpires DateTime?
+
+  // User moderation (admin actions)
+  approvedAt         DateTime?
+  approvedBy         String?   @db.VarChar(30)  // userId of admin who approved
+  rejectedAt         DateTime?
+  rejectionReason    String?   @db.Text
+  suspendedAt        DateTime?
+  suspensionReason   String?   @db.Text
+  deactivatedAt      DateTime?
+  deactivationReason String?   @db.Text
+  lastModifiedBy     String?   @db.VarChar(30)  // userId of last admin who modified
+  lastModifiedAt     DateTime?
+
+  // Security
+  lastLoginAt         DateTime?
+  loginAttempts       Int      @default(0)
+  lockoutUntil        DateTime?
+
+  // Two-Factor Authentication
+  twoFactorEnabled    Boolean  @default(false)
+  twoFactorSecret     String?  @db.VarChar(255)  // TOTP secret (base32 encoded)
+
+  // Social links
+  socialLinks         Json?    @map("social_links")  // { bluesky: "handle.bsky.social", twitter: "...", ... }
+
+  // Age verification and content settings
+  birthday            DateTime?       @db.Date
+  birthdayDisplay     BirthdayDisplay @default(HIDDEN) @map("birthday_display")
+  ageVerifiedAt       DateTime?       @map("age_verified_at")
+  contentFilters      Json?           @map("content_filters")  // { nsfw: 'show'|'blur'|'hide', r18: ..., r18g: ... }
+
+  // Bluesky OAuth connection
+  blueskyDid          String?  @unique @db.VarChar(255) @map("bluesky_did")  // did:plc:xxx
+  blueskyHandle       String?  @db.VarChar(255) @map("bluesky_handle")       // user.bsky.social
+  blueskyVerified     Boolean  @default(false) @map("bluesky_verified")       // OAuth接続で検証済み
+  blueskyLinkedAt     DateTime? @map("bluesky_linked_at")
+
+  // Supporter tier (Patreon integration)
+  supporterTier         SupporterTier @default(NONE) @map("supporter_tier")
+  supporterSince        DateTime?     @map("supporter_since")
+  supporterExpiresAt    DateTime?     @map("supporter_expires_at")
+
+  // Patreon OAuth connection
+  patreonId             String?       @unique @db.VarChar(255) @map("patreon_id")
+  patreonAccessToken    String?       @db.Text @map("patreon_access_token")     // Encrypted
+  patreonRefreshToken   String?       @db.Text @map("patreon_refresh_token")    // Encrypted
+  patreonTokenExpiresAt DateTime?     @map("patreon_token_expires_at")
+  patreonLastSyncAt     DateTime?     @map("patreon_last_sync_at")
+
+  // Portfolio tools (JSON array of tool names)
+  toolsUsed           String?  @db.Text @map("tools_used")
+
+  // Default tool selection preference
+  useProfileToolsAsDefault Boolean @default(true) @map("use_profile_tools_as_default")
+
+  // Terms of Service acceptance
+  tosAcceptedAt      DateTime? @map("tos_accepted_at")       // When ToS was accepted
+  tosAcceptedVersion Int?      @map("tos_accepted_version")  // Which ToS version was accepted
+
+  // Timestamps
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  // Relations
+  artworks          Artwork[]
+  likes             Like[]
+  bookmarks         Bookmark[]
+  comments          Comment[]
+  reactions         Reaction[]
+  following         Follow[]  @relation("UserFollowing")
+  followers         Follow[]  @relation("UserFollowers")
+  backupCodes       TwoFactorBackupCode[]
+  sessions          Session[]
+  authenticators    Authenticator[]
+  auditLogsAsAdmin  AuditLog[] @relation("AuditLogAdmin")
+  auditLogsAsTarget AuditLog[] @relation("AuditLogTarget")
+  collections       Collection[]
+  notifications     Notification[]
+  actedNotifications Notification[] @relation("NotificationActor")
+
+  // Direct Messages
+  conversationParticipants ConversationParticipant[]
+  sentMessages             Message[] @relation("MessageSender")
+
+  // MLS (Messaging Layer Security)
+  mlsKeyPackages           MlsKeyPackage[]
+
+  // Mutes
+  mutingUsers     UserMute[]      @relation("UserMuting")
+  mutedByUsers    UserMute[]      @relation("UserMuted")
+  wordMutes       WordMute[]
+  tagMutes        TagMute[]
+
+  // Reports
+  reportsFiled    Report[]        @relation("ReportedBy")
+  reportsReceived Report[]        @relation("ReportedUser")
+  reportsReviewed Report[]        @relation("ReportReviewer")
+
+  // Rate Limiting
+  rateLimitLogs     RateLimitLog[]
+  rateLimitPenalties RateLimitPenalty[]
+
+  // Analytics
+  viewLogs          ViewLog[]
+
+  @@unique([username, domain], name: "username_domain")
+  @@index([username])
+  @@index([email])
+  @@index([createdAt])
+  @@map("users")
+}
+
+// ============================================
+// Artwork Management
+// ============================================
+
+enum ArtworkType {
+  ILLUSTRATION
+  MANGA
+}
+
+enum AgeRating {
+  ALL_AGES
+  NSFW      // Suggestive/sexy content (between ALL_AGES and R18)
+  R18
+  R18G
+}
+
+enum CreationPeriodUnit {
+  HOURS
+  DAYS
+  WEEKS
+  MONTHS
+}
+
+enum ArtworkMedium {
+  DIGITAL
+  TRADITIONAL
+  THREE_D
+  MIXED
+}
+
+enum BirthdayDisplay {
+  HIDDEN       // Birthday is not shown
+  MONTH_DAY    // Only month/day shown (e.g., "January 15")
+  FULL_DATE    // Full date shown (e.g., "January 15, 1990")
+}
+
+model Artwork {
+  id            String      @id @default(cuid())
+  title         String      @db.VarChar(200)
+  description   String?     @db.Text
+  type          ArtworkType @default(ILLUSTRATION)
+  ageRating     AgeRating   @default(ALL_AGES)
+
+  // Author
+  authorId      String
+  author        User        @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  // Visibility settings
+  visibility    Visibility  @default(PUBLIC)
+
+  // License information
+  license           String?     @db.VarChar(200)  // Artwork-specific license (overrides user default)
+  customLicenseUrl  String?     @db.VarChar(500) @map("custom_license_url")  // Custom license URL
+  customLicenseText String?     @db.Text @map("custom_license_text")  // Custom license text description
+
+  // Statistics
+  viewCount     Int         @default(0)
+  likeCount     Int         @default(0)
+  bookmarkCount Int         @default(0)
+  commentCount  Int         @default(0)
+  reactionCount Int         @default(0)
+
+  // Timestamps
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  publishedAt   DateTime?
+
+  // ActivityPub fields (for federation)
+  apObjectId    String?     @unique  // ActivityPub Object ID (URL)
+  federated     Boolean     @default(false)  // Whether this was federated
+
+  // Soft delete (for federated artworks)
+  isDeleted     Boolean     @default(false) @map("is_deleted")
+  deletedAt     DateTime?   @map("deleted_at")
+
+  // Creator protection options
+  disableRightClick Boolean  @default(true) @map("disable_right_click")
+
+  // Link Card (OG image for social sharing)
+  ogCardUrl     String?     @db.VarChar(500) @map("og_card_url")
+  ogCardBlur    Boolean     @default(false) @map("og_card_blur")
+
+  // Link card crop coordinates (in original source image pixels)
+  // Null = center crop to 16:9
+  ogCardCropX          Int?  @map("og_card_crop_x")
+  ogCardCropY          Int?  @map("og_card_crop_y")
+  ogCardCropWidth      Int?  @map("og_card_crop_width")
+  ogCardCropHeight     Int?  @map("og_card_crop_height")
+
+  // Creation metadata (for portfolio)
+  creationDate        DateTime?           @map("creation_date")
+  creationPeriodValue Int?                @map("creation_period_value")
+  creationPeriodUnit  CreationPeriodUnit? @map("creation_period_unit")
+  isCommission        Boolean             @default(false) @map("is_commission")
+  clientName          String?             @db.VarChar(200) @map("client_name")
+  projectName         String?             @db.VarChar(200) @map("project_name")
+  medium              ArtworkMedium?
+  externalUrl         String?             @db.VarChar(500) @map("external_url")
+  toolsUsed           String?             @db.Text @map("tools_used")  // JSON array of tool names
+
+  // Relations
+  images        ArtworkImage[]
+  tags          ArtworkTag[]
+  likes         Like[]
+  bookmarks     Bookmark[]
+  comments      Comment[]
+  reactions     Reaction[]
+  collectionArtworks CollectionArtwork[]
+  notifications Notification[]
+  reports       Report[]
+  viewLogs      ViewLog[]
+
+  @@index([authorId])
+  @@index([type])
+  @@index([ageRating])
+  @@index([visibility])
+  @@index([createdAt])
+  @@index([publishedAt])
+  @@index([viewCount])
+  @@index([likeCount])
+  @@index([isDeleted])
+  @@index([creationDate])
+  @@map("artworks")
+}
+
+model ArtworkImage {
+  id           String   @id @default(cuid())
+  artworkId    String
+  artwork      Artwork  @relation(fields: [artworkId], references: [id], onDelete: Cascade)
+
+  // Image info
+  url          String   @db.VarChar(500)   // 2048px version (for detail page)
+  thumbnailUrl String   @db.VarChar(500)   // 320px version (for thumbnails)
+  width        Int                          // Width of 2048px version
+  height       Int                          // Height of 2048px version
+  originalWidth   Int?  @map("original_width")   // Width of original image
+  originalHeight  Int?  @map("original_height")  // Height of original image
+  order        Int      @default(0)
+
+  // Storage
+  storageKey            String   @db.VarChar(500)  // Storage key for 2048px version
+  originalStorageKey    String?  @db.VarChar(500)  // Storage key for full-size version (if file size <= limit)
+  fileSize              Int      // bytes (for 2048px version)
+  originalFileSize      Int?     // bytes (for full-size version, if exists)
+  mimeType              String   @db.VarChar(100)
+
+  // Image format and metadata
+  originalFormat        String   @db.VarChar(20)   // "jpeg", "png", "gif", "webp", "svg"
+  hasMetadata           Boolean  @default(false)   // Whether metadata was embedded
+  wasResized            Boolean  @default(false)   // Whether the image was resized from original
+
+  // Encryption metadata (for image protection)
+  encryptionIv                String?  @db.VarChar(32) @map("encryption_iv")         // Base64 encoded IV for 2048px
+  originalEncryptionIv        String?  @db.VarChar(32) @map("original_encryption_iv") // Base64 encoded IV for full-size
+  thumbnailEncryptionIv       String?  @db.VarChar(32) @map("thumbnail_encryption_iv") // Base64 encoded IV for thumbnail
+  isEncrypted                 Boolean  @default(false) @map("is_encrypted")
+
+  // Remote image cache (for federated images)
+  cacheStatus       RemoteImageCacheStatus? @map("cache_status")
+  cachedAt          DateTime?               @map("cached_at")
+  cacheExpiresAt    DateTime?               @map("cache_expires_at")
+  remoteUrl         String?                 @db.VarChar(1000) @map("remote_url")  // Original remote URL
+
+  // Timestamps
+  createdAt    DateTime @default(now())
+
+  @@index([artworkId, order])
+  @@index([cacheStatus])
+  @@map("artwork_images")
+}
+
+// ============================================
+// Tag Management
+// ============================================
+
+model Tag {
+  id           String       @id @default(cuid())
+  name         String       @unique @db.VarChar(100)
+  artworkCount Int          @default(0)
+
+  // Timestamps
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  // Relations
+  artworks     ArtworkTag[]
+  tagMutes     TagMute[]
+
+  @@index([name])
+  @@index([artworkCount])
+  @@map("tags")
+}
+
+model ArtworkTag {
+  id        String   @id @default(cuid())
+  artworkId String
+  tagId     String
+  artwork   Artwork  @relation(fields: [artworkId], references: [id], onDelete: Cascade)
+  tag       Tag      @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([artworkId, tagId])
+  @@index([artworkId])
+  @@index([tagId])
+  @@map("artwork_tags")
+}
+
+// ============================================
+// Social Features
+// ============================================
+
+enum NotificationType {
+  LIKE
+  COMMENT
+  COMMENT_REPLY
+  FOLLOW
+  DIRECT_MESSAGE
+  REACTION
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      NotificationType
+  actorId   String
+  actor     User             @relation("NotificationActor", fields: [actorId], references: [id], onDelete: Cascade)
+  artworkId String?
+  artwork   Artwork?         @relation(fields: [artworkId], references: [id], onDelete: Cascade)
+  commentId String?          @unique
+  comment   Comment?         @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  likeId    String?          @unique
+  like      Like?            @relation(fields: [likeId], references: [id], onDelete: Cascade)
+  followId  String?          @unique
+  follow    Follow?          @relation(fields: [followId], references: [id], onDelete: Cascade)
+  messageId  String?          @unique
+  message    Message?         @relation(fields: [messageId], references: [id], onDelete: Cascade)
+  reactionId String?          @unique
+  reaction   Reaction?        @relation(fields: [reactionId], references: [id], onDelete: Cascade)
+  isRead     Boolean          @default(false)
+  readAt    DateTime?
+  createdAt DateTime         @default(now())
+
+  @@index([userId, isRead, createdAt])
+  @@index([actorId])
+  @@index([type])
+  @@map("notifications")
+}
+
+model Like {
+  id        String   @id @default(cuid())
+  userId    String
+  artworkId String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  artwork   Artwork  @relation(fields: [artworkId], references: [id], onDelete: Cascade)
+
+  // ActivityPub fields (for federation)
+  apActivityId String?  @unique  // ActivityPub Activity ID (URL)
+  federated    Boolean  @default(false)  // Whether this was federated
+
+  // Notification
+  notification Notification?
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, artworkId])
+  @@index([userId])
+  @@index([artworkId])
+  @@index([createdAt])
+  @@map("likes")
+}
+
+// Emoji Reaction (supports both logged-in and anonymous users)
+model Reaction {
+  id          String   @id @default(cuid())
+  artworkId   String
+  artwork     Artwork  @relation(fields: [artworkId], references: [id], onDelete: Cascade)
+
+  emoji       String   @db.VarChar(64)    // Unicode emoji
+
+  // User identification (mutually exclusive: either userId or ipHash)
+  userId      String?                     // Logged-in user (nullable)
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ipHash      String?  @db.VarChar(64)    // Anonymous user IP hash (SHA256)
+
+  // ActivityPub (logged-in users only)
+  apActivityId String?  @unique           // ActivityPub EmojiReact Activity ID
+  federated    Boolean  @default(false)   // Whether this was federated
+
+  // Notification
+  notification Notification?
+
+  createdAt   DateTime @default(now())
+
+  // Constraints: same user/IP can only react once with the same emoji per artwork
+  @@unique([artworkId, userId, emoji], name: "user_artwork_emoji")
+  @@unique([artworkId, ipHash, emoji], name: "ip_artwork_emoji")
+  @@index([artworkId])
+  @@index([userId])
+  @@index([ipHash])
+  @@index([emoji])
+  @@index([createdAt])
+  @@map("reactions")
+}
+
+// Rate limiting for anonymous reactions
+model AnonymousReactionLimit {
+  id            String   @id @default(cuid())
+  ipHash        String   @unique @db.VarChar(64)  // SHA256 hash
+  reactionCount Int      @default(0)
+  windowStart   DateTime @default(now())
+  expiresAt     DateTime
+
+  @@index([expiresAt])
+  @@map("anonymous_reaction_limits")
+}
+
+model Bookmark {
+  id        String   @id @default(cuid())
+  userId    String
+  artworkId String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  artwork   Artwork  @relation(fields: [artworkId], references: [id], onDelete: Cascade)
+
+  // Bookmarks are always private (not federated)
+  // No ActivityPub fields needed
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, artworkId])
+  @@index([userId])
+  @@index([artworkId])
+  @@index([createdAt])
+  @@map("bookmarks")
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  artworkId String
+  userId    String
+  artwork   Artwork  @relation(fields: [artworkId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  content   String   @db.Text
+
+  // For nested comments (replies)
+  parentId  String?
+  parent    Comment? @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies   Comment[] @relation("CommentReplies")
+
+  // ActivityPub fields (for federation)
+  apActivityId String?  @unique  // ActivityPub Note ID (URL)
+  federated    Boolean  @default(false)  // Whether this was federated
+
+  // Notification
+  notification Notification?
+
+  // Reports
+  reports      Report[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([artworkId])
+  @@index([userId])
+  @@index([parentId])
+  @@index([createdAt])
+  @@map("comments")
+}
+
+enum FollowStatus {
+  PENDING   // Follow request pending
+  ACCEPTED  // Follow request accepted
+  REJECTED  // Follow request rejected
+}
+
+model Follow {
+  id          String       @id @default(cuid())
+  followerId  String
+  followingId String
+  follower    User         @relation("UserFollowing", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User         @relation("UserFollowers", fields: [followingId], references: [id], onDelete: Cascade)
+
+  status      FollowStatus @default(ACCEPTED)  // Default: auto-accept
+
+  // ActivityPub fields (for federation)
+  apActivityId String?     @unique  // ActivityPub Follow Activity ID (URL)
+  federated    Boolean     @default(false)  // Whether this was federated
+
+  // Notification
+  notification Notification?
+
+  createdAt   DateTime @default(now())
+
+  @@unique([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("follows")
+}
+
+// ============================================
+// Two-Factor Authentication
+// ============================================
+
+model TwoFactorBackupCode {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  code      String   @db.VarChar(10)  // 8-digit backup code
+  isUsed    Boolean  @default(false)
+
+  createdAt DateTime @default(now())
+  usedAt    DateTime?
+
+  @@index([userId])
+  @@index([code])
+  @@map("two_factor_backup_codes")
+}
+
+// ============================================
+// Session Management
+// ============================================
+
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Session info
+  refreshToken String   @unique @db.VarChar(500)
+  deviceName   String?  @db.VarChar(100)
+  deviceType   String?  @db.VarChar(50)  // "desktop", "mobile", "tablet"
+  ipAddress    String?  @db.VarChar(45)  // IPv4 or IPv6
+  userAgent    String?  @db.VarChar(500)
+  location     String?  @db.VarChar(200) // Optional: City, Country
+
+  // Timestamps
+  createdAt    DateTime @default(now())
+  expiresAt    DateTime
+  lastUsedAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([refreshToken])
+  @@index([expiresAt])
+  @@map("sessions")
+}
+
+model LoginAttempt {
+  id            String   @id @default(cuid())
+  userId        String?  // Null if user not found
+  email         String   @db.VarChar(255)
+  ipAddress     String   @db.VarChar(45)
+  userAgent     String?  @db.VarChar(500)
+  success       Boolean
+  failureReason String?  @db.VarChar(100)  // "invalid_password", "account_locked", etc.
+  createdAt     DateTime @default(now())
+
+  @@index([email])
+  @@index([ipAddress])
+  @@index([createdAt])
+  @@index([success])
+  @@map("login_attempts")
+}
+
+// ============================================
+// WebAuthn / Passkey Authentication
+// ============================================
+
+model Authenticator {
+  id                   String   @id @default(cuid())
+  userId               String
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // WebAuthn credential fields (required by @simplewebauthn/server)
+  credentialId         Bytes    @unique                   // Base64URL decoded credential ID
+  credentialPublicKey  Bytes                              // COSE public key
+  counter              BigInt                             // Signature counter for replay attack prevention
+  credentialDeviceType String   @db.VarChar(32)           // "singleDevice" or "multiDevice"
+  credentialBackedUp   Boolean                            // Whether the credential is backed up (synced)
+
+  // Transports (for hints during authentication)
+  transports           String[] @default([])              // ["usb", "ble", "nfc", "internal", "hybrid"]
+
+  // User-facing metadata
+  name                 String   @db.VarChar(100)          // User-defined name (e.g., "MacBook Pro Touch ID")
+
+  // Timestamps
+  createdAt            DateTime @default(now())
+  lastUsedAt           DateTime?
+
+  @@index([userId])
+  @@map("authenticators")
+}
+
+model WebAuthnChallenge {
+  id          String   @id @default(cuid())
+  userId      String?                                     // null for authentication challenges (discoverable credentials)
+  challenge   String   @unique @db.VarChar(100)           // Base64URL encoded challenge
+  type        String   @db.VarChar(20)                    // "registration" or "authentication"
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+
+  @@index([expiresAt])
+  @@map("webauthn_challenges")
+}
+
+// ============================================
+// Federation Management
+// ============================================
+
+model FederatedInstance {
+  id              String   @id @default(cuid())
+  domain          String   @unique @db.VarChar(255)
+
+  // Instance information
+  softwareName    String?  @db.VarChar(100)  // "open-illustboard", "mastodon", "pixelfed"
+  softwareVersion String?  @db.VarChar(50)
+
+  // Federation control
+  isBlocked       Boolean  @default(false)  // Blocked from federation
+  isTrusted       Boolean  @default(false)  // Trusted open-illustboard instance
+
+  // Timestamps
+  lastSeen        DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([domain])
+  @@index([isTrusted])
+  @@index([isBlocked])
+  @@map("federated_instances")
+}
+
+// ============================================
+// Activity Delivery Logging
+// ============================================
+
+enum ActivityDeliveryStatus {
+  PENDING
+  DELIVERED
+  FAILED
+}
+
+model ActivityDeliveryLog {
+  id              String                 @id @default(cuid())
+
+  // Sender and target
+  senderId        String
+  inboxUrl        String                 @db.VarChar(500)
+
+  // Activity details
+  activityType    String                 @db.VarChar(50)  // "Follow", "Like", "Create", "Update", "Delete", etc.
+  activityId      String?                @db.VarChar(500) // ActivityPub activity ID
+  activityPayload Json                   // Full activity JSON for retry
+
+  // Status tracking
+  status          ActivityDeliveryStatus @default(PENDING)
+  attemptCount    Int                    @default(0)
+  maxAttempts     Int                    @default(4)
+
+  // Error tracking
+  lastError       String?                @db.Text
+  lastAttemptAt   DateTime?
+
+  // BullMQ job tracking
+  bullmqJobId     String?                @unique @db.VarChar(100)
+
+  // Timestamps
+  createdAt       DateTime               @default(now())
+  updatedAt       DateTime               @updatedAt
+  deliveredAt     DateTime?
+
+  @@index([senderId])
+  @@index([status])
+  @@index([activityType])
+  @@index([createdAt])
+  @@index([inboxUrl])
+  @@map("activity_delivery_logs")
+}
+
+// ============================================
+// Audit Logging
+// ============================================
+
+model AuditLog {
+  id            String    @id @default(cuid())
+  createdAt     DateTime  @default(now())
+
+  // Who performed the action
+  adminId       String
+  admin         User      @relation("AuditLogAdmin", fields: [adminId], references: [id], onDelete: Cascade)
+
+  // What action was performed
+  action        String    @db.VarChar(100)  // e.g., "USER_APPROVED", "USER_REJECTED", "USER_SUSPENDED"
+  targetUserId  String?
+  targetUser    User?     @relation("AuditLogTarget", fields: [targetUserId], references: [id], onDelete: Cascade)
+
+  // Action details
+  reason        String?   @db.Text
+  metadata      Json?     // Additional context (e.g., IP address, session info)
+
+  @@index([adminId])
+  @@index([targetUserId])
+  @@index([createdAt])
+  @@index([action])
+  @@map("audit_logs")
+}
+
+// ============================================
+// Collections
+// ============================================
+
+model Collection {
+  id            String      @id @default(cuid())
+  title         String      @db.VarChar(100)
+  description   String?     @db.Text
+
+  // Owner
+  userId        String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Visibility
+  visibility    Visibility  @default(PUBLIC)
+
+  // Cover image (optional, can be auto-generated from first artwork)
+  coverImageUrl String?     @db.VarChar(500)
+
+  // Statistics
+  artworkCount  Int         @default(0)
+
+  // Timestamps
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  // Relations
+  artworks      CollectionArtwork[]
+
+  @@index([userId])
+  @@index([visibility])
+  @@index([createdAt])
+  @@map("collections")
+}
+
+model CollectionArtwork {
+  id           String     @id @default(cuid())
+  collectionId String
+  artworkId    String
+  collection   Collection @relation(fields: [collectionId], references: [id], onDelete: Cascade)
+  artwork      Artwork    @relation(fields: [artworkId], references: [id], onDelete: Cascade)
+
+  // Order within the collection
+  order     Int      @default(0)
+
+  // When added to collection
+  addedAt   DateTime @default(now())
+
+  @@unique([collectionId, artworkId])
+  @@index([collectionId])
+  @@index([artworkId])
+  @@index([order])
+  @@map("collection_artworks")
+}
+
+// ============================================
+// Mutes (User, Word, Tag)
+// ============================================
+
+model UserMute {
+  id              String    @id @default(cuid())
+  muterId         String
+  muter           User      @relation("UserMuting", fields: [muterId], references: [id], onDelete: Cascade)
+  mutedId         String
+  muted           User      @relation("UserMuted", fields: [mutedId], references: [id], onDelete: Cascade)
+
+  // Mute settings
+  muteNotifications Boolean @default(true)  // Also hide notifications from this user
+  duration        Int?                      // Mute duration in seconds, null = permanent
+  expiresAt       DateTime?
+
+  createdAt       DateTime  @default(now())
+
+  @@unique([muterId, mutedId])
+  @@index([muterId])
+  @@index([mutedId])
+  @@index([expiresAt])
+  @@map("user_mutes")
+}
+
+model WordMute {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  keyword         String    @db.VarChar(255)
+  regex           Boolean   @default(false)   // Treat keyword as regex
+  wholeWord       Boolean   @default(false)   // Match whole word only
+  caseSensitive   Boolean   @default(false)   // Case sensitive matching
+
+  duration        Int?                        // Mute duration in seconds, null = permanent
+  expiresAt       DateTime?
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("word_mutes")
+}
+
+model TagMute {
+  id              String    @id @default(cuid())
+  userId          String
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tagId           String
+  tag             Tag       @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  duration        Int?                        // Mute duration in seconds, null = permanent
+  expiresAt       DateTime?
+
+  createdAt       DateTime  @default(now())
+
+  @@unique([userId, tagId])
+  @@index([userId])
+  @@index([tagId])
+  @@index([expiresAt])
+  @@map("tag_mutes")
+}
+
+// ============================================
+// Reports (Moderation)
+// ============================================
+
+enum ReportType {
+  ARTWORK
+  USER
+  COMMENT
+}
+
+enum ReportStatus {
+  PENDING       // Awaiting review
+  INVESTIGATING // Under investigation
+  RESOLVED      // Action taken
+  DISMISSED     // No action needed
+}
+
+enum ReportReason {
+  INAPPROPRIATE_CONTENT
+  SPAM
+  HARASSMENT
+  COPYRIGHT_VIOLATION
+  SEXUAL_CONTENT
+  VIOLENCE
+  ACCOUNT_SPAM
+  IMPERSONATION
+  HATE_SPEECH
+  OTHER
+}
+
+model Report {
+  id              String       @id @default(cuid())
+  type            ReportType
+  reason          ReportReason
+  description     String       @db.Text
+
+  status          ReportStatus @default(PENDING)
+
+  // Reporter
+  reporterId      String
+  reporter        User         @relation("ReportedBy", fields: [reporterId], references: [id], onDelete: Cascade)
+
+  // Target (one of these will be set based on type)
+  artworkId       String?
+  artwork         Artwork?     @relation(fields: [artworkId], references: [id], onDelete: Cascade)
+  targetUserId    String?
+  targetUser      User?        @relation("ReportedUser", fields: [targetUserId], references: [id], onDelete: Cascade)
+  commentId       String?
+  comment         Comment?     @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  // Admin review
+  reviewedBy      String?
+  reviewer        User?        @relation("ReportReviewer", fields: [reviewedBy], references: [id], onDelete: SetNull)
+  adminNotes      String?      @db.Text
+  adminAction     String?      @db.VarChar(100)  // Action taken: "warning_issued", "content_removed", "user_suspended", etc.
+
+  // Timestamps
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+  reviewedAt      DateTime?
+  resolvedAt      DateTime?
+
+  @@index([type])
+  @@index([status])
+  @@index([reporterId])
+  @@index([targetUserId])
+  @@index([artworkId])
+  @@index([commentId])
+  @@index([createdAt])
+  @@map("reports")
+}
+
+// ============================================
+// Direct Messages
+// ============================================
+
+model Conversation {
+  id              String    @id @default(cuid())
+  title           String?   @db.VarChar(200)  // For group conversations (future)
+  isGroup         Boolean   @default(false)   // For group conversations (future)
+  lastMessageAt   DateTime  @default(now())
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  participants    ConversationParticipant[]
+  messages        Message[]
+
+  @@index([lastMessageAt])
+  @@map("conversations")
+}
+
+model ConversationParticipant {
+  id              String       @id @default(cuid())
+  conversationId  String
+  conversation    Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  userId          String
+  user            User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  lastReadAt      DateTime?
+  isMuted         Boolean      @default(false)
+  hasLeft         Boolean      @default(false)  // For group conversations
+  joinedAt        DateTime     @default(now())
+
+  @@unique([conversationId, userId])
+  @@index([userId])
+  @@index([conversationId])
+  @@map("conversation_participants")
+}
+
+model Message {
+  id              String       @id @default(cuid())
+  conversationId  String
+  conversation    Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderId        String
+  sender          User         @relation("MessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+
+  content         String       @db.Text
+
+  // Encryption (DB-level encryption for privacy)
+  encryptionVersion Int        @default(0) @map("encryption_version")  // 0=plaintext, 1=AES-256-GCM
+  contentIv         String?    @db.VarChar(24) @map("content_iv")      // Base64 encoded IV for decryption
+
+  // Threading (for replies within DM conversation)
+  replyToId       String?
+  replyTo         Message?     @relation("MessageReplies", fields: [replyToId], references: [id], onDelete: SetNull)
+  replies         Message[]    @relation("MessageReplies")
+
+  // ActivityPub fields (for federation)
+  apActivityId    String?      @unique  // ActivityPub Note ID (URL)
+  federated       Boolean      @default(false)  // Whether this came from/went to federation
+
+  // Status
+  isDeleted       Boolean      @default(false)  // Soft delete
+  deletedAt       DateTime?
+
+  // Timestamps
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  // Notification relation
+  notification    Notification?
+
+  @@index([conversationId, createdAt])
+  @@index([senderId])
+  @@index([apActivityId])
+  @@map("messages")
+}
+
+// ============================================
+// MLS (Messaging Layer Security)
+// ============================================
+
+model MlsKeyPackage {
+  id            String    @id @default(cuid())
+  userId        String
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // KeyPackage data (MLS RFC 9420)
+  keyPackage    Bytes                             // MLS KeyPackage binary (TLS-serialized)
+  publicKey     String    @db.VarChar(100)        // Public key for identification (hex)
+  cipherSuite   Int       @default(1)             // MLS cipher suite (1 = MLS_128_DHKEMX25519_AES128GCM_SHA256_Ed25519)
+
+  // Timestamps
+  createdAt     DateTime  @default(now())
+  expiresAt     DateTime?                         // Optional expiration
+
+  @@index([userId])
+  @@index([publicKey])
+  @@map("mls_key_packages")
+}
+
+model MlsGroupState {
+  id            String    @id @default(cuid())
+  groupId       String    @unique @db.VarChar(100)  // MLS group identifier (hex)
+
+  // Group state (for group continuity)
+  epochNumber   Int       @default(0)
+  groupState    Bytes                               // Serialized MLS group state
+
+  // Participants
+  participantIds String[]                           // User IDs in this group
+
+  // Timestamps
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  @@index([groupId])
+  @@map("mls_group_states")
+}
+
+// ============================================
+// Rate Limiting & Bot Protection
+// ============================================
+
+enum RateLimitTier {
+  NORMAL
+  WARNING
+  SOFT_LIMIT
+  HARD_LIMIT
+}
+
+model RateLimitLog {
+  id              String         @id @default(cuid())
+  userId          String?
+  user            User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  ipAddress       String         @db.VarChar(45)
+  endpoint        String         @db.VarChar(100)
+  action          String         @db.VarChar(50)
+  tier            RateLimitTier  @default(NORMAL)
+  requestCount    Int
+  windowSize      Int
+  intervalVariance Float?
+  avgInterval     Float?
+  createdAt       DateTime       @default(now())
+  windowStart     DateTime
+
+  // Composite score fields (new algorithm)
+  riskScore       Float?
+  intervalScore   Float?
+  regularityScore Float?
+  detectionReason String?        @db.VarChar(50)
+  isAnonymous     Boolean        @default(true)
+
+  @@index([userId, createdAt])
+  @@index([ipAddress, createdAt])
+  @@index([tier, createdAt])
+  @@map("rate_limit_logs")
+}
+
+model RateLimitPenalty {
+  id              String         @id @default(cuid())
+  userId          String?
+  user            User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  ipAddress       String         @db.VarChar(45)
+  tier            RateLimitTier
+  reason          String         @db.VarChar(200)
+  startedAt       DateTime       @default(now())
+  expiresAt       DateTime
+  violationCount  Int            @default(1)
+  escalatedFrom   String?
+
+  @@unique([userId, ipAddress], name: "user_ip_penalty")
+  @@index([userId])
+  @@index([ipAddress])
+  @@index([expiresAt])
+  @@map("rate_limit_penalties")
+}
+
+model RateLimitConfig {
+  id                    String    @id @default(cuid())
+
+  // Short window thresholds (default: 30 seconds)
+  windowSeconds         Int       @default(30)
+  softLimitPerWindow    Int       @default(8)
+  hardLimitPerWindow    Int       @default(12)
+
+  // Hourly thresholds
+  softLimitPerHour      Int       @default(150)
+  hardLimitPerHour      Int       @default(250)
+
+  // Pattern detection thresholds (coefficient of variation) - legacy
+  cvSoftThreshold       Float     @default(0.15)
+  cvHardThreshold       Float     @default(0.08)
+
+  // Penalty durations (minutes)
+  softPenaltyMinutes    Int       @default(5)
+  hardPenaltyMinutes    Int       @default(30)
+  maxPenaltyMinutes     Int       @default(120)
+
+  // Feature flag
+  enabled               Boolean   @default(true)
+
+  // Composite score thresholds (new algorithm)
+  hardLimitScore        Float     @default(90)
+  softLimitScore        Float     @default(50)
+  warningScore          Float     @default(35)
+
+  // Minimum sample size for pattern analysis
+  minSamplesAnonymous   Int       @default(15)
+  minSamplesUser        Int       @default(20)
+
+  // Instant detection (for obvious automation)
+  instantDetectionIntervalMs  Int   @default(3000)
+  instantDetectionCV          Float @default(1.0)
+
+  // Rollout control
+  measurementMode       Boolean   @default(false)
+  useCompositeScore     Boolean   @default(false)
+
+  updatedAt             DateTime  @updatedAt
+  updatedBy             String?
+
+  @@map("rate_limit_config")
+}
+
+// ============================================
+// Analytics (View Logs)
+// ============================================
+
+model ViewLog {
+  id          String   @id @default(cuid())
+  artworkId   String
+  artwork     Artwork  @relation(fields: [artworkId], references: [id], onDelete: Cascade)
+
+  // Viewer identification (mutually exclusive: either viewerId or visitorHash)
+  viewerId    String?                     // Logged-in user (nullable)
+  viewer      User?    @relation(fields: [viewerId], references: [id], onDelete: SetNull)
+  visitorHash String?  @db.VarChar(64)    // Anonymous: SHA256(IP + UserAgent + dailySalt)
+
+  // Traffic source
+  referrer    String?  @db.VarChar(500)   // Referrer domain (e.g., "twitter.com", "pixiv.net")
+
+  // Timestamps
+  createdAt   DateTime @default(now())
+
+  @@index([artworkId, createdAt])
+  @@index([artworkId, visitorHash])
+  @@index([createdAt])  // For cleanup job
+  @@map("view_logs")
+}

@@ -1,0 +1,59 @@
+GNU AFFERO GENERAL PUBLIC LICENSE
+Version 3, 19 November 2007
+
+Copyright (C) 2025-2026 illo contributors
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published
+by the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+================================================================================
+ADDITIONAL TERMS pursuant to Section 7 of the GNU Affero General Public License
+================================================================================
+
+The following additional terms apply to this software:
+
+1. ATTRIBUTION REQUIREMENT
+
+   If you modify this software and make it available over a network, you must
+   retain visible attribution to "illo" in the user interface. This
+   attribution must include either:
+   - A "Powered by illo" notice in the footer or about page
+   - A link to https://github.com/barineco/illo
+
+2. TERMS OF SERVICE INTEGRITY
+
+   You may NOT remove, disable, weaken, or circumvent the Terms of Service
+   agreement functionality that requires users to acknowledge and accept terms
+   before registration. Specifically:
+   - The ToS agreement checkbox during user registration MUST remain functional
+   - The scroll-to-read enforcement mechanism MUST NOT be removed or bypassed
+   - Instance administrators MUST be able to configure their own ToS content
+
+3. ARTIST PROTECTION FEATURES
+
+   You may NOT remove, disable, or weaken security features designed to protect
+   artists' content, including but not limited to:
+   - Image encryption and signed URL mechanisms
+   - Right-click protection options
+   - Rate limiting for image access
+   - Scraping prevention measures
+
+4. TRADEMARK
+
+   "illo" and associated logos are trademarks. You may not use these
+   marks in derivative works except to indicate compatibility or origin.
+
+These additional terms are applied under Section 7 of the AGPL-3.0.
+
+For the full text of the GNU Affero General Public License, see:
+https://www.gnu.org/licenses/agpl-3.0.html

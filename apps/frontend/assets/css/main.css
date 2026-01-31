@@ -1,0 +1,252 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* ダークテーマ（デフォルト） */
+  :root,
+  .dark {
+    /* 背景色 */
+    --color-background: #1a1a1a;
+    --color-surface: #2a2a2a;
+    --color-surface-hover: #3a3a3a;
+    --color-surface-secondary: #374151;
+    --color-surface-tertiary: #4b5563;
+    --color-hover: #4b5563;
+
+    /* アクセント色 */
+    --color-primary: #31BAE8;
+    --color-primary-hover: #2AA5D0;
+    --color-primary-text: #ffffff;
+
+    /* テキスト色 */
+    --color-text: #e8e8e8;
+    --color-text-muted: #9ca3af;
+
+    /* ボーダー色 */
+    --color-border: #4b5563;
+    --color-border-subtle: #374151;
+
+    /* テキスト色（追加） */
+    --color-text-secondary: #d1d5db;
+
+    /* ステータス色 */
+    --color-danger: #ff4060;
+    --color-danger-bg: rgba(127, 29, 29, 0.2);
+    --color-danger-border: #b91c1c;
+    --color-danger-text: #f87171;
+    --color-danger-hover-bg: #dc2626;
+    --color-danger-hover-text: #ffffff;
+    --color-success-bg: rgba(34, 197, 94, 0.2);
+    --color-success-border: #16a34a;
+    --color-success-text: #4ade80;
+    --color-warning-bg: rgba(234, 179, 8, 0.2);
+    --color-warning-text: #fbbf24;
+    --color-info-bg: rgba(59, 130, 246, 0.15);
+    --color-info-border: #3b82f6;
+    --color-info-text: #60a5fa;
+    --color-info-solid-bg: #1e3a8a;
+    --color-info-solid-hover: #1e40af;
+
+    /* Badge colors (for semantic badges like Remote, Admin, etc.) */
+    --color-badge-remote-bg: rgba(139, 92, 246, 0.2);
+    --color-badge-remote-text: #a78bfa;
+    --color-badge-admin-bg: rgba(236, 72, 153, 0.2);
+    --color-badge-admin-text: #f472b6;
+    --color-badge-active-bg: rgba(34, 197, 94, 0.2);
+    --color-badge-active-text: #4ade80;
+    --color-badge-pending-bg: rgba(234, 179, 8, 0.2);
+    --color-badge-pending-text: #fbbf24;
+    --color-badge-suspended-bg: rgba(249, 115, 22, 0.2);
+    --color-badge-suspended-text: #fb923c;
+    --color-badge-rejected-bg: rgba(239, 68, 68, 0.2);
+    --color-badge-rejected-text: #f87171;
+
+    /* オーバーレイ（テーマ非依存・常に黒系） */
+    --color-overlay: rgba(0, 0, 0, 0.8);
+    --color-overlay-light: rgba(0, 0, 0, 0.5);
+    --color-overlay-dark: rgba(0, 0, 0, 0.95);
+
+    /* 画像ビューワー専用 */
+    --color-viewer-bg: rgba(0, 0, 0, 0.95);
+    --color-viewer-controls: rgba(0, 0, 0, 0.7);
+    --color-viewer-button: rgba(255, 255, 255, 0.1);
+    --color-viewer-button-hover: rgba(255, 255, 255, 0.2);
+
+    /* スクリム（カード上の半透明黒） */
+    --color-scrim: rgba(0, 0, 0, 0.7);
+    --color-scrim-light: rgba(0, 0, 0, 0.4);
+
+    /* ボタン */
+    --color-button-primary: var(--color-primary);
+    --color-button-primary-hover: var(--color-primary-hover);
+    --color-button-secondary: #374151;
+    --color-button-secondary-hover: #4b5563;
+    --color-button-ghost-hover: #4b5563;
+    --color-button-danger: #ff4060;
+    --color-button-danger-hover: #cc3350;
+    --color-button-success: #16a34a;
+    --color-button-success-hover: #15803d;
+    --color-button-warning: #ea580c;
+    --color-button-warning-hover: #c2410c;
+
+    /* トグルボタン */
+    --color-toggle-like: #ff4060;
+    --color-toggle-like-hover: #e6395a;
+    --color-toggle-like-text: #f87171;
+    --color-toggle-bookmark: #f97316;
+    --color-toggle-bookmark-hover: #ea580c;
+    --color-toggle-bookmark-text: #fb923c;
+
+    /* フォーカスリング */
+    --color-focus-ring: #31BAE8;
+
+    /* 成功アイコン */
+    --color-success-icon: #00c853;
+
+    /* グレースケール */
+    --color-gray-300: #d1d5db;
+    --color-gray-400: #9ca3af;
+    --color-gray-500: #6b7280;
+    --color-gray-600: #4b5563;
+    --color-gray-700: #374151;
+
+    /* 外部ブランドカラー */
+    --color-bluesky: #0085ff;
+    --color-bluesky-hover: #0073e6;
+    --color-bluesky-disabled: rgba(0, 133, 255, 0.5);
+    --color-bluesky-bg: rgba(0, 133, 255, 0.15);
+    --color-bluesky-bg-hover: rgba(0, 133, 255, 0.25);
+    --color-bluesky-border: rgba(0, 133, 255, 0.5);
+    --color-pixiv: #0096fa;
+    --color-patreon: #ff424d;
+    --color-patreon-bg: rgba(255, 66, 77, 0.15);
+    --color-patreon-hover: rgba(255, 66, 77, 0.25);
+    --color-patreon-border: rgba(255, 66, 77, 0.5);
+  }
+
+  /* ライトテーマ */
+  .light {
+    /* 背景色 */
+    --color-background: #f5f5f5;
+    --color-surface: #ffffff;
+    --color-surface-hover: #f0f0f0;
+    --color-surface-secondary: #e5e7eb;
+    --color-surface-tertiary: #d1d5db;
+    --color-hover: #d1d5db;
+
+    /* アクセント色 */
+    --color-primary: #31BAE8;
+    --color-primary-hover: #2AA5D0;
+    --color-primary-text: #ffffff;
+
+    /* テキスト色 */
+    --color-text: #1f2937;
+    --color-text-muted: #6b7280;
+
+    /* ボーダー色 */
+    --color-border: #d1d5db;
+    --color-border-subtle: #e5e7eb;
+
+    /* テキスト色（追加） */
+    --color-text-secondary: #4b5563;
+
+    /* ステータス色 */
+    --color-danger: #dc2626;
+    --color-danger-bg: rgba(254, 202, 202, 0.5);
+    --color-danger-border: #dc2626;
+    --color-danger-text: #dc2626;
+    --color-danger-hover-bg: #dc2626;
+    --color-danger-hover-text: #ffffff;
+    --color-success-bg: rgba(187, 247, 208, 0.5);
+    --color-success-border: #16a34a;
+    --color-success-text: #16a34a;
+    --color-warning-bg: rgba(254, 240, 138, 0.5);
+    --color-warning-text: #ca8a04;
+    --color-info-bg: rgba(219, 234, 254, 0.7);
+    --color-info-border: #3b82f6;
+    --color-info-text: #1d4ed8;
+    --color-info-solid-bg: #1e40af;
+    --color-info-solid-hover: #1d4ed8;
+
+    /* Badge colors (for semantic badges like Remote, Admin, etc.) */
+    --color-badge-remote-bg: rgba(139, 92, 246, 0.15);
+    --color-badge-remote-text: #7c3aed;
+    --color-badge-admin-bg: rgba(236, 72, 153, 0.15);
+    --color-badge-admin-text: #db2777;
+    --color-badge-active-bg: rgba(34, 197, 94, 0.15);
+    --color-badge-active-text: #16a34a;
+    --color-badge-pending-bg: rgba(234, 179, 8, 0.15);
+    --color-badge-pending-text: #ca8a04;
+    --color-badge-suspended-bg: rgba(249, 115, 22, 0.15);
+    --color-badge-suspended-text: #ea580c;
+    --color-badge-rejected-bg: rgba(239, 68, 68, 0.15);
+    --color-badge-rejected-text: #dc2626;
+
+    /* オーバーレイ（テーマ非依存・常に黒系） */
+    --color-overlay: rgba(0, 0, 0, 0.8);
+    --color-overlay-light: rgba(0, 0, 0, 0.5);
+    --color-overlay-dark: rgba(0, 0, 0, 0.95);
+
+    /* 画像ビューワー専用 */
+    --color-viewer-bg: rgba(0, 0, 0, 0.95);
+    --color-viewer-controls: rgba(0, 0, 0, 0.7);
+    --color-viewer-button: rgba(255, 255, 255, 0.1);
+    --color-viewer-button-hover: rgba(255, 255, 255, 0.2);
+
+    /* スクリム（カード上の半透明黒） */
+    --color-scrim: rgba(0, 0, 0, 0.7);
+    --color-scrim-light: rgba(0, 0, 0, 0.4);
+
+    /* ボタン */
+    --color-button-primary: var(--color-primary);
+    --color-button-primary-hover: var(--color-primary-hover);
+    --color-button-secondary: #e5e7eb;
+    --color-button-secondary-hover: #d1d5db;
+    --color-button-ghost-hover: #d1d5db;
+    --color-button-danger: #dc2626;
+    --color-button-danger-hover: #b91c1c;
+    --color-button-success: #16a34a;
+    --color-button-success-hover: #15803d;
+    --color-button-warning: #ea580c;
+    --color-button-warning-hover: #c2410c;
+
+    /* トグルボタン */
+    --color-toggle-like: #ff4060;
+    --color-toggle-like-hover: #e6395a;
+    --color-toggle-like-text: #dc2626;
+    --color-toggle-bookmark: #f97316;
+    --color-toggle-bookmark-hover: #ea580c;
+    --color-toggle-bookmark-text: #ea580c;
+
+    /* フォーカスリング */
+    --color-focus-ring: #31BAE8;
+
+    /* 成功アイコン */
+    --color-success-icon: #00c853;
+
+    /* グレースケール */
+    --color-gray-300: #d1d5db;
+    --color-gray-400: #9ca3af;
+    --color-gray-500: #6b7280;
+    --color-gray-600: #4b5563;
+    --color-gray-700: #374151;
+
+    /* 外部ブランドカラー（ライトモードでも同じ） */
+    --color-bluesky: #0085ff;
+    --color-bluesky-hover: #0073e6;
+    --color-bluesky-disabled: rgba(0, 133, 255, 0.5);
+    --color-bluesky-bg: rgba(0, 133, 255, 0.1);
+    --color-bluesky-bg-hover: rgba(0, 133, 255, 0.2);
+    --color-bluesky-border: rgba(0, 133, 255, 0.6);
+    --color-pixiv: #0096fa;
+    --color-patreon: #ff424d;
+    --color-patreon-bg: rgba(255, 66, 77, 0.1);
+    --color-patreon-hover: rgba(255, 66, 77, 0.2);
+    --color-patreon-border: rgba(255, 66, 77, 0.6);
+  }
+
+  body {
+    @apply bg-[var(--color-background)] text-[var(--color-text)];
+  }
+}

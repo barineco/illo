@@ -1,0 +1,82 @@
+services:
+  # PostgreSQL Database
+  postgres-localdev:
+    image: postgres:16-alpine
+    container_name: illustboard-localdev-postgres-localdev
+    environment:
+      POSTGRES_USER: illustboard_user
+      POSTGRES_PASSWORD: illustboard_pass
+      POSTGRES_DB: illustboard_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_localdev:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U illustboard_user -d illustboard_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - open-illustboard-localdev
+
+  # Redis Cache
+  redis-localdev:
+    image: redis:7-alpine
+    container_name: illustboard-localdev-redis-localdev
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data_localdev:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - open-illustboard-localdev
+
+  # MinIO Object Storage
+  minio-localdev:
+    image: minio/minio:latest
+    container_name: illustboard-localdev-minio-localdev
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_data_localdev:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - open-illustboard-localdev
+
+  # MailHog (Email Testing)
+  mailhog-localdev:
+    image: mailhog/mailhog:latest
+    container_name: illustboard-localdev-mailhog-localdev
+    ports:
+      - "8025:8025"  # Web UI only (SMTP port 1025 is internal only)
+    restart: unless-stopped
+    networks:
+      - open-illustboard-localdev
+
+volumes:
+  postgres_data_localdev:
+    driver: local
+  redis_data_localdev:
+    driver: local
+  minio_data_localdev:
+    driver: local
+
+networks:
+  open-illustboard-localdev:
+    driver: bridge

@@ -1,0 +1,255 @@
+services:
+  # PostgreSQL Database
+  # Port is NOT exposed by default for security. Set EXPOSE_POSTGRES_PORT=true to expose.
+  postgres:
+    image: postgres:16-alpine
+    container_name: ${APP_NAME:-illo}-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-illustboard_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-illustboard_pass}
+      POSTGRES_DB: ${POSTGRES_DB:-illustboard_db}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-illustboard_user} -d ${POSTGRES_DB:-illustboard_db}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - internal
+
+  # Redis Cache
+  # Port is NOT exposed by default for security. Set EXPOSE_REDIS_PORT=true to expose.
+  redis:
+    image: redis:7-alpine
+    container_name: ${APP_NAME:-illo}-redis
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - internal
+
+  # MinIO Object Storage
+  # Console port can be exposed for administration. Set EXPOSE_MINIO_CONSOLE=true.
+  minio:
+    image: minio/minio:latest
+    container_name: ${APP_NAME:-illo}-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+    volumes:
+      - minio_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - internal
+
+  # MinIO Console (Optional - for administration)
+  # Only started when EXPOSE_MINIO_CONSOLE=true via profiles
+  minio-console:
+    image: nginx:alpine
+    container_name: ${APP_NAME:-illo}-minio-console
+    ports:
+      - "${MINIO_CONSOLE_PORT:-9001}:9001"
+    command: |
+      sh -c "echo 'server { listen 9001; location / { proxy_pass http://minio:9001; proxy_set_header Host $$host; proxy_set_header X-Real-IP $$remote_addr; } }' > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
+    depends_on:
+      - minio
+    restart: unless-stopped
+    networks:
+      - internal
+    profiles:
+      - minio-console
+
+  # Backend Service (Production)
+  backend:
+    build:
+      context: .
+      dockerfile: apps/backend/Dockerfile
+      args:
+        NODE_ENV: production
+    container_name: ${APP_NAME:-illo}-backend
+    environment:
+      # Database
+      DATABASE_URL: postgresql://${POSTGRES_USER:-illustboard_user}:${POSTGRES_PASSWORD:-illustboard_pass}@postgres:5432/${POSTGRES_DB:-illustboard_db}
+      # Redis
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      # MinIO / S3
+      MINIO_ENDPOINT: minio
+      MINIO_PORT: 9000
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      MINIO_BUCKET: ${S3_BUCKET:-illustboard}
+      MINIO_PUBLIC_URL: ${MINIO_PUBLIC_URL:-https://your-domain.com}
+      # Backend
+      PORT: 11104
+      NODE_ENV: production
+      FRONTEND_URL: ${FRONTEND_URL:-https://your-domain.com}
+      # JWT
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required in production}
+      JWT_EXPIRES_IN: ${JWT_EXPIRES_IN:-7d}
+      # ActivityPub / Federation
+      BASE_URL: ${BASE_URL:?BASE_URL is required in production}
+      # Encryption
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:?ENCRYPTION_KEY is required in production}
+      # Image Encryption
+      IMAGE_ENCRYPTION_KEY: ${IMAGE_ENCRYPTION_KEY}
+      # Message Encryption
+      MESSAGE_ENCRYPTION_KEY: ${MESSAGE_ENCRYPTION_KEY}
+      # Image Signed URLs
+      IMAGE_SIGNED_URL_ENABLED: ${IMAGE_SIGNED_URL_ENABLED:-true}
+      IMAGE_SIGNING_KEY: ${IMAGE_SIGNING_KEY}
+      IMAGE_SIGNED_URL_EXPIRES: ${IMAGE_SIGNED_URL_EXPIRES:-300}
+      # Image Hotlink Protection
+      IMAGE_HOTLINK_PROTECTION: ${IMAGE_HOTLINK_PROTECTION:-true}
+      IMAGE_ALLOW_NO_REFERER: ${IMAGE_ALLOW_NO_REFERER:-false}
+      # SMTP
+      SMTP_HOST: ${SMTP_HOST}
+      SMTP_PORT: ${SMTP_PORT:-587}
+      SMTP_SECURE: ${SMTP_SECURE:-true}
+      SMTP_USER: ${SMTP_USER}
+      SMTP_PASS: ${SMTP_PASS}
+      MAIL_FROM: ${MAIL_FROM:-noreply@localhost}
+      # Bluesky OAuth
+      BLUESKY_OAUTH_ENABLED: ${BLUESKY_OAUTH_ENABLED:-true}
+      BLUESKY_OAUTH_PRIVATE_JWK: "${BLUESKY_OAUTH_PRIVATE_JWK}"
+      # Patreon OAuth
+      PATREON_CLIENT_ID: ${PATREON_CLIENT_ID}
+      PATREON_CLIENT_SECRET: ${PATREON_CLIENT_SECRET}
+      PATREON_REDIRECT_URI: ${PATREON_REDIRECT_URI}
+      PATREON_CREATOR_ACCESS_TOKEN: ${PATREON_CREATOR_ACCESS_TOKEN}
+      # Instance Contact Information
+      INSTANCE_CONTACT_INFO: ${INSTANCE_CONTACT_INFO:-}
+      INSTANCE_ADMIN_USERNAME: ${INSTANCE_ADMIN_USERNAME:-}
+      # Instance Branding
+      INSTANCE_NAME: ${INSTANCE_NAME:-illo}
+      INSTANCE_TAGLINE: ${INSTANCE_TAGLINE:-}
+      # Rate Limiting (Anti-Scraping)
+      RATE_LIMIT_MEASUREMENT_MODE: ${RATE_LIMIT_MEASUREMENT_MODE:-false}
+      RATE_LIMIT_USE_COMPOSITE_SCORE: ${RATE_LIMIT_USE_COMPOSITE_SCORE:-false}
+      RATE_LIMIT_HARD_SCORE: ${RATE_LIMIT_HARD_SCORE:-90}
+      RATE_LIMIT_SOFT_SCORE: ${RATE_LIMIT_SOFT_SCORE:-50}
+      RATE_LIMIT_WARNING_SCORE: ${RATE_LIMIT_WARNING_SCORE:-35}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - internal
+    command: >
+      sh -c "
+        cd /app/apps/backend &&
+        pnpm prisma migrate deploy &&
+        cd /app &&
+        node apps/backend/dist/apps/backend/src/main.js
+      "
+
+  # Frontend Service (Production)
+  frontend:
+    build:
+      context: .
+      dockerfile: apps/frontend/Dockerfile
+      args:
+        NUXT_PUBLIC_API_BASE: ""
+    container_name: ${APP_NAME:-illo}-frontend
+    environment:
+      NUXT_PUBLIC_API_BASE: ""
+      API_BASE_SERVER: "http://backend:11104"
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 11103
+      # Instance Branding
+      NUXT_PUBLIC_INSTANCE_NAME: ${INSTANCE_NAME:-illo}
+      NUXT_PUBLIC_INSTANCE_TAGLINE: ${INSTANCE_TAGLINE:-}
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - internal
+
+  # Nginx Reverse Proxy (HTTP mode)
+  # Used with Cloudflare Tunnel (CFT) or for development
+  # Profile: http (default when SSL_ENABLED=false)
+  nginx:
+    image: nginx:alpine
+    container_name: ${APP_NAME:-illo}-nginx
+    ports:
+      - "${NGINX_PORT:-3000}:80"
+    volumes:
+      - ./nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - frontend
+      - backend
+    restart: unless-stopped
+    networks:
+      - internal
+    profiles:
+      - http
+
+  # Nginx Reverse Proxy (SSL mode)
+  # Used for direct HTTPS exposure without Cloudflare Tunnel
+  # Requires SSL certificates at ./ssl/cert.pem and ./ssl/key.pem
+  # Profile: ssl (when SSL_ENABLED=true)
+  nginx-ssl:
+    image: nginx:alpine
+    container_name: ${APP_NAME:-illo}-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.ssl.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - frontend
+      - backend
+    restart: unless-stopped
+    networks:
+      - internal
+    profiles:
+      - ssl
+
+  # Cloudflare Tunnel (Optional - for secure exposure without port forwarding)
+  # Enable by setting CLOUDFLARE_TUNNEL_ENABLED=true and CLOUDFLARE_TUNNEL_TOKEN
+  # Note: When using CFT, use 'http' profile (nginx without SSL)
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: ${APP_NAME:-illo}-cloudflared
+    command: tunnel --no-autoupdate run
+    environment:
+      - TUNNEL_TOKEN=${CLOUDFLARE_TUNNEL_TOKEN:-}
+      - TUNNEL_TRANSPORT_PROTOCOL=http2
+    depends_on:
+      - nginx
+    restart: unless-stopped
+    networks:
+      - internal
+    profiles:
+      - cloudflare
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+  minio_data:
+    driver: local
+
+networks:
+  internal:
+    driver: bridge

@@ -1,0 +1,91 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
+
+# Production builds
+dist/
+build/
+.output/
+.nuxt/
+.next/
+backups/
+
+# Environment variables
+.env
+.env.bak
+.env.backup.*
+.env.pre-restore.*
+
+# Development environment files
+dev/.env.local-dev
+dev/.env.fed-dev-1
+dev/.env.fed-dev-2
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Testing
+coverage/
+.nyc_output/
+
+# Cache
+.cache/
+.parcel-cache/
+.eslintcache
+.stylelintcache
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Database
+*.sqlite
+*.sqlite3
+*.db
+
+# Docker
+.dockerignore
+
+# MinIO / S3 local storage (uploaded files, not source code)
+/storage/
+/uploads/
+apps/backend/storage/
+apps/backend/uploads/
+
+# TypeScript
+*.tsbuildinfo
+
+# SSL certificates (sensitive)
+nginx/ssl/*.pem
+nginx/ssl/*.key
+nginx/ssl/*.crt
+
+# PID files (background process tracking)
+.backend.pid
+.frontend.pid
+
+# Misc
+.turbo/
+.vercel/
+

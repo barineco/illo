@@ -1,0 +1,216 @@
+# Federation Testing Environment - Instance 2
+# This Docker Compose configuration creates a production-like instance for testing ActivityPub federation.
+# All ports are offset by +20000 from production to avoid conflicts.
+#
+# Usage:
+#   docker-compose -f docker-compose.federation-test-2.yml --env-file .env.federation-test-2 up -d
+#   docker-compose -f docker-compose.federation-test-2.yml down
+#
+# Network architecture:
+#   - Accessible via http://localhost:23000 (Nginx reverse proxy)
+#   - Infrastructure ports: PostgreSQL (25432), Redis (26379), MinIO (29000/29001), MailHog (21025/28025)
+#   - Backend/Frontend run inside containers (no host access)
+#   - Separate volumes and network: open-illustboard-feddev-2
+
+services:
+  # PostgreSQL Database (Federation Test)
+  postgres-feddev:
+    image: postgres:16-alpine
+    container_name: illustboard-feddev2-postgres-feddev
+    environment:
+      POSTGRES_USER: illustboard_user_fed
+      POSTGRES_PASSWORD: illustboard_pass_fed
+      POSTGRES_DB: illustboard_db_fed
+    # No host port exposure - accessed only within Docker network
+    volumes:
+      - postgres_data_feddev2:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U illustboard_user_fed -d illustboard_db_fed"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - open-illustboard-feddev-2
+
+  # Redis Cache (Federation Test)
+  redis-feddev:
+    image: redis:7-alpine
+    container_name: illustboard-feddev2-redis-feddev
+    # No host port exposure - accessed only within Docker network
+    volumes:
+      - redis_data_feddev2:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - open-illustboard-feddev-2
+
+  # MinIO Object Storage (Federation Test)
+  minio-feddev:
+    image: minio/minio:latest
+    container_name: illustboard-feddev2-minio-feddev
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin_fed
+      MINIO_ROOT_PASSWORD: minioadmin_fed
+    # No host port exposure - accessed via nginx reverse proxy
+    # MinIO Console can be exposed for debugging: "29001:9001"
+    volumes:
+      - minio_data_feddev2:/data
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - open-illustboard-feddev-2
+
+  # MailHog (Email Testing - Federation Test)
+  mailhog-feddev:
+    image: mailhog/mailhog:latest
+    container_name: illustboard-feddev2-mailhog-feddev
+    ports:
+      # SMTP - No host exposure (internal Docker network only)
+      - "28025:8025"  # Web UI for email debugging (+20000 offset)
+    networks:
+      - open-illustboard-feddev-2
+
+  # Backend Service (Federation Test - Production Mode)
+  backend-feddev:
+    build:
+      context: ..
+      dockerfile: apps/backend/Dockerfile
+    container_name: illustboard-feddev2-backend-feddev
+    environment:
+      # Database
+      DATABASE_URL: postgresql://illustboard_user_fed:illustboard_pass_fed@postgres-feddev:5432/illustboard_db_fed
+      # Redis
+      REDIS_HOST: redis-feddev
+      REDIS_PORT: 6379
+      # MinIO / S3
+      MINIO_ENDPOINT: minio-feddev
+      MINIO_PORT: 9000
+      MINIO_USE_SSL: "false"
+      MINIO_ACCESS_KEY: minioadmin_fed
+      MINIO_SECRET_KEY: minioadmin_fed
+      MINIO_BUCKET: illustboard
+      # Public URL serves MinIO content through nginx reverse proxy at /illustboard/
+      # Recommended: OrbStack HTTPS (https://nginx-feddev.illustboard-feddev-2.orb.local)
+      # Alternative: Cloudflare Tunnel or localhost (http://localhost:23000)
+      MINIO_PUBLIC_URL: ${MINIO_PUBLIC_URL:-https://nginx-feddev.illustboard-feddev-2.orb.local}
+      # Backend
+      PORT: 11104
+      NODE_ENV: production
+      # Disable SSL verification for .orb.local domains (development only)
+      NODE_TLS_REJECT_UNAUTHORIZED: 0
+      FRONTEND_URL: ${FRONTEND_URL:-https://nginx-feddev.illustboard-feddev-2.orb.local}
+      # JWT - Development defaults (CHANGE IN PRODUCTION!)
+      # Generate with: node -e "console.log(require('crypto').randomBytes(64).toString('base64'))"
+      JWT_SECRET: ${JWT_SECRET:-DEV_SECRET_feddev2_DO_NOT_USE_IN_PRODUCTION_abcdef0123456789}
+      JWT_EXPIRES_IN: 7d
+      # ActivityPub / Federation
+      BASE_URL: ${BASE_URL:-https://nginx-feddev.illustboard-feddev-2.orb.local}
+      # Encryption - Development defaults (CHANGE IN PRODUCTION!)
+      # Generate with: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
+      ENCRYPTION_KEY: ${ENCRYPTION_KEY:-fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210}
+      # Image Encryption - Development defaults (CHANGE IN PRODUCTION!)
+      # Must be 64-character hex string (32 bytes)
+      IMAGE_ENCRYPTION_KEY: ${IMAGE_ENCRYPTION_KEY:-fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210}
+      # Message Encryption - Development defaults (CHANGE IN PRODUCTION!)
+      # Must be 64-character hex string (32 bytes)
+      MESSAGE_ENCRYPTION_KEY: ${MESSAGE_ENCRYPTION_KEY:-9876543210abcdef9876543210abcdef9876543210abcdef9876543210abcdef}
+      # Image Signed URLs - Development defaults (CHANGE IN PRODUCTION!)
+      IMAGE_SIGNED_URL_ENABLED: ${IMAGE_SIGNED_URL_ENABLED:-true}
+      # Must be 64-character hex string (32 bytes)
+      IMAGE_SIGNING_KEY: ${IMAGE_SIGNING_KEY:-9876543210abcdef9876543210abcdef9876543210abcdef9876543210abcdef}
+      IMAGE_SIGNED_URL_EXPIRES: ${IMAGE_SIGNED_URL_EXPIRES:-30}
+      # Image Hotlink Protection
+      IMAGE_HOTLINK_PROTECTION: ${IMAGE_HOTLINK_PROTECTION:-true}
+      IMAGE_ALLOW_NO_REFERER: ${IMAGE_ALLOW_NO_REFERER:-false}
+      # Mail Configuration
+      SMTP_HOST: mailhog-feddev
+      SMTP_PORT: 1025
+      SMTP_SECURE: "false"
+      MAIL_FROM: noreply@feddev.localhost
+      # Instance ID for cookie namespacing (must match frontend)
+      INSTANCE_ID: feddev2
+      # Instance Branding
+      INSTANCE_NAME: FedDev2
+      INSTANCE_TAGLINE: Federation Test Instance 2
+      # Rate Limiting (Anti-Scraping)
+      RATE_LIMIT_MEASUREMENT_MODE: ${RATE_LIMIT_MEASUREMENT_MODE:-false}
+      RATE_LIMIT_USE_COMPOSITE_SCORE: ${RATE_LIMIT_USE_COMPOSITE_SCORE:-false}
+      RATE_LIMIT_HARD_SCORE: ${RATE_LIMIT_HARD_SCORE:-90}
+      RATE_LIMIT_SOFT_SCORE: ${RATE_LIMIT_SOFT_SCORE:-50}
+      RATE_LIMIT_WARNING_SCORE: ${RATE_LIMIT_WARNING_SCORE:-35}
+    depends_on:
+      postgres-feddev:
+        condition: service_healthy
+      redis-feddev:
+        condition: service_healthy
+      minio-feddev:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - open-illustboard-feddev-2
+
+  # Frontend Service (Federation Test - Production Mode)
+  frontend-feddev:
+    build:
+      context: ..
+      dockerfile: apps/frontend/Dockerfile
+      args:
+        NUXT_PUBLIC_API_BASE: ""
+    container_name: illustboard-feddev2-frontend-feddev
+    environment:
+      # For SSR: use internal Docker service name (server-only)
+      API_BASE_SERVER: "http://backend-feddev:11104"
+      # For client-side: empty string works with nginx reverse proxy
+      NUXT_PUBLIC_API_BASE: ""
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 11103
+      # Instance ID for cookie namespacing (must match backend)
+      INSTANCE_ID: feddev2
+      # Instance Branding
+      NUXT_PUBLIC_INSTANCE_NAME: FedDev2
+      NUXT_PUBLIC_INSTANCE_TAGLINE: Federation Test Instance 2
+    depends_on:
+      - backend-feddev
+    restart: unless-stopped
+    networks:
+      - open-illustboard-feddev-2
+
+  # Nginx Reverse Proxy (Federation Test)
+  nginx-feddev:
+    image: nginx:alpine
+    container_name: illustboard-feddev2-nginx-feddev
+    labels:
+      - "dev.orbstack.domains=nginx-feddev.illustboard-feddev-2.orb.local"
+    ports:
+      - "23000:80"    # Main HTTP access (+20000 offset from 3000)
+    volumes:
+      - ../nginx/nginx.feddev-2.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - frontend-feddev
+      - backend-feddev
+    restart: unless-stopped
+    networks:
+      - open-illustboard-feddev-2
+
+volumes:
+  postgres_data_feddev2:
+    driver: local
+  redis_data_feddev2:
+    driver: local
+  minio_data_feddev2:
+    driver: local
+
+networks:
+  open-illustboard-feddev-2:
+    driver: bridge

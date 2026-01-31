@@ -1,0 +1,38 @@
+{
+  "name": "illo",
+  "version": "0.1.0",
+  "private": true,
+  "description": "self-hosted illustration platform",
+  "author": "maughtchiner <barineco@proton.me>",
+  "license": "AGPL-3.0",
+  "engines": {
+    "node": ">=20.0.0",
+    "pnpm": ">=9.0.0"
+  },
+  "packageManager": "pnpm@9.15.0",
+  "scripts": {
+    "dev": "pnpm --parallel -r dev",
+    "build": "pnpm -r build",
+    "lint": "pnpm -r lint",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,vue}\"",
+    "clean": "pnpm -r clean && rm -rf node_modules",
+    "version": "node scripts/sync-version.js && git add apps/frontend/package.json apps/backend/package.json",
+    "docker:up": "docker-compose -f dev/docker-compose.local-dev.yml up -d",
+    "docker:down": "docker-compose -f dev/docker-compose.local-dev.yml down",
+    "docker:dev": "docker-compose -f dev/docker-compose.local-dev.yml up",
+    "docker:dev:build": "docker-compose -f dev/docker-compose.local-dev.yml up --build",
+    "docker:dev:down": "docker-compose -f dev/docker-compose.local-dev.yml down",
+    "docker:prod": "docker-compose -f docker-compose.yml up -d",
+    "docker:prod:build": "docker-compose -f docker-compose.yml up -d --build",
+    "docker:prod:down": "docker-compose -f docker-compose.yml down",
+    "docker:logs": "docker-compose -f dev/docker-compose.local-dev.yml logs -f",
+    "docker:logs:backend": "docker-compose -f dev/docker-compose.local-dev.yml logs -f backend",
+    "docker:logs:frontend": "docker-compose -f dev/docker-compose.local-dev.yml logs -f frontend",
+    "db:migrate": "pnpm --filter backend db:migrate"
+  },
+  "devDependencies": {
+    "@types/node": "^20.17.10",
+    "prettier": "^3.4.2",
+    "typescript": "^5.7.2"
+  }
+}

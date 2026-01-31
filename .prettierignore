@@ -1,0 +1,7 @@
+node_modules
+dist
+.nuxt
+.output
+coverage
+.turbo
+pnpm-lock.yaml
