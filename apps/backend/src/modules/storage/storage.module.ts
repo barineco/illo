@@ -6,9 +6,15 @@ import { ImageSigningService } from './image-signing.service'
 import { ImageProxyController } from './image-proxy.controller'
 import { PrismaModule } from '../prisma/prisma.module'
 import { FederationModule } from '../federation/federation.module'
+import { HeadlessDetectionModule } from '../headless-detection/headless-detection.module'
 
 @Module({
-  imports: [ConfigModule, PrismaModule, forwardRef(() => FederationModule)],
+  imports: [
+    ConfigModule,
+    PrismaModule,
+    forwardRef(() => FederationModule),
+    HeadlessDetectionModule,
+  ],
   controllers: [ImageProxyController],
   providers: [StorageService, EncryptionService, ImageSigningService],
   exports: [StorageService, EncryptionService, ImageSigningService],

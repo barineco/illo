@@ -91,6 +91,11 @@ export class AuthService {
       throw new UnauthorizedException('User account is disabled')
     }
 
+    // Email verification check (skip for Bluesky OAuth users who have no email)
+    if (user.email && !user.isEmailVerified) {
+      throw new UnauthorizedException('Please verify your email before logging in')
+    }
+
     if (user.twoFactorEnabled) {
       return {
         requiresTwoFactor: true,
@@ -574,8 +579,9 @@ export class AuthService {
     user: { id: string },
     ipAddress?: string,
     userAgent?: string,
+    rememberMe: boolean = false,
   ) {
-    return this.generateTokens(user.id, ipAddress, userAgent)
+    return this.generateTokens(user.id, ipAddress, userAgent, rememberMe)
   }
 
   async findByUsername(username: string) {

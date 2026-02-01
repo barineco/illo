@@ -1229,6 +1229,9 @@ model RateLimitLog {
   detectionReason String?        @db.VarChar(50)
   isAnonymous     Boolean        @default(true)
 
+  // Headless detection integration
+  hasRealInteraction Boolean?    @map("has_real_interaction")
+
   @@index([userId, createdAt])
   @@index([ipAddress, createdAt])
   @@index([tier, createdAt])
@@ -1295,6 +1298,10 @@ model RateLimitConfig {
   measurementMode       Boolean   @default(false)
   useCompositeScore     Boolean   @default(false)
 
+  // No real interaction detection (headless browser integration)
+  noInteractionEnabled              Boolean   @default(false) @map("no_interaction_enabled")
+  noInteractionThresholdMultiplier  Float     @default(1.0)   @map("no_interaction_threshold_multiplier")
+
   updatedAt             DateTime  @updatedAt
   updatedBy             String?
 
@@ -1325,4 +1332,82 @@ model ViewLog {
   @@index([artworkId, visitorHash])
   @@index([createdAt])  // For cleanup job
   @@map("view_logs")
+}
+
+// ============================================
+// Headless Browser Detection
+// ============================================
+
+model HeadlessDetectionConfig {
+  id                    String    @id @default(cuid())
+
+  // Feature flags
+  enabled               Boolean   @default(true)
+  measurementMode       Boolean   @default(true)  // true: log only, false: take action
+
+  // Score thresholds
+  suspiciousThreshold   Int       @default(31)
+  likelyBotThreshold    Int       @default(51)
+  definiteBotThreshold  Int       @default(76)
+
+  // Signal weights
+  userAgentWeight       Float     @default(1.0)
+  clientHintsWeight     Float     @default(1.0)
+  headerWeight          Float     @default(1.0)
+  rateLimitWeight       Float     @default(1.0)
+  userInteractionWeight Float     @default(1.0)
+
+  // Action settings
+  suspiciousAction      String    @default("log_only")   @db.VarChar(20)
+  likelyBotAction       String    @default("degrade")    @db.VarChar(20)
+  definiteBotAction     String    @default("block")      @db.VarChar(20)
+
+  // Whitelists
+  allowedUserAgents     String[]  @default([])
+  allowedIpRanges       String[]  @default([])
+
+  // Timestamps
+  updatedAt             DateTime  @updatedAt
+  updatedBy             String?
+
+  @@map("headless_detection_config")
+}
+
+model HeadlessDetectionLog {
+  id                    String    @id @default(cuid())
+  ipAddress             String    @db.VarChar(45)
+  userId                String?
+
+  // Score details
+  totalScore            Int
+  verdict               String    @db.VarChar(20)
+  confidence            Float
+
+  // Individual signal scores
+  userAgentScore        Int
+  clientHintsScore      Int
+  headerScore           Int
+  rateLimitScore        Int
+  userInteractionScore  Int
+
+  // Real user interaction tracking
+  hasRealInteraction    Boolean   @default(false)
+
+  // Raw headers (for debugging)
+  userAgent             String?   @db.Text
+  rawHeaders            Json?
+
+  // Detection reasons
+  detectionReasons      String[]  @default([])
+
+  // Action taken
+  actionTaken           String    @db.VarChar(20)
+
+  // Timestamp
+  createdAt             DateTime  @default(now())
+
+  @@index([ipAddress, createdAt])
+  @@index([verdict, createdAt])
+  @@index([totalScore, createdAt])
+  @@map("headless_detection_logs")
 }

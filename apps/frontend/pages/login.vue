@@ -201,7 +201,7 @@ const handlePasskeyLogin = async () => {
   try {
     // Use email if entered for passkey hints, otherwise empty
     const emailHint = credentials.value.email || undefined
-    await authenticateWithPasskey(emailHint, rememberMe.value)
+    await authenticateWithPasskey(emailHint, true)
     navigateTo('/')
   } catch (err: any) {
     if (err.name === 'NotAllowedError') {

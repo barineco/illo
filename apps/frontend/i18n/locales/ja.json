@@ -5,6 +5,13 @@
     "confirm": "18歳以上です",
     "goBack": "戻る"
   },
+  "contentVisibility": {
+    "title": "このコンテンツは非表示設定されています",
+    "description": "このコンテンツは非表示に設定されています。表示しますか？",
+    "hint": "レーティング付き作品を常に表示するには、表示設定を変更してください",
+    "show": "表示する",
+    "settings": "設定を変更"
+  },
   "nav": {
     "home": "ホーム",
     "dashboard": "ダッシュボード",
@@ -230,7 +237,8 @@
     "projectName": "プロジェクト",
     "commission": "コミッション",
     "clientName": "クライアント",
-    "externalLink": "外部リンク"
+    "externalLink": "外部リンク",
+    "viewDetails": "詳細を見る"
   },
   "user": {
     "profile": "プロフィール",
@@ -824,7 +832,13 @@
       "violations": "違反回数",
       "actions": "操作",
       "remove": "解除",
-      "noPenalties": "ペナルティはありません"
+      "noPenalties": "ペナルティはありません",
+      "headlessDetection": "ヘッドレスブラウザ検知連携",
+      "headlessDetectionDesc": "インタラクションがないアクセスに対してより厳格な閾値を適用します",
+      "noInteractionEnabled": "インタラクション検知を有効化",
+      "noInteractionEnabledDesc": "マウスやキーボード操作のないアクセスを検知します",
+      "noInteractionThresholdMultiplier": "閾値倍率",
+      "noInteractionThresholdMultiplierDesc": "インタラクションがない場合の閾値倍率（0.5 = 閾値が半分になり、より厳格に）"
     },
     "imageCache": {
       "title": "画像キャッシュ",

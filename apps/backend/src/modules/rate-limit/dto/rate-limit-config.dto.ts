@@ -124,6 +124,17 @@ export class UpdateRateLimitConfigDto {
   @IsOptional()
   @IsBoolean()
   useCompositeScore?: boolean;
+
+  // No real interaction detection (headless browser integration)
+  @IsOptional()
+  @IsBoolean()
+  noInteractionEnabled?: boolean;
+
+  @IsOptional()
+  @IsNumber()
+  @Min(0.1)
+  @Max(1.0)
+  noInteractionThresholdMultiplier?: number;
 }
 
 export class RateLimitConfigResponseDto {
@@ -149,6 +160,9 @@ export class RateLimitConfigResponseDto {
   instantDetectionCV: number;
   measurementMode: boolean;
   useCompositeScore: boolean;
+  // No real interaction detection (headless browser integration)
+  noInteractionEnabled: boolean;
+  noInteractionThresholdMultiplier: number;
   updatedAt: Date;
   updatedBy: string | null;
 }

@@ -142,6 +142,13 @@ services:
       RATE_LIMIT_HARD_SCORE: ${RATE_LIMIT_HARD_SCORE:-90}
       RATE_LIMIT_SOFT_SCORE: ${RATE_LIMIT_SOFT_SCORE:-50}
       RATE_LIMIT_WARNING_SCORE: ${RATE_LIMIT_WARNING_SCORE:-35}
+      # Headless Browser Detection (Anti-Scraping)
+      HEADLESS_DETECTION_ENABLED: ${HEADLESS_DETECTION_ENABLED:-true}
+      HEADLESS_DETECTION_MEASUREMENT_MODE: ${HEADLESS_DETECTION_MEASUREMENT_MODE:-true}
+      HEADLESS_DETECTION_SUSPICIOUS_THRESHOLD: ${HEADLESS_DETECTION_SUSPICIOUS_THRESHOLD:-31}
+      HEADLESS_DETECTION_LIKELY_BOT_THRESHOLD: ${HEADLESS_DETECTION_LIKELY_BOT_THRESHOLD:-51}
+      HEADLESS_DETECTION_DEFINITE_BOT_THRESHOLD: ${HEADLESS_DETECTION_DEFINITE_BOT_THRESHOLD:-76}
+      HEADLESS_DETECTION_INTERACTION_SECRET: ${HEADLESS_DETECTION_INTERACTION_SECRET:?HEADLESS_DETECTION_INTERACTION_SECRET is required in production}
     depends_on:
       postgres:
         condition: service_healthy
@@ -167,6 +174,7 @@ services:
       dockerfile: apps/frontend/Dockerfile
       args:
         NUXT_PUBLIC_API_BASE: ""
+        HEADLESS_DETECTION_INTERACTION_SECRET: ${HEADLESS_DETECTION_INTERACTION_SECRET:?HEADLESS_DETECTION_INTERACTION_SECRET is required in production}
     container_name: ${APP_NAME:-illo}-frontend
     environment:
       NUXT_PUBLIC_API_BASE: ""
@@ -177,6 +185,8 @@ services:
       # Instance Branding
       NUXT_PUBLIC_INSTANCE_NAME: ${INSTANCE_NAME:-illo}
       NUXT_PUBLIC_INSTANCE_TAGLINE: ${INSTANCE_TAGLINE:-}
+      # Headless Browser Detection
+      HEADLESS_DETECTION_INTERACTION_SECRET: ${HEADLESS_DETECTION_INTERACTION_SECRET:?HEADLESS_DETECTION_INTERACTION_SECRET is required in production}
     depends_on:
       - backend
     restart: unless-stopped
@@ -193,6 +203,7 @@ services:
       - "${NGINX_PORT:-3000}:80"
     volumes:
       - ./nginx/nginx.prod.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx:/var/www:ro
     depends_on:
       - frontend
       - backend
@@ -214,6 +225,7 @@ services:
       - "443:443"
     volumes:
       - ./nginx/nginx.ssl.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx:/var/www:ro
       - ./ssl:/etc/nginx/ssl:ro
     depends_on:
       - frontend

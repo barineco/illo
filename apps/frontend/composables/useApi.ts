@@ -13,10 +13,29 @@ export const useApi = () => {
   const instanceId = config.public.instanceId || 'default'
 
   const getAuthHeaders = (): Record<string, string> => {
+    const headers: Record<string, string> = {}
+
     const token = useCookie(`${instanceId}_accessToken`)
-    return token.value
-      ? { Authorization: `Bearer ${token.value}` }
-      : {}
+    if (token.value) {
+      headers.Authorization = `Bearer ${token.value}`
+    }
+
+    // Add user interaction token on client side
+    if (import.meta.client) {
+      const { getToken, hasRealUserInteraction } = useUserInteraction()
+      const interactionToken = getToken()
+      const realInteraction = hasRealUserInteraction()
+
+      console.log('[useApi] Interaction token:', interactionToken ? 'PRESENT' : 'MISSING')
+      console.log('[useApi] Real user interaction:', realInteraction)
+
+      if (interactionToken) {
+        headers['X-User-Interaction-Token'] = interactionToken
+      }
+      headers['X-Real-User-Interaction'] = realInteraction ? 'true' : 'false'
+    }
+
+    return headers
   }
 
   /**
@@ -131,9 +150,9 @@ export const useApi = () => {
       xhr.open(method, `${baseURL}${endpoint}`)
 
       const authHeaders = getAuthHeaders()
-      if (authHeaders.Authorization) {
-        xhr.setRequestHeader('Authorization', authHeaders.Authorization)
-      }
+      Object.entries(authHeaders).forEach(([key, value]) => {
+        xhr.setRequestHeader(key, value)
+      })
 
       xhr.send(formData)
     })

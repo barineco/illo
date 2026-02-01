@@ -28,6 +28,8 @@ import { RateLimitInterceptor, shouldDegradeQuality } from '../rate-limit/rate-l
 import { RateLimit } from '../rate-limit/decorators/rate-limit.decorator'
 import { RemoteImageCacheStatus, ArtworkImage } from '@prisma/client'
 import { RemoteImageCacheService } from '../federation/services/remote-image-cache.service'
+import { HeadlessDetectionGuard } from '../headless-detection/headless-detection.guard'
+import { HeadlessDetectionService } from '../headless-detection/headless-detection.service'
 
 /**
  * Image Proxy Controller
@@ -52,6 +54,7 @@ export class ImageProxyController {
     private configService: ConfigService,
     @Inject(forwardRef(() => RemoteImageCacheService))
     private remoteImageCacheService: RemoteImageCacheService,
+    private headlessDetectionService: HeadlessDetectionService,
   ) {}
 
   /**
@@ -64,7 +67,7 @@ export class ImageProxyController {
    */
   @Public()
   @Get(':imageId/signed-url')
-  @UseGuards(RateLimitGuard)
+  @UseGuards(HeadlessDetectionGuard, RateLimitGuard)
   @UseInterceptors(RateLimitInterceptor)
   @RateLimit({ action: 'image_fetch' })
   async getSignedUrl(
@@ -247,10 +250,12 @@ export class ImageProxyController {
       // Set response headers
       // Thumbnail is always JPEG, regardless of original format
       const contentType = variant === 'thumbnail' ? 'image/jpeg' : (image.mimeType || 'image/jpeg')
+      // Only cache thumbnails - standard and original should always be revalidated
+      const cacheControl = variant === 'thumbnail' ? 'private, max-age=3600' : 'no-store'
       res.set({
         'Content-Type': contentType,
         'Content-Length': finalData.length.toString(),
-        'Cache-Control': 'private, max-age=3600',
+        'Cache-Control': cacheControl,
         'X-Content-Type-Options': 'nosniff',
         'X-Frame-Options': 'SAMEORIGIN',
         'Content-Security-Policy': "frame-ancestors 'self'",
@@ -344,8 +349,30 @@ export class ImageProxyController {
   /**
    * Check if the image request is from an allowed origin (hotlink protection)
    * Uses Sec-Fetch-Site header (modern browsers) with Referer fallback
+   * Also considers headless browser detection results
    */
   private isValidImageRequest(req: Request): boolean {
+    // Check headless browser detection first
+    const headlessResult = (req as any).headlessDetectionResult
+    if (headlessResult && this.headlessDetectionService.isEnabled()) {
+      const config = this.headlessDetectionService.getConfig()
+
+      // If in measurement mode, only log but don't block
+      if (!config.measurementMode) {
+        // Block definite bots
+        if (headlessResult.verdict === 'definite_bot') {
+          this.logger.warn(`Blocking image request from definite bot (score: ${headlessResult.totalScore})`)
+          return false
+        }
+
+        // Degrade quality for likely bots (return false to force placeholder)
+        if (headlessResult.verdict === 'likely_bot') {
+          this.logger.log(`Image request from likely bot (score: ${headlessResult.totalScore})`)
+          // Don't block here, but the caller should handle quality degradation
+        }
+      }
+    }
+
     // Check if hotlink protection is enabled
     const hotlinkProtection = this.configService.get<string>('IMAGE_HOTLINK_PROTECTION', 'true')
     if (hotlinkProtection !== 'true') {
@@ -536,11 +563,12 @@ export class ImageProxyController {
     }
 
     // Set response headers
-    const cacheTime = variant === 'original' ? 600 : 300 // 10min for original, 5min for others
+    // Only cache thumbnails - standard and original should always be revalidated
+    const cacheControl = variant === 'thumbnail' ? 'private, max-age=300' : 'no-store'
     res.set({
       'Content-Type': result.mimeType,
       'Content-Length': result.buffer.length.toString(),
-      'Cache-Control': `private, max-age=${cacheTime}`,
+      'Cache-Control': cacheControl,
       'X-Content-Type-Options': 'nosniff',
       'X-Frame-Options': 'SAMEORIGIN',
       'Content-Security-Policy': "frame-ancestors 'self'",
@@ -578,10 +606,12 @@ export class ImageProxyController {
     }
 
     const contentType = variant === 'thumbnail' ? 'image/jpeg' : (image.mimeType || 'image/jpeg')
+    // Only cache thumbnails - standard and original should always be revalidated
+    const cacheControl = variant === 'thumbnail' ? 'private, max-age=3600' : 'no-store'
     res.set({
       'Content-Type': contentType,
       'Content-Length': finalData.length.toString(),
-      'Cache-Control': 'private, max-age=3600',
+      'Cache-Control': cacheControl,
       'X-Content-Type-Options': 'nosniff',
       'X-Frame-Options': 'SAMEORIGIN',
       'Content-Security-Policy': "frame-ancestors 'self'",

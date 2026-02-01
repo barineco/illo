@@ -449,8 +449,9 @@ export class ArtworksService {
    * Get artwork by ID with access control
    * @param artworkId - The artwork ID
    * @param currentUserId - The current user ID (optional, for access control)
+   * @param contentFilters - The user's content filter settings (optional)
    */
-  async getArtworkById(artworkId: string, currentUserId?: string) {
+  async getArtworkById(artworkId: string, currentUserId?: string, contentFilters?: ContentFilters) {
     const artwork = await this.prisma.artwork.findUnique({
       where: { id: artworkId },
       include: ARTWORK_DETAIL_INCLUDE,
@@ -493,9 +494,29 @@ export class ArtworksService {
       data: { viewCount: { increment: 1 } },
     })
 
+    // Calculate filter setting based on age rating and content filters
+    const rating = String(artwork.ageRating)
+    let filterSetting: 'show' | 'blur' | 'hide' = 'show'
+
+    // Apply content filters (or defaults for non-logged users)
+    const filters = contentFilters || {
+      nsfw: 'blur',
+      r18: 'hide',
+      r18g: 'hide',
+    }
+
+    if (rating === 'NSFW' && filters.nsfw) {
+      filterSetting = filters.nsfw
+    } else if (rating === 'R18' && filters.r18) {
+      filterSetting = filters.r18
+    } else if (rating === 'R18G' && filters.r18g) {
+      filterSetting = filters.r18g
+    }
+
     const result = {
       ...artwork,
       tags: artwork.tags.map((at) => at.tag),
+      filterSetting,
     }
 
     // Apply signed URLs if enabled
@@ -527,12 +548,13 @@ export class ArtworksService {
       }).then(follows => follows.map(f => f.followingId))
 
       const visibilityConditions: Prisma.ArtworkWhereInput[] = [
-        // Public and unlisted artworks
         { visibility: Visibility.PUBLIC },
-        { visibility: Visibility.UNLISTED },
-        // Own artworks (including PRIVATE)
         { authorId: params.currentUserId },
       ]
+
+      if (params.authorId) {
+        visibilityConditions.push({ visibility: Visibility.UNLISTED })
+      }
 
       // FOLLOWERS_ONLY from followed users
       if (followingIds.length > 0) {
@@ -546,8 +568,11 @@ export class ArtworksService {
 
       where.OR = visibilityConditions
     } else {
-      // Not logged in: can only see PUBLIC and UNLISTED artworks
-      where.visibility = { in: [Visibility.PUBLIC, Visibility.UNLISTED] }
+      if (params.authorId) {
+        where.visibility = { in: [Visibility.PUBLIC, Visibility.UNLISTED] }
+      } else {
+        where.visibility = Visibility.PUBLIC
+      }
     }
 
     // Apply mute filters if user is logged in
@@ -1448,9 +1473,14 @@ export class ArtworksService {
       }
     }
 
-    // Build where clause with muted tag filtering
     const where: Prisma.ArtworkWhereInput = {
       authorId: { in: filteredFollowingIds },
+      OR: [
+        { visibility: Visibility.PUBLIC },
+        { visibility: Visibility.UNLISTED },
+        { visibility: Visibility.FOLLOWERS_ONLY },
+        { AND: [{ visibility: Visibility.PRIVATE }, { authorId: userId }] },
+      ],
     }
 
     if (mutedTagIds.length > 0) {

@@ -28,6 +28,7 @@ definePageMeta({
 })
 
 const { t } = useI18n()
+const route = useRoute()
 
 interface Tab {
   key: string
@@ -50,5 +51,8 @@ const tabItems = computed(() => {
   }))
 })
 
-const selectedTab = ref('profile')
+// Initialize selected tab from query parameter or default to 'profile'
+const initialTab = (route.query.tab as string) || 'profile'
+const validTab = tabs.some(t => t.key === initialTab) ? initialTab : 'profile'
+const selectedTab = ref(validTab)
 </script>

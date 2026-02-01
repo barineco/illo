@@ -19,7 +19,7 @@ _validate_env() {
     echo -e "${CYAN}Required Variables${NC}"
     echo -e "${DIM}$(printf '─%.0s' $(seq 1 40))${NC}"
 
-    local required_vars=("JWT_SECRET" "ENCRYPTION_KEY" "BASE_URL")
+    local required_vars=("JWT_SECRET" "ENCRYPTION_KEY" "BASE_URL" "HEADLESS_DETECTION_INTERACTION_SECRET")
     for var in "${required_vars[@]}"; do
         local value="${!var}"
         if [ -z "$value" ]; then
@@ -127,7 +127,7 @@ cmd_check_env() {
     echo -e "${CYAN}Required Variables${NC}"
     echo -e "${DIM}$(printf '─%.0s' $(seq 1 40))${NC}"
 
-    local required_vars=("JWT_SECRET" "ENCRYPTION_KEY" "BASE_URL")
+    local required_vars=("JWT_SECRET" "ENCRYPTION_KEY" "BASE_URL" "HEADLESS_DETECTION_INTERACTION_SECRET")
     for var in "${required_vars[@]}"; do
         local value="${!var}"
         if [ -z "$value" ]; then

@@ -106,6 +106,53 @@
       </div>
     </div>
 
+    <!-- Content Visibility Confirmation (hide setting, after age verification) -->
+    <div v-else-if="mockArtwork && requiresContentVisibilityConfirmation" class="flex flex-col items-center justify-center py-20 px-4">
+      <div class="w-24 h-24 mb-6 rounded-full bg-[var(--color-surface-secondary)] flex items-center justify-center">
+        <Icon name="EyeSlash" class="w-12 h-12 text-[var(--color-text-muted)]" />
+      </div>
+      <h2 class="text-2xl font-bold mb-2">{{ $t('contentVisibility.title') }}</h2>
+      <div class="inline-flex items-center gap-1 px-3 py-1 mb-4 rounded-full text-sm font-medium bg-[var(--color-danger-bg)] text-[var(--color-danger-text)]">
+        {{ $t(`artwork.rating.${mockArtwork.ageRating?.toLowerCase()}`) }}
+      </div>
+      <p class="text-[var(--color-text-muted)] text-center max-w-md mb-2">
+        {{ $t('contentVisibility.description') }}
+      </p>
+      <p class="text-sm text-[var(--color-text-secondary)] text-center max-w-md mb-6">
+        {{ $t('contentVisibility.hint') }}
+      </p>
+      <div class="flex flex-col sm:flex-row gap-3 w-full max-w-lg">
+        <BaseButton
+          variant="primary"
+          size="lg"
+          shape="rounded"
+          class="flex-1"
+          @click="onContentVisibilityConfirm"
+        >
+          {{ $t('contentVisibility.show') }}
+        </BaseButton>
+        <BaseButton
+          variant="secondary"
+          size="lg"
+          shape="rounded"
+          class="flex-1"
+          @click="onContentVisibilityCancel"
+        >
+          {{ $t('common.goBack') }}
+        </BaseButton>
+        <BaseButton
+          v-if="user"
+          variant="secondary"
+          size="lg"
+          shape="rounded"
+          class="flex-1"
+          @click="onContentVisibilitySettings"
+        >
+          {{ $t('contentVisibility.settings') }}
+        </BaseButton>
+      </div>
+    </div>
+
     <!-- Main Artwork Section -->
     <div v-else-if="mockArtwork" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
       <!-- Artwork Images -->
@@ -538,6 +585,7 @@ const { data: artworkData, error: fetchError, status } = await useAsyncData(
         medium: data.medium || null,
         externalUrl: data.externalUrl || null,
         toolsUsed: data.toolsUsed ? JSON.parse(data.toolsUsed) : [],
+        filterSetting: data.filterSetting || 'show',
       }
     } catch (e: any) {
       throw e
@@ -603,6 +651,43 @@ const onAgeConfirm = () => {
 
 const onAgeCancel = () => {
   router.back()
+}
+
+// Content visibility confirmation state
+const contentVisibilityConfirmedThisSession = ref(false)
+
+// Check if content visibility confirmation is required
+const requiresContentVisibilityConfirmation = computed(() => {
+  if (!mockArtwork.value) return false
+
+  // Age verification takes priority - if age verification is required, show that first
+  if (requiresAgeVerification.value) return false
+
+  // For non-logged users who passed age verification this session,
+  // treat age verification as content visibility confirmation
+  if (!user.value && ageVerifiedThisSession.value) return false
+
+  // Check if filter setting is 'hide'
+  const filterSetting = mockArtwork.value.filterSetting
+  if (filterSetting !== 'hide') return false
+
+  // Already confirmed in this session
+  if (contentVisibilityConfirmedThisSession.value) return false
+
+  return true
+})
+
+// Content visibility confirmation handlers
+const onContentVisibilityConfirm = () => {
+  contentVisibilityConfirmedThisSession.value = true
+}
+
+const onContentVisibilityCancel = () => {
+  router.back()
+}
+
+const onContentVisibilitySettings = () => {
+  navigateTo('/settings?tab=moderation')
 }
 
 // Signed URLs for images

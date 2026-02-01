@@ -103,6 +103,8 @@ export default defineNuxtConfig({
       // Instance branding
       instanceName: process.env.NUXT_PUBLIC_INSTANCE_NAME || 'illo',
       instanceTagline: process.env.NUXT_PUBLIC_INSTANCE_TAGLINE || '',
+      // User interaction tracking secret (must match backend)
+      interactionSecret: process.env.HEADLESS_DETECTION_INTERACTION_SECRET || 'default-secret-change-me',
     },
   },
 

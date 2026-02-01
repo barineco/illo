@@ -58,6 +58,9 @@ export interface RateLimitConfig {
   // ロールアウト制御（新規）
   measurementMode: boolean;
   useCompositeScore: boolean;
+  // インタラクション検出連携（新規）
+  noInteractionEnabled: boolean;
+  noInteractionThresholdMultiplier: number;
 }
 
 export interface RateLimitDecoratorOptions {

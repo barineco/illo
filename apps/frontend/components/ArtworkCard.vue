@@ -64,13 +64,19 @@
         <!-- Blurred overlay for filtered content -->
         <div
           v-if="shouldShowBlur && !isBlurRemoved"
-          class="absolute inset-0 backdrop-blur-2xl bg-black/50 flex items-center justify-center cursor-pointer z-10"
-          @click.prevent.stop="removeBlur"
+          class="absolute inset-0 backdrop-blur-2xl bg-black/50 flex items-center justify-center z-10"
+          :class="{ 'cursor-pointer': artwork.ageRating === 'NSFW', 'pointer-events-none': artwork.ageRating === 'R18' || artwork.ageRating === 'R18G' }"
+          @click.prevent.stop="handleBlurClick"
         >
           <div class="text-white text-center px-4">
             <Icon name="EyeSlashIcon" class="w-8 h-8 mx-auto mb-2" />
             <span class="text-sm">{{ $t(`artwork.rating.${artwork.ageRating?.toLowerCase() || 'nsfw'}`) }}</span>
-            <p class="text-xs text-white/70 mt-1">{{ $t('common.showMore') }}</p>
+            <p v-if="artwork.ageRating === 'NSFW'" class="text-xs text-white/70 mt-1">
+              {{ $t('common.showMore') }}
+            </p>
+            <p v-else class="text-xs text-white/70 mt-1">
+              {{ $t('artwork.viewDetails') }}
+            </p>
           </div>
         </div>
 
@@ -303,6 +309,21 @@ const shouldShowBlur = computed(() => {
 const isBlurRemoved = ref(false)
 const removeBlur = () => {
   isBlurRemoved.value = true
+}
+
+// Handle blur click - different behavior for NSFW vs R18/R18G
+const handleBlurClick = () => {
+  const rating = props.artwork.ageRating
+
+  // R18/R18G: Don't remove blur, let click pass through to navigate to detail page
+  // (The click is already prevented/stopped, so we do nothing here)
+  // User must view detail page for age verification
+  if (rating === 'R18' || rating === 'R18G') {
+    return
+  }
+
+  // NSFW: Allow blur removal (traditional behavior)
+  removeBlur()
 }
 
 // Image preview state

@@ -190,7 +190,12 @@ export class ArtworksController {
     @CurrentUser() user: any,
     @Req() request: Request,
   ) {
-    const artwork = await this.artworksService.getArtworkById(id, user?.id)
+    // Get user's content filters if authenticated
+    const contentFilters = user?.id
+      ? await this.usersService.getContentFilters(user.id)
+      : undefined
+
+    const artwork = await this.artworksService.getArtworkById(id, user?.id, contentFilters)
 
     // Check if rate limited and degrade quality
     const rateLimitStatus = request.rateLimitStatus

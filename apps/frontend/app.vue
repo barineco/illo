@@ -9,6 +9,9 @@
 <script setup lang="ts">
 const config = useRuntimeConfig()
 
+// Initialize user interaction tracking for bot detection
+useUserInteraction()
+
 const siteTitle = computed(() => {
   const name = config.public.instanceName || 'illo'
   const tagline = config.public.instanceTagline

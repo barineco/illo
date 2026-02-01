@@ -207,6 +207,7 @@ cmd_rebuild() {
     local do_pull=""
     local auto_restart=false
     local services=()
+    local rebuild_services=()
 
     for arg in "$@"; do
         case "$arg" in
@@ -228,6 +229,15 @@ cmd_rebuild() {
 
     check_env_file
 
+    # Filter out nginx/cloudflared from rebuild targets
+    if [ ${#services[@]} -gt 0 ]; then
+        for svc in "${services[@]}"; do
+            if [ "$svc" != "nginx" ] && [ "$svc" != "nginx-ssl" ] && [ "$svc" != "cloudflared" ]; then
+                rebuild_services+=("$svc")
+            fi
+        done
+    fi
+
     echo ""
     echo -e "${BOLD}Rebuilding Docker Images${NC}"
     echo ""
@@ -240,11 +250,14 @@ cmd_rebuild() {
         print_info "Pulling latest base images"
     fi
 
-    if [ ${#services[@]} -gt 0 ]; then
-        print_info "Services: ${services[*]}"
-        docker compose -p "$COMPOSE_PROJECT" -f "$COMPOSE_FILE" --env-file "$ENV_FILE" build $no_cache $do_pull "${services[@]}"
-    else
-        docker compose -p "$COMPOSE_PROJECT" -f "$COMPOSE_FILE" --env-file "$ENV_FILE" build $no_cache $do_pull
+    # Build images (excluding nginx/cloudflared)
+    if [ ${#rebuild_services[@]} -gt 0 ]; then
+        print_info "Services: ${rebuild_services[*]}"
+        docker compose -p "$COMPOSE_PROJECT" -f "$COMPOSE_FILE" --env-file "$ENV_FILE" build $no_cache $do_pull "${rebuild_services[@]}"
+    elif [ ${#services[@]} -eq 0 ]; then
+        # No specific services specified, build all except nginx/cloudflared
+        print_info "Building backend and frontend (excluding nginx/cloudflared)"
+        docker compose -p "$COMPOSE_PROJECT" -f "$COMPOSE_FILE" --env-file "$ENV_FILE" build $no_cache $do_pull backend frontend
     fi
 
     echo ""
@@ -252,7 +265,23 @@ cmd_rebuild() {
 
     if [ "$auto_restart" = true ]; then
         echo ""
-        cmd_restart --force
+        print_info "Enabling maintenance mode..."
+        cmd_maintenance_on
+
+        echo ""
+        print_info "Restarting services..."
+        load_env
+        local profiles=$(get_compose_profiles)
+
+        # Restart only backend/frontend (exclude nginx/cloudflared)
+        docker compose -p "$COMPOSE_PROJECT" -f "$COMPOSE_FILE" --env-file "$ENV_FILE" $profiles up -d --force-recreate backend frontend 2>/dev/null
+
+        # Wait for services to be healthy
+        wait_for_healthy
+
+        echo ""
+        print_info "Disabling maintenance mode..."
+        cmd_maintenance_off
     else
         echo ""
         echo -e "  ${ARROW} Apply changes: ${CYAN}./install.sh restart${NC}"
@@ -507,22 +536,32 @@ cmd_update() {
     fi
     echo ""
 
-    # Step 5: Build new images (no cache for reliability)
+    # Step 5: Build new images (no cache for reliability, excluding nginx/cloudflared)
     print_info "Step 5/6: Building new images (--no-cache --pull)..."
-    docker compose -p "$COMPOSE_PROJECT" -f "$COMPOSE_FILE" --env-file "$ENV_FILE" build --no-cache --pull
+    print_info "Building backend and frontend (excluding nginx/cloudflared)"
+    docker compose -p "$COMPOSE_PROJECT" -f "$COMPOSE_FILE" --env-file "$ENV_FILE" build --no-cache --pull backend frontend
 
     # Step 6: Recreate services with force-recreate
     print_info "Step 6/6: Restarting services..."
     local profiles=$(get_compose_profiles)
-    local all_profiles="--profile ssl --profile http --profile cloudflare --profile minio-console"
 
-    docker compose -p "$COMPOSE_PROJECT" -f "$COMPOSE_FILE" --env-file "$ENV_FILE" $all_profiles down --remove-orphans 2>/dev/null || true
-    docker compose -p "$COMPOSE_PROJECT" -f "$COMPOSE_FILE" --env-file "$ENV_FILE" $profiles up -d --force-recreate
+    # Enable maintenance mode before restart
+    echo ""
+    print_info "Enabling maintenance mode..."
+    cmd_maintenance_on
+
+    echo ""
+    print_info "Restarting backend and frontend..."
+    # Restart only backend/frontend (exclude nginx/cloudflared)
+    docker compose -p "$COMPOSE_PROJECT" -f "$COMPOSE_FILE" --env-file "$ENV_FILE" $profiles up -d --force-recreate backend frontend 2>/dev/null
 
     # Wait for services to be healthy
-    start_spinner "Waiting for services to be healthy..."
-    sleep 10
-    stop_spinner true "Services ready"
+    wait_for_healthy
+
+    # Disable maintenance mode after services are healthy
+    echo ""
+    print_info "Disabling maintenance mode..."
+    cmd_maintenance_off
 
     # Verify migration status after update
     echo ""

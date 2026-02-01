@@ -80,6 +80,7 @@ source "${INSTALL_CMD}/backup.sh"
 source "${INSTALL_CMD}/keys.sh"
 source "${INSTALL_CMD}/shell.sh"
 source "${INSTALL_CMD}/fix-env.sh"
+source "${INSTALL_CMD}/maintenance.sh"
 
 ################################################################################
 # Help Function
@@ -105,6 +106,7 @@ cmd_help() {
     echo "  clean [--volumes] [--images] [--all]  Clean up containers/volumes/images"
     echo "  reset                Complete environment reset (data loss!)"
     echo "  update               Safe production update (backup + rebuild + restart)"
+    echo "  maintenance <on|off|status>  Manage maintenance mode"
     echo ""
     echo -e "${CYAN}Monitoring:${NC}"
     echo "  status               Check status of all services"
@@ -193,6 +195,25 @@ case "$COMMAND" in
         ;;
     update)
         cmd_update
+        ;;
+    maintenance)
+        SUBCOMMAND="${1:-status}"
+        case "$SUBCOMMAND" in
+            on)
+                cmd_maintenance_on
+                ;;
+            off)
+                cmd_maintenance_off
+                ;;
+            status)
+                cmd_maintenance_status
+                ;;
+            *)
+                print_error "Unknown maintenance subcommand: $SUBCOMMAND"
+                echo "Usage: ./install.sh maintenance <on|off|status>"
+                exit 1
+                ;;
+        esac
         ;;
     fix-env)
         cmd_fix_env

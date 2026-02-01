@@ -27,6 +27,7 @@ import { BlueskyOAuthModule } from './modules/bluesky-oauth/bluesky-oauth.module
 import { PatreonModule } from './modules/patreon/patreon.module'
 import { InstanceModule } from './modules/instance/instance.module'
 import { RateLimitModule } from './modules/rate-limit/rate-limit.module'
+import { HeadlessDetectionModule } from './modules/headless-detection/headless-detection.module'
 import { ReactionsModule } from './modules/reactions/reactions.module'
 import { MlsModule } from './modules/mls/mls.module'
 import { TosModule } from './modules/tos/tos.module'
@@ -62,6 +63,7 @@ import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard'
     PatreonModule,
     InstanceModule,
     RateLimitModule,
+    HeadlessDetectionModule,
     ReactionsModule,
     MlsModule,
     TosModule,

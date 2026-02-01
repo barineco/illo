@@ -189,7 +189,7 @@ export class BlueskyOAuthController {
             `${frontendUrl}/auth/pending-approval?via=bluesky`,
           )
         }
-        const tokens = await this.authService.loginUser(user)
+        const tokens = await this.authService.loginUser(user, undefined, undefined, true)
         return this.redirectWithTokens(res, frontendUrl, tokens, 'login')
       }
 
@@ -293,7 +293,7 @@ export class BlueskyOAuthController {
     }
 
     // User is active, generate tokens
-    const tokens = await this.authService.loginUser(user)
+    const tokens = await this.authService.loginUser(user, undefined, undefined, true)
     return res.json({
       pendingApproval: false,
       accessToken: tokens.accessToken,

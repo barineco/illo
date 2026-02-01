@@ -39,10 +39,15 @@ export class RateLimitGuard implements CanActivate {
     // Extract artwork ID from route params if available
     const artworkId = request.params?.id;
 
+    // Get hasRealInteraction from headless detection result (if available)
+    const headlessResult = (request as any).headlessDetectionResult;
+    const hasRealInteraction = headlessResult?.signals?.userInteraction?.hasRealInteraction;
+
     const status = await this.rateLimitService.checkRateLimit(
       { userId: user?.id, ipAddress },
       options.action,
       artworkId,
+      hasRealInteraction,
     );
 
     // Attach status to request for interceptor

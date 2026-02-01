@@ -56,10 +56,21 @@ export class RateLimitService implements OnModuleInit {
     identifier: RateLimitIdentifier,
     action: string,
     artworkId?: string,
+    hasRealInteraction?: boolean,
   ): Promise<RateLimitStatus> {
     const config = await this.getConfig();
 
+    // Even if rate limiting is disabled, apply interaction-based degradation if enabled
     if (!config.enabled) {
+      if (config.noInteractionEnabled && hasRealInteraction === false) {
+        // Log this detection (without full rate limit processing)
+        this.logInteractionOnlyDetection(identifier, action);
+        return {
+          tier: RateLimitTier.SOFT_LIMIT,
+          degradeQuality: true,
+          reason: 'no_real_interaction',
+        };
+      }
       return { tier: RateLimitTier.NORMAL, degradeQuality: false };
     }
 
@@ -76,46 +87,38 @@ export class RateLimitService implements OnModuleInit {
       };
     }
 
-    // Record this request and get counts
     const key = this.buildKey(identifier, action);
     const now = Date.now();
 
-    // Record request with artwork ID to deduplicate
     if (artworkId) {
       await this.recordRequest(key, now, artworkId, config.windowSeconds);
     }
 
-    // Get request counts for both windows
     const [countPerWindow, countPerHour] = await Promise.all([
       this.getRequestCount(key, config.windowSeconds),
       this.getRequestCount(key, 3600),
     ]);
 
-    // Analyze pattern
     const patternAnalysis = await this.analyzeRequestPattern(identifier, action);
-
-    // Check if user is anonymous (not logged in)
     const isAnonymous = !identifier.userId;
 
-    // Determine tier using appropriate algorithm
     let tier: RateLimitTier;
     let riskScore: CompositeRiskScore | undefined;
     let detectionReason: string | undefined;
 
     if (config.useCompositeScore) {
-      // New algorithm: composite risk score
       const result = this.determineTierV2(
         countPerWindow,
         countPerHour,
         patternAnalysis,
         config,
         isAnonymous,
+        hasRealInteraction,
       );
       tier = result.tier;
       riskScore = result.riskScore;
       detectionReason = result.reason;
     } else {
-      // Legacy algorithm
       tier = this.determineTier(
         countPerWindow,
         countPerHour,
@@ -138,6 +141,7 @@ export class RateLimitService implements OnModuleInit {
         riskScore,
         `measurement:${detectionReason || 'legacy'}`,
         isAnonymous,
+        hasRealInteraction,
       );
       return {
         tier: RateLimitTier.NORMAL, // Always return NORMAL in measurement mode
@@ -166,6 +170,7 @@ export class RateLimitService implements OnModuleInit {
         riskScore,
         detectionReason,
         isAnonymous,
+        hasRealInteraction,
       );
     }
 
@@ -233,6 +238,8 @@ export class RateLimitService implements OnModuleInit {
       instantDetectionCV: dbConfig.instantDetectionCV,
       measurementMode: dbConfig.measurementMode,
       useCompositeScore: dbConfig.useCompositeScore,
+      noInteractionEnabled: dbConfig.noInteractionEnabled,
+      noInteractionThresholdMultiplier: dbConfig.noInteractionThresholdMultiplier,
     };
 
     // Cache in Redis
@@ -410,6 +417,7 @@ export class RateLimitService implements OnModuleInit {
     pattern: PatternAnalysis,
     config: RateLimitConfig,
     isAnonymous: boolean,
+    hasRealInteraction?: boolean,
   ): { tier: RateLimitTier; riskScore?: CompositeRiskScore; reason?: string } {
     // Anonymous users have 50% stricter volume limits
     const anonymousMultiplier = isAnonymous ? 0.5 : 1.0;
@@ -443,7 +451,19 @@ export class RateLimitService implements OnModuleInit {
       return { tier: RateLimitTier.SOFT_LIMIT, reason: 'volume_soft_limit' };
     }
 
-    // 3. Instant detection (obvious automation, sample size not required)
+    // 3. No real interaction detection (immediate trigger)
+    // If enabled and no real interaction detected, immediately apply SOFT_LIMIT
+    if (
+      config.noInteractionEnabled &&
+      hasRealInteraction === false // explicitly false, not undefined
+    ) {
+      return {
+        tier: RateLimitTier.SOFT_LIMIT,
+        reason: 'no_real_interaction',
+      };
+    }
+
+    // 4. Instant detection (obvious automation, sample size not required)
     if (
       pattern.avgInterval &&
       pattern.intervalCV < config.instantDetectionCV &&
@@ -461,7 +481,7 @@ export class RateLimitService implements OnModuleInit {
       };
     }
 
-    // 4. Check minimum sample size for pattern analysis
+    // 5. Check minimum sample size for pattern analysis
     const minSamples = isAnonymous
       ? config.minSamplesAnonymous
       : config.minSamplesUser;
@@ -469,7 +489,7 @@ export class RateLimitService implements OnModuleInit {
       return { tier: RateLimitTier.NORMAL, reason: 'insufficient_samples' };
     }
 
-    // 5. Calculate composite risk score
+    // 6. Calculate composite risk score
     const riskScore = this.calculateRiskScore(
       pattern.avgInterval,
       pattern.intervalCV,
@@ -479,7 +499,7 @@ export class RateLimitService implements OnModuleInit {
     // Anonymous users have 10% stricter thresholds
     const thresholdMultiplier = isAnonymous ? 0.9 : 1.0;
 
-    // 6. Pattern-based tier determination
+    // 7. Pattern-based tier determination
     if (riskScore.score >= config.hardLimitScore * thresholdMultiplier) {
       return { tier: RateLimitTier.HARD_LIMIT, riskScore, reason: 'pattern_hard_limit' };
     }
@@ -494,7 +514,7 @@ export class RateLimitService implements OnModuleInit {
   }
 
   /**
-   * Determine rate limit tier based on thresholds
+   * Legacy algorithm: Determine rate limit tier based on thresholds
    * Anonymous (non-logged-in) users have stricter limits
    */
   private determineTier(
@@ -775,6 +795,7 @@ export class RateLimitService implements OnModuleInit {
     riskScore?: CompositeRiskScore,
     detectionReason?: string,
     isAnonymous?: boolean,
+    hasRealInteraction?: boolean,
   ): Promise<void> {
     try {
       await this.prisma.rateLimitLog.create({
@@ -794,10 +815,44 @@ export class RateLimitService implements OnModuleInit {
           regularityScore: riskScore?.factors.regularityScore ?? null,
           detectionReason: detectionReason ?? null,
           isAnonymous: isAnonymous ?? !identifier.userId,
+          hasRealInteraction: hasRealInteraction ?? null,
         },
       });
     } catch (error) {
       this.logger.error('Failed to log rate limit event', error);
+    }
+  }
+
+  /**
+   * Log interaction-only detection (when rate limiting is disabled but noInteractionEnabled is true)
+   */
+  private async logInteractionOnlyDetection(
+    identifier: RateLimitIdentifier,
+    action: string,
+  ): Promise<void> {
+    try {
+      await this.prisma.rateLimitLog.create({
+        data: {
+          userId: identifier.userId || null,
+          ipAddress: identifier.ipAddress,
+          endpoint: 'artwork_view',
+          action,
+          tier: RateLimitTier.SOFT_LIMIT,
+          requestCount: 0,
+          windowSize: 0,
+          intervalVariance: null,
+          avgInterval: null,
+          windowStart: new Date(),
+          riskScore: null,
+          intervalScore: null,
+          regularityScore: null,
+          detectionReason: 'no_real_interaction_only',
+          isAnonymous: !identifier.userId,
+          hasRealInteraction: false,
+        },
+      });
+    } catch (error) {
+      this.logger.error('Failed to log interaction-only detection', error);
     }
   }
 
@@ -836,6 +891,8 @@ export class RateLimitService implements OnModuleInit {
       instantDetectionCV: config.instantDetectionCV.toString(),
       measurementMode: config.measurementMode.toString(),
       useCompositeScore: config.useCompositeScore.toString(),
+      noInteractionEnabled: config.noInteractionEnabled.toString(),
+      noInteractionThresholdMultiplier: config.noInteractionThresholdMultiplier.toString(),
     });
     await this.redis.expire(CONFIG_CACHE_KEY, CONFIG_CACHE_TTL);
   }
@@ -865,6 +922,8 @@ export class RateLimitService implements OnModuleInit {
       instantDetectionCV: parseFloat(hash.instantDetectionCV) || 1.0,
       measurementMode: hash.measurementMode === 'true',
       useCompositeScore: hash.useCompositeScore === 'true',
+      noInteractionEnabled: hash.noInteractionEnabled === 'true',
+      noInteractionThresholdMultiplier: parseFloat(hash.noInteractionThresholdMultiplier) || 1.0,
     };
   }
 

@@ -170,17 +170,17 @@ cleanup_dev_processes() {
 
 start_infrastructure() {
     print_info "Starting infrastructure (Docker)..."
-    docker-compose -p illustboard-localdev -f dev/docker-compose.local-dev.yml up -d
+    docker compose -p illustboard-localdev -f dev/docker compose.local-dev.yml up -d
 
     print_info "Waiting for services to be ready..."
     sleep 5
 
-    docker-compose -p illustboard-localdev -f dev/docker-compose.local-dev.yml ps
+    docker compose -p illustboard-localdev -f dev/docker compose.local-dev.yml ps
 }
 
 stop_infrastructure() {
     print_info "Stopping infrastructure (Docker)..."
-    docker-compose -p illustboard-localdev -f dev/docker-compose.local-dev.yml down
+    docker compose -p illustboard-localdev -f dev/docker compose.local-dev.yml down
 }
 
 ################################################################################
@@ -285,6 +285,14 @@ start_backend() {
     export RATE_LIMIT_HARD_SCORE="${RATE_LIMIT_HARD_SCORE:-90}"
     export RATE_LIMIT_SOFT_SCORE="${RATE_LIMIT_SOFT_SCORE:-50}"
     export RATE_LIMIT_WARNING_SCORE="${RATE_LIMIT_WARNING_SCORE:-35}"
+
+    # Headless Browser Detection
+    export HEADLESS_DETECTION_ENABLED="${HEADLESS_DETECTION_ENABLED:-true}"
+    export HEADLESS_DETECTION_MEASUREMENT_MODE="${HEADLESS_DETECTION_MEASUREMENT_MODE:-true}"
+    export HEADLESS_DETECTION_SUSPICIOUS_THRESHOLD="${HEADLESS_DETECTION_SUSPICIOUS_THRESHOLD:-31}"
+    export HEADLESS_DETECTION_LIKELY_BOT_THRESHOLD="${HEADLESS_DETECTION_LIKELY_BOT_THRESHOLD:-51}"
+    export HEADLESS_DETECTION_DEFINITE_BOT_THRESHOLD="${HEADLESS_DETECTION_DEFINITE_BOT_THRESHOLD:-76}"
+    export HEADLESS_DETECTION_INTERACTION_SECRET="${HEADLESS_DETECTION_INTERACTION_SECRET:-dev-secret-change-in-production}"
 
     nohup pnpm dev > "$BACKEND_LOG" 2>&1 &
     echo $! > "$BACKEND_PID"
@@ -556,13 +564,13 @@ show_logs() {
             fi
             ;;
         postgres|redis|minio|mailhog)
-            docker-compose -p illustboard-localdev -f dev/docker-compose.local-dev.yml logs -f "$service"
+            docker compose -p illustboard-localdev -f dev/docker compose.local-dev.yml logs -f "$service"
             ;;
         "")
             print_info "Showing all logs..."
             print_info "Press Ctrl+C to stop"
             sleep 1
-            docker-compose -p illustboard-localdev -f dev/docker-compose.local-dev.yml logs -f &
+            docker compose -p illustboard-localdev -f dev/docker compose.local-dev.yml logs -f &
             tail -f "$FRONTEND_LOG" "$BACKEND_LOG" 2>/dev/null
             ;;
         *)
@@ -579,7 +587,7 @@ show_status() {
 
     # Infrastructure status
     echo "Infrastructure (Docker):"
-    docker-compose -p illustboard-localdev -f dev/docker-compose.local-dev.yml ps
+    docker compose -p illustboard-localdev -f dev/docker compose.local-dev.yml ps
 
     echo ""
 
@@ -626,7 +634,7 @@ reset_environment() {
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         print_info "Resetting development environment..."
         stop_services
-        docker-compose -p illustboard-localdev -f dev/docker-compose.local-dev.yml down -v
+        docker compose -p illustboard-localdev -f dev/docker compose.local-dev.yml down -v
         rm -rf "$LOG_DIR"/*
         print_success "Environment reset complete"
         print_info "Starting fresh environment..."

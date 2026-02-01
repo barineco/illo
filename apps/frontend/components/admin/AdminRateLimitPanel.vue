@@ -222,6 +222,37 @@
           </div>
         </div>
 
+        <!-- Headless Detection Integration -->
+        <div class="mt-6 p-4 bg-[var(--color-background)] rounded-lg border border-[var(--color-border)]">
+          <h3 class="font-medium text-[var(--color-text)] mb-4">{{ $t('admin.rateLimit.headlessDetection') }}</h3>
+          <p class="text-sm text-[var(--color-text-muted)] mb-4">{{ $t('admin.rateLimit.headlessDetectionDesc') }}</p>
+
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <div class="font-medium text-sm">{{ $t('admin.rateLimit.noInteractionEnabled') }}</div>
+              <div class="text-xs text-[var(--color-text-muted)]">{{ $t('admin.rateLimit.noInteractionEnabledDesc') }}</div>
+            </div>
+            <ToggleSwitch
+              v-model="config.noInteractionEnabled"
+              @change="updateConfig"
+            />
+          </div>
+
+          <div v-if="config.noInteractionEnabled">
+            <label class="block text-sm font-medium mb-1">{{ $t('admin.rateLimit.noInteractionThresholdMultiplier') }}</label>
+            <input
+              v-model.number="config.noInteractionThresholdMultiplier"
+              type="number"
+              min="0.1"
+              max="1.0"
+              step="0.1"
+              class="w-full px-3 py-2 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg"
+              @change="updateConfig"
+            />
+            <p class="text-xs text-[var(--color-text-muted)] mt-1">{{ $t('admin.rateLimit.noInteractionThresholdMultiplierDesc') }}</p>
+          </div>
+        </div>
+
         <!-- Save Message -->
         <div v-if="configSaved" class="mt-4 p-3 bg-[var(--color-success-bg)] text-[var(--color-success-text)] rounded-lg">
           {{ $t('admin.rateLimit.configSaved') }}
@@ -434,6 +465,9 @@ const config = ref({
   hardPenaltyMinutes: 30,
   maxPenaltyMinutes: 120,
   enabled: true,
+  // Headless detection integration
+  noInteractionEnabled: false,
+  noInteractionThresholdMultiplier: 1.0,
 })
 
 // Stats state

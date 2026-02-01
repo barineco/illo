@@ -244,6 +244,11 @@ cmd_setup_env() {
         "generate_secret_key 32" \
         "Changing this will invalidate all existing signed image URLs"
 
+    prompt_secret "HEADLESS_DETECTION_INTERACTION_SECRET (bot detection)" \
+        "$HEADLESS_DETECTION_INTERACTION_SECRET" CFG_HEADLESS_DETECTION_INTERACTION_SECRET \
+        "generate_secret_key 32" \
+        "User interaction token signing key for bot detection"
+
     # --- Bluesky OAuth ---
     echo -e "${CYAN}Bluesky OAuth${NC}"
     echo -e "${DIM}$(printf '─%.0s' $(seq 1 50))${NC}"

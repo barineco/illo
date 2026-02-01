@@ -5,6 +5,13 @@
     "confirm": "I am 18 or older",
     "goBack": "Go Back"
   },
+  "contentVisibility": {
+    "title": "This content is hidden by your settings",
+    "description": "This content is set to hidden. Do you want to view it?",
+    "hint": "To always show rated content, please adjust your content settings",
+    "show": "Show Content",
+    "settings": "Change Settings"
+  },
   "nav": {
     "home": "Home",
     "dashboard": "Dashboard",
@@ -230,7 +237,8 @@
     "projectName": "Project",
     "commission": "Commission",
     "clientName": "Client",
-    "externalLink": "External Link"
+    "externalLink": "External Link",
+    "viewDetails": "View Details"
   },
   "user": {
     "profile": "Profile",
@@ -851,7 +859,13 @@
         "WARNING": "Warning",
         "SOFT_LIMIT": "Soft Limit",
         "HARD_LIMIT": "Hard Limit"
-      }
+      },
+      "headlessDetection": "Headless Browser Detection",
+      "headlessDetectionDesc": "Apply stricter thresholds for access without real user interaction",
+      "noInteractionEnabled": "Enable Interaction Detection",
+      "noInteractionEnabledDesc": "Detect access without mouse or keyboard interaction",
+      "noInteractionThresholdMultiplier": "Threshold Multiplier",
+      "noInteractionThresholdMultiplierDesc": "Multiplier for thresholds when no interaction detected (0.5 = thresholds halved, stricter)"
     },
     "imageCache": {
       "title": "Image Cache",

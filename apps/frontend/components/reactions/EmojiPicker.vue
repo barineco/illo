@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, watch, onUnmounted } from 'vue'
+import { ref, computed, watch, onUnmounted } from 'vue'
 import { PaperAirplaneIcon } from '@heroicons/vue/24/solid'
 import { useEmoji } from '~/composables/useEmoji'
 import { REACTION_EMOJIS } from '~/data/emoji/emoji-data'
@@ -19,6 +19,16 @@ const { recentEmojis, recordEmojiUsage } = useEmoji()
 
 const customEmojiInput = ref('')
 
+const EMOJI_PATTERN =
+  /^(?:\p{Emoji_Presentation}|\p{Emoji}\uFE0F|\p{Emoji_Modifier_Base}\p{Emoji_Modifier}?|\p{Emoji}(?:\u200D\p{Emoji})+)+$/u
+
+const isValidEmoji = (str: string): boolean => EMOJI_PATTERN.test(str)
+
+const canSubmitCustomEmoji = computed(() => {
+  const emoji = customEmojiInput.value.trim()
+  return emoji && isValidEmoji(emoji)
+})
+
 const handleEmojiSelect = (emoji: string) => {
   recordEmojiUsage(emoji)
   emit('select', emoji)
@@ -27,7 +37,7 @@ const handleEmojiSelect = (emoji: string) => {
 
 const handleCustomSubmit = () => {
   const emoji = customEmojiInput.value.trim()
-  if (emoji) {
+  if (emoji && isValidEmoji(emoji)) {
     recordEmojiUsage(emoji)
     emit('select', emoji)
     customEmojiInput.value = ''
@@ -104,7 +114,7 @@ onUnmounted(() => {
         />
         <button
           class="submit-button"
-          :disabled="!customEmojiInput.trim()"
+          :disabled="!canSubmitCustomEmoji"
           @click="handleCustomSubmit"
         >
           <PaperAirplaneIcon class="submit-icon" />
@@ -117,9 +127,9 @@ onUnmounted(() => {
 <style scoped>
 .emoji-picker {
   position: absolute;
-  bottom: 100%;
+  top: 100%;
   left: 0;
-  margin-bottom: 0.5rem;
+  margin-top: 0.5rem;
   width: 320px;
   max-height: 400px;
   background: var(--color-surface);
@@ -128,7 +138,7 @@ onUnmounted(() => {
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
   display: flex;
   flex-direction: column;
-  z-index: 50;
+  z-index: 100;
   overflow: hidden;
   padding: 0.75rem;
 }
@@ -240,6 +250,6 @@ onUnmounted(() => {
 .picker-fade-enter-from,
 .picker-fade-leave-to {
   opacity: 0;
-  transform: translateY(0.5rem);
+  transform: translateY(-0.5rem);
 }
 </style>

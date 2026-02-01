@@ -39,32 +39,27 @@ export default defineNuxtRouteMiddleware(async (to) => {
       return
     }
 
-    // 本番環境ではエラーをスルー（ページは通常通り表示、APIコール失敗時に個別エラー）
-    if (isProduction) {
-      console.warn('Setup status check failed, continuing anyway:', error.message)
-      return
-    }
-
-    console.error('Failed to check setup status:', error)
-
-    if (
+    // 接続エラーの場合は503エラーページを表示
+    const isConnectionError =
       error.name === 'FetchError' ||
       error.message?.includes('fetch failed') ||
       error.cause?.code === 'ECONNREFUSED'
-    ) {
-      return navigateTo('/backend-error')
+
+    if (isConnectionError) {
+      console.warn('Backend connection failed:', error.message)
+      throw createError({
+        statusCode: 503,
+        statusMessage: 'Service Temporarily Unavailable',
+        fatal: true,
+      })
     }
 
-    if (error.statusCode) {
-      console.error(`Setup status check returned HTTP ${error.statusCode}`)
-      return navigateTo('/backend-error')
-    }
-
-    console.error('Unknown error during setup check, details:', {
-      name: error.name,
-      message: error.message,
-      cause: error.cause,
+    // その他のエラーも503として処理
+    console.error('Failed to check setup status:', error)
+    throw createError({
+      statusCode: 503,
+      statusMessage: 'Service Temporarily Unavailable',
+      fatal: true,
     })
-    return navigateTo('/backend-error')
   }
 })
