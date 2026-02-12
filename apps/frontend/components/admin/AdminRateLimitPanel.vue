@@ -76,6 +76,18 @@
           />
         </div>
 
+        <!-- Composite Score Toggle -->
+        <div class="flex items-center justify-between mb-6 p-4 bg-[var(--color-background)] rounded-lg">
+          <div>
+            <div class="font-medium">{{ $t('admin.rateLimit.useCompositeScore') }}</div>
+            <div class="text-sm text-[var(--color-text-muted)]">{{ $t('admin.rateLimit.useCompositeScoreDesc') }}</div>
+          </div>
+          <ToggleSwitch
+            v-model="config.useCompositeScore"
+            @change="updateConfig"
+          />
+        </div>
+
         <!-- Thresholds -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <!-- Window Settings -->
@@ -431,6 +443,7 @@ const config = ref({
   hardPenaltyMinutes: 30,
   maxPenaltyMinutes: 120,
   enabled: true,
+  useCompositeScore: false,
   // Headless detection integration
   noInteractionEnabled: false,
   noInteractionThresholdMultiplier: 1.0,

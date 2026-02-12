@@ -1,3 +1,5 @@
+const setupCompleteCache = { value: false }
+
 export default defineNuxtRouteMiddleware(async (to) => {
   const config = useRuntimeConfig()
   const isProduction = process.env.NODE_ENV === 'production'
@@ -24,6 +26,10 @@ export default defineNuxtRouteMiddleware(async (to) => {
       retryDelay: 1000,
     })
 
+    if (response.isSetupComplete) {
+      setupCompleteCache.value = true
+    }
+
     if (to.path === '/setup') {
       if (response.isSetupComplete) {
         return navigateTo('/')
@@ -36,6 +42,10 @@ export default defineNuxtRouteMiddleware(async (to) => {
     }
   } catch (error: any) {
     if (to.path === '/setup') {
+      return
+    }
+
+    if (setupCompleteCache.value) {
       return
     }
 

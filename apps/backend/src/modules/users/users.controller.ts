@@ -213,6 +213,22 @@ export class UsersController {
   }
 
   /**
+   * Search users by username or display name (authenticated)
+   * GET /api/users/search?q=query&limit=5
+   */
+  @Get('search')
+  @UseGuards(JwtAuthGuard)
+  async searchUsers(
+    @Query('q') q: string,
+    @Query('limit') limit?: string,
+  ) {
+    if (!q || q.length < 2) {
+      return { users: [] }
+    }
+    return this.usersService.searchUsers(q, limit ? parseInt(limit, 10) : 10, false)
+  }
+
+  /**
    * Get user by Bluesky handle (public)
    * GET /api/users/by-bluesky/:handle
    */

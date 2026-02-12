@@ -1433,6 +1433,7 @@ model HeadlessDetectionLog {
   headerScore           Int
   rateLimitScore        Int
   userInteractionScore  Int
+  deviceFingerprintScore Int    @default(0)
 
   // Real user interaction tracking
   hasRealInteraction    Boolean   @default(false)

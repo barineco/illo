@@ -41,9 +41,8 @@
         </div>
         <div class="text-[var(--color-text-muted)] mb-4">{{ formatUserHandle(user) }}</div>
 
-        <p v-if="user.bio" class="text-[var(--color-text)] mb-4 max-w-2xl whitespace-pre-wrap">
-          {{ user.bio }}
-        </p>
+        <!-- eslint-disable-next-line vue/no-v-html -->
+        <p v-if="user.bio" class="text-[var(--color-text)] mb-4 max-w-2xl whitespace-pre-wrap bio-links" v-html="linkify(user.bio)"></p>
 
         <!-- Social Links -->
         <div v-if="hasSocialLinks" class="flex flex-wrap items-center gap-3 mb-4">
@@ -212,6 +211,7 @@ defineEmits<{
 }>()
 
 const { formatUserHandle } = useUsername()
+const { linkify } = useLinkify()
 
 // Tools visibility state
 const showTools = ref(false)
@@ -263,3 +263,13 @@ const formatDate = (date: Date): string => {
   }).format(date)
 }
 </script>
+
+<style scoped>
+.bio-links :deep(a) {
+  color: var(--color-primary);
+}
+
+.bio-links :deep(a:hover) {
+  text-decoration: underline;
+}
+</style>

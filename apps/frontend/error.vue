@@ -10,7 +10,7 @@
     </header>
 
     <!-- Error Content -->
-    <main class="flex-1 flex items-center justify-center px-4 py-12">
+    <main class="flex-1 flex items-center justify-center px-4 py-12 pb-28">
       <div class="flex flex-col items-center text-center max-w-md">
         <!-- Error Icon -->
         <div

@@ -63,17 +63,31 @@ export interface UserInteractionSignal {
 }
 
 /**
- * 複合ヘッドレスブラウザスコア
- * 5つのシグナルを統合した最終判定
+ * デバイスフィンガープリント
+ * Canvas/WebGL/navigator特性を検出
+ */
+export interface DeviceFingerprintSignal {
+  hasFingerprint: boolean;
+  webdriverDetected: boolean;
+  suspiciousPlugins: boolean;
+  suspiciousWebGL: boolean;
+  suspiciousCanvas: boolean;
+  score: number; // 0-25
+  details: string[];
+}
+
+/**
+ * 複合ヘッドレス判定
  */
 export interface HeadlessBotScore {
-  totalScore: number; // 0-100
+  totalScore: number;
   signals: {
     userAgent: UserAgentSignal;
     clientHints: ClientHintsSignal;
     headerConsistency: HeaderConsistencySignal;
     rateLimit: RateLimitSignal;
     userInteraction: UserInteractionSignal;
+    deviceFingerprint: DeviceFingerprintSignal;
   };
   verdict: 'normal' | 'suspicious' | 'likely_bot' | 'definite_bot';
   confidence: number; // 0-1
@@ -109,6 +123,7 @@ export interface HeadlessDetectionConfig {
   headerWeight: number;
   rateLimitWeight: number;
   userInteractionWeight: number;
+  deviceFingerprintWeight: number;
 
   // 対応設定
   suspiciousAction: HeadlessDetectionAction;

@@ -453,7 +453,7 @@ const fetchSortedArtworks = async (append = false) => {
       params.tag = selectedTagFilter.value
     }
 
-    const response = await api.get<any>(`/api/artworks/user/${props.username}`, params)
+    const response = await api.get<any>(`/api/artworks/user/${props.username}`, { params })
 
     const newArtworks = transformArtworks(response.artworks)
 

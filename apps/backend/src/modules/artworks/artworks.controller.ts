@@ -26,7 +26,6 @@ import { RateLimit } from '../rate-limit/decorators/rate-limit.decorator'
 import { RateLimitGuard } from '../rate-limit/rate-limit.guard'
 import { RateLimitInterceptor } from '../rate-limit/rate-limit.interceptor'
 import { ArtworkType, AgeRating, Visibility, RateLimitTier, CreationPeriodUnit, ArtworkMedium, CopyrightType } from '@prisma/client'
-
 @Controller('artworks')
 export class ArtworksController {
   constructor(
@@ -214,19 +213,23 @@ export class ArtworksController {
 
     const artwork = await this.artworksService.getArtworkById(id, user?.id, contentFilters)
 
-    // Check if rate limited and degrade quality
     const rateLimitStatus = request.rateLimitStatus
-    if (
+    const isOwnArtwork = user?.id && artwork.authorId === user.id
+
+    if (isOwnArtwork) {
+      if (rateLimitStatus) {
+        request.rateLimitStatus = { ...rateLimitStatus, tier: RateLimitTier.NORMAL, degradeQuality: false }
+      }
+    } else if (
       rateLimitStatus &&
       (rateLimitStatus.tier === RateLimitTier.SOFT_LIMIT ||
         rateLimitStatus.tier === RateLimitTier.HARD_LIMIT)
     ) {
-      // Replace full URLs with thumbnail URLs
       if (artwork.images) {
         artwork.images = artwork.images.map((img: any) => ({
           ...img,
-          url: img.thumbnailUrl, // Use thumbnail instead of full image
-          originalUrl: img.url, // Keep original for reference
+          url: img.thumbnailUrl,
+          originalUrl: img.url,
           degraded: true,
         }))
       }
@@ -390,8 +393,8 @@ export class ArtworksController {
     @Query('page') page?: string,
     @Query('limit') limit?: string,
     @Query('sort') sort?: 'latest' | 'popular' | 'views' | 'creationDateDesc' | 'creationDateAsc',
+    @Query('tag') tag?: string,
   ) {
-    // Get user's content filters if authenticated
     const contentFilters = user?.id
       ? await this.usersService.getContentFilters(user.id)
       : undefined
@@ -403,6 +406,7 @@ export class ArtworksController {
       user?.id,
       contentFilters,
       sort,
+      tag,
     )
   }
 

@@ -8,6 +8,7 @@ import {
   HeaderConsistencySignal,
   RateLimitSignal,
   UserInteractionSignal,
+  DeviceFingerprintSignal,
   HeadlessDetectionConfig,
   HeadlessDetectionAction,
 } from './interfaces/headless-detection.interface';
@@ -53,6 +54,7 @@ export class HeadlessDetectionService {
       headerWeight: 1.0,
       rateLimitWeight: 1.0,
       userInteractionWeight: 1.0,
+      deviceFingerprintWeight: 1.0,
       suspiciousAction: HeadlessDetectionAction.LOG_ONLY,
       likelyBotAction: HeadlessDetectionAction.DEGRADE_QUALITY,
       definiteBotAction: HeadlessDetectionAction.BLOCK,
@@ -71,6 +73,7 @@ export class HeadlessDetectionService {
     const headerConsistencySignal = this.analyzeHeaderConsistency(req);
     const rateLimitSignal = this.analyzeRateLimit(req);
     const userInteractionSignal = this.analyzeUserInteraction(req);
+    const deviceFingerprintSignal = this.analyzeDeviceFingerprint(req);
 
     // 複合スコア計算
     const totalScore =
@@ -78,7 +81,8 @@ export class HeadlessDetectionService {
       clientHintsSignal.score * this.config.clientHintsWeight +
       headerConsistencySignal.score * this.config.headerWeight +
       rateLimitSignal.score * this.config.rateLimitWeight +
-      userInteractionSignal.score * this.config.userInteractionWeight;
+      userInteractionSignal.score * this.config.userInteractionWeight +
+      deviceFingerprintSignal.score * this.config.deviceFingerprintWeight;
 
     // 判定
     const verdict = this.determineVerdict(totalScore);
@@ -92,6 +96,7 @@ export class HeadlessDetectionService {
         headerConsistency: headerConsistencySignal,
         rateLimit: rateLimitSignal,
         userInteraction: userInteractionSignal,
+        deviceFingerprint: deviceFingerprintSignal,
       },
       verdict,
       confidence,
@@ -444,6 +449,79 @@ export class HeadlessDetectionService {
     };
   }
 
+  private analyzeDeviceFingerprint(req: Request): DeviceFingerprintSignal {
+    const details: string[] = [];
+    let score = 0;
+    let webdriverDetected = false;
+    let suspiciousPlugins = false;
+    let suspiciousWebGL = false;
+    let suspiciousCanvas = false;
+
+    const header = req.headers['x-device-fingerprint'] as string | undefined;
+    if (!header) {
+      score += 10;
+      details.push('No device fingerprint');
+      return {
+        hasFingerprint: false,
+        webdriverDetected,
+        suspiciousPlugins,
+        suspiciousWebGL,
+        suspiciousCanvas,
+        score: Math.min(score, 25),
+        details,
+      };
+    }
+
+    try {
+      const fp = JSON.parse(Buffer.from(header, 'base64').toString('utf-8'));
+
+      if (fp.webdriver === true) {
+        webdriverDetected = true;
+        score += 25;
+        details.push('navigator.webdriver is true');
+      }
+
+      if (
+        fp.pluginsCount === 0 &&
+        fp.maxTouchPoints === 0
+      ) {
+        suspiciousPlugins = true;
+        score += 15;
+        details.push(`No plugins on desktop (plugins: ${fp.pluginsCount})`);
+      }
+
+      const renderer = (fp.webglRenderer || '').toLowerCase();
+      if (
+        renderer.includes('swiftshader') ||
+        renderer.includes('llvmpipe') ||
+        renderer.includes('mesa')
+      ) {
+        suspiciousWebGL = true;
+        score += 20;
+        details.push(`Suspicious WebGL renderer: ${fp.webglRenderer}`);
+      }
+
+      if (!fp.canvas || fp.canvas.length === 0) {
+        suspiciousCanvas = true;
+        score += 15;
+        details.push('Empty canvas fingerprint');
+      }
+    } catch {
+      score += 5;
+      details.push('Invalid device fingerprint format');
+    }
+
+    return {
+      hasFingerprint: true,
+      webdriverDetected,
+      suspiciousPlugins,
+      suspiciousWebGL,
+      suspiciousCanvas,
+      score: Math.min(score, 25),
+      details,
+    };
+  }
+
   private determineVerdict(
     score: number,
   ): 'normal' | 'suspicious' | 'likely_bot' | 'definite_bot' {
@@ -504,6 +582,7 @@ export class HeadlessDetectionService {
         ...result.signals.clientHints.details,
         ...result.signals.headerConsistency.details,
         ...result.signals.userInteraction.details,
+        ...result.signals.deviceFingerprint.details,
       ];
 
       const action = this.config.measurementMode
@@ -521,6 +600,7 @@ export class HeadlessDetectionService {
           headerScore: result.signals.headerConsistency.score,
           rateLimitScore: result.signals.rateLimit.score,
           userInteractionScore: result.signals.userInteraction.score,
+          deviceFingerprintScore: result.signals.deviceFingerprint.score,
           hasRealInteraction: result.signals.userInteraction.hasRealInteraction,
           userAgent: userAgent || null,
           rawHeaders: headers,

@@ -33,6 +33,12 @@ export const useApi = () => {
         headers['X-User-Interaction-Token'] = interactionToken
       }
       headers['X-Real-User-Interaction'] = realInteraction ? 'true' : 'false'
+
+      const { getFingerprint } = useDeviceFingerprint()
+      const fingerprint = getFingerprint()
+      if (fingerprint) {
+        headers['X-Device-Fingerprint'] = fingerprint
+      }
     }
 
     return headers

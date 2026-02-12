@@ -20,6 +20,9 @@ import {
 const CONFIG_CACHE_TTL = 300; // 5 minutes
 const CONFIG_CACHE_KEY = 'ratelimit:config';
 const PATTERN_SAMPLE_SIZE = 100;
+const NO_INTERACTION_KEY_PREFIX = 'ratelimit:no_interaction:';
+const NO_INTERACTION_TTL = 86400; // 24 hours - cleared only by real interaction
+const NO_INTERACTION_GRACE_SECONDS = 5; // grace period for concurrent requests on page load
 
 @Injectable()
 export class RateLimitService implements OnModuleInit {
@@ -63,13 +66,17 @@ export class RateLimitService implements OnModuleInit {
     // Even if rate limiting is disabled, apply interaction-based degradation if enabled
     if (!config.enabled) {
       if (config.noInteractionEnabled && hasRealInteraction === false) {
-        // Log this detection (without full rate limit processing)
-        this.logInteractionOnlyDetection(identifier, action);
-        return {
-          tier: RateLimitTier.SOFT_LIMIT,
-          degradeQuality: true,
-          reason: 'no_real_interaction',
-        };
+        const isConsecutive = await this.checkConsecutiveNoInteraction(identifier);
+        if (isConsecutive) {
+          this.logInteractionOnlyDetection(identifier, action);
+          return {
+            tier: RateLimitTier.SOFT_LIMIT,
+            degradeQuality: true,
+            reason: 'no_real_interaction',
+          };
+        }
+      } else if (hasRealInteraction === true) {
+        await this.clearNoInteractionFlag(identifier);
       }
       return { tier: RateLimitTier.NORMAL, degradeQuality: false };
     }
@@ -107,13 +114,14 @@ export class RateLimitService implements OnModuleInit {
     let detectionReason: string | undefined;
 
     if (config.useCompositeScore) {
-      const result = this.determineTierV2(
+      const result = await this.determineTierV2(
         countPerWindow,
         countPerHour,
         patternAnalysis,
         config,
         isAnonymous,
         hasRealInteraction,
+        identifier,
       );
       tier = result.tier;
       riskScore = result.riskScore;
@@ -126,6 +134,21 @@ export class RateLimitService implements OnModuleInit {
         config,
         isAnonymous,
       );
+    }
+
+    // No-interaction consecutive detection (independent of scoring algorithm)
+    if (
+      tier === RateLimitTier.NORMAL &&
+      config.noInteractionEnabled &&
+      hasRealInteraction === false
+    ) {
+      const isConsecutive = await this.checkConsecutiveNoInteraction(identifier);
+      if (isConsecutive) {
+        tier = RateLimitTier.SOFT_LIMIT;
+        detectionReason = 'no_real_interaction';
+      }
+    } else if (hasRealInteraction === true) {
+      await this.clearNoInteractionFlag(identifier);
     }
 
     // Measurement mode: log everything but don't apply penalties
@@ -411,14 +434,15 @@ export class RateLimitService implements OnModuleInit {
   /**
    * New algorithm: Determine tier using composite risk score
    */
-  private determineTierV2(
+  private async determineTierV2(
     countPerWindow: number,
     countPerHour: number,
     pattern: PatternAnalysis,
     config: RateLimitConfig,
     isAnonymous: boolean,
     hasRealInteraction?: boolean,
-  ): { tier: RateLimitTier; riskScore?: CompositeRiskScore; reason?: string } {
+    identifier?: RateLimitIdentifier,
+  ): Promise<{ tier: RateLimitTier; riskScore?: CompositeRiskScore; reason?: string }> {
     // Anonymous users have 50% stricter volume limits
     const anonymousMultiplier = isAnonymous ? 0.5 : 1.0;
 
@@ -451,16 +475,23 @@ export class RateLimitService implements OnModuleInit {
       return { tier: RateLimitTier.SOFT_LIMIT, reason: 'volume_soft_limit' };
     }
 
-    // 3. No real interaction detection (immediate trigger)
-    // If enabled and no real interaction detected, immediately apply SOFT_LIMIT
+    // 3. No real interaction detection
+    // First request without interaction is allowed (grace for external share links).
+    // Second consecutive request without interaction triggers SOFT_LIMIT.
     if (
       config.noInteractionEnabled &&
-      hasRealInteraction === false // explicitly false, not undefined
+      hasRealInteraction === false &&
+      identifier
     ) {
-      return {
-        tier: RateLimitTier.SOFT_LIMIT,
-        reason: 'no_real_interaction',
-      };
+      const isConsecutive = await this.checkConsecutiveNoInteraction(identifier);
+      if (isConsecutive) {
+        return {
+          tier: RateLimitTier.SOFT_LIMIT,
+          reason: 'no_real_interaction',
+        };
+      }
+    } else if (hasRealInteraction === true && identifier) {
+      await this.clearNoInteractionFlag(identifier);
     }
 
     // 4. Instant detection (obvious automation, sample size not required)
@@ -832,6 +863,45 @@ export class RateLimitService implements OnModuleInit {
     } catch (error) {
       this.logger.error('Failed to log interaction-only detection', error);
     }
+  }
+
+  private getNoInteractionKey(identifier: RateLimitIdentifier): string {
+    const id = identifier.userId || identifier.ipAddress;
+    return `${NO_INTERACTION_KEY_PREFIX}${id}`;
+  }
+
+  /**
+   * Check if this is a consecutive no-interaction request.
+   * Stores a timestamp on first occurrence. Requests within the grace period
+   * (for concurrent page-load requests) are allowed. After the grace period,
+   * subsequent no-interaction requests are blocked.
+   */
+  private async checkConsecutiveNoInteraction(
+    identifier: RateLimitIdentifier,
+  ): Promise<boolean> {
+    const key = this.getNoInteractionKey(identifier);
+    const stored = await this.redis.get(key);
+
+    if (!stored) {
+      await this.redis.setex(key, NO_INTERACTION_TTL, Date.now().toString());
+      return false;
+    }
+
+    const firstSeen = parseInt(stored, 10);
+    const elapsed = (Date.now() - firstSeen) / 1000;
+
+    if (elapsed < NO_INTERACTION_GRACE_SECONDS) {
+      return false;
+    }
+
+    return true;
+  }
+
+  private async clearNoInteractionFlag(
+    identifier: RateLimitIdentifier,
+  ): Promise<void> {
+    const key = this.getNoInteractionKey(identifier);
+    await this.redis.del(key);
   }
 
   /**

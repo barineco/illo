@@ -905,6 +905,7 @@ export class ArtworksService {
     currentUserId?: string,
     contentFilters?: ContentFilters,
     sort?: 'latest' | 'popular' | 'views' | 'creationDateDesc' | 'creationDateAsc',
+    tag?: string,
   ) {
     const { username, domain } = this.parseUserHandle(handle)
 
@@ -921,13 +922,15 @@ export class ArtworksService {
       throw new NotFoundException(`User @${handle} not found`)
     }
 
-    // For remote users, ensure artworks are fetched from their outbox
     if (domain !== '') {
       this.logger.debug(`Fetching remote artworks for ${username}@${domain}`)
       await this.remoteArtworkService.ensureRemoteArtworksFetched(user)
     }
 
-    return this.getArtworks({ page, limit, authorId: user.id, currentUserId, contentFilters, sort })
+    return this.getArtworks({
+      page, limit, authorId: user.id, currentUserId, contentFilters, sort,
+      tags: tag ? [tag] : undefined,
+    })
   }
 
   /**
@@ -1239,6 +1242,9 @@ export class ArtworksService {
           }),
           ...(updateDto.originalCreatorAllowDownload !== undefined && {
             originalCreatorAllowDownload: updateDto.originalCreatorAllowDownload,
+          }),
+          ...(updateDto.characterId !== undefined && {
+            characterId: updateDto.characterId || null,
           }),
         },
       })

@@ -7,6 +7,7 @@ import {
 } from '@nestjs/common';
 import { HeadlessDetectionService } from './headless-detection.service';
 import { HeadlessDetectionAction } from './interfaces/headless-detection.interface';
+import { RateLimitTier } from '@prisma/client';
 import { Request } from 'express';
 
 @Injectable()
@@ -56,6 +57,13 @@ export class HeadlessDetectionGuard implements CanActivate {
               'Access denied: Headless browser detected',
             );
           }
+          if (config.definiteBotAction === HeadlessDetectionAction.DEGRADE_QUALITY) {
+            request.rateLimitStatus = {
+              tier: RateLimitTier.SOFT_LIMIT,
+              degradeQuality: true,
+              reason: 'headless_definite_bot',
+            };
+          }
           break;
 
         case 'likely_bot':
@@ -66,6 +74,16 @@ export class HeadlessDetectionGuard implements CanActivate {
             throw new ForbiddenException(
               'Access denied: Automated access detected',
             );
+          }
+          if (config.likelyBotAction === HeadlessDetectionAction.DEGRADE_QUALITY) {
+            this.logger.log(
+              `Degrading quality for likely bot (score: ${result.totalScore}) from ${this.getIpAddress(request)}`,
+            );
+            request.rateLimitStatus = {
+              tier: RateLimitTier.SOFT_LIMIT,
+              degradeQuality: true,
+              reason: 'headless_likely_bot',
+            };
           }
           break;
 

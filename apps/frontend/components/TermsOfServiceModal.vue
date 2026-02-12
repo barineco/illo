@@ -86,18 +86,18 @@
           <div v-if="currentHtmlContent" class="mb-4">
             <div class="flex items-center gap-2 text-sm text-[var(--color-text-muted)]">
               <Icon
-                :name="hasScrolledToBottom ? 'CheckCircle' : 'ArrowDown'"
+                :name="currentTabScrolled ? 'CheckCircle' : 'ArrowDown'"
                 class="w-4 h-4"
-                :class="{ 'animate-bounce': !hasScrolledToBottom, 'text-green-500': hasScrolledToBottom }"
+                :class="{ 'animate-bounce': !currentTabScrolled, 'text-green-500': currentTabScrolled }"
               />
-              <span :class="{ 'text-green-500': hasScrolledToBottom }">
-                {{ hasScrolledToBottom ? $t('tos.scrollComplete') : $t('tos.mustScrollToAgree') }}
+              <span :class="{ 'text-green-500': currentTabScrolled }">
+                {{ currentTabScrolled ? $t('tos.scrollComplete') : $t('tos.mustScrollToAgree') }}
               </span>
             </div>
             <div class="mt-2 h-1 bg-[var(--color-border)] rounded-full overflow-hidden">
               <div
                 class="h-full transition-all duration-100 ease-out"
-                :class="hasScrolledToBottom ? 'bg-green-500' : 'bg-[var(--color-primary)]'"
+                :class="currentTabScrolled ? 'bg-green-500' : 'bg-[var(--color-primary)]'"
                 :style="{ width: `${scrollProgress}%` }"
               ></div>
             </div>
@@ -190,15 +190,15 @@ const currentHtmlContent = computed(() => {
 const loading = ref(false)
 const tosVersion = ref(1)
 const agreed = ref(false)
-const hasScrolledToBottom = ref(false)
+const hasScrolledTos = ref(false)
+const hasScrolledPrivacy = ref(false)
 const scrollProgress = ref(0)
 const tosContentRef = ref<HTMLElement | null>(null)
 
-// Computed
-const canAgree = computed(() => {
-  // Can agree if has scrolled to bottom
-  return hasScrolledToBottom.value
-})
+const hasScrolledToBottom = computed(() => hasScrolledTos.value && hasScrolledPrivacy.value)
+const currentTabScrolled = computed(() => activeTab.value === 'tos' ? hasScrolledTos.value : hasScrolledPrivacy.value)
+
+const canAgree = computed(() => hasScrolledToBottom.value)
 
 const handleScroll = (event: Event) => {
   const target = event.target as HTMLElement
@@ -209,10 +209,12 @@ const handleScroll = (event: Event) => {
     scrollProgress.value = Math.min(100, (target.scrollTop / scrollHeight) * 100)
 
     if (target.scrollTop >= scrollHeight - 10) {
-      hasScrolledToBottom.value = true
+      if (activeTab.value === 'tos') hasScrolledTos.value = true
+      else hasScrolledPrivacy.value = true
     }
   } else {
-    hasScrolledToBottom.value = true
+    if (activeTab.value === 'tos') hasScrolledTos.value = true
+    else hasScrolledPrivacy.value = true
     scrollProgress.value = 100
   }
 }
@@ -253,16 +255,18 @@ const unlockBodyScroll = () => {
   }
 }
 
-watch(activeTab, () => {
+watch(activeTab, (tab) => {
   if (tosContentRef.value) {
     tosContentRef.value.scrollTop = 0
   }
-  scrollProgress.value = 0
+  const alreadyScrolled = tab === 'tos' ? hasScrolledTos.value : hasScrolledPrivacy.value
+  scrollProgress.value = alreadyScrolled ? 100 : 0
   nextTick(() => {
     if (tosContentRef.value) {
       const { scrollHeight, clientHeight } = tosContentRef.value
       if (scrollHeight <= clientHeight) {
-        hasScrolledToBottom.value = true
+        if (tab === 'tos') hasScrolledTos.value = true
+        else hasScrolledPrivacy.value = true
         scrollProgress.value = 100
       }
     }
@@ -274,7 +278,8 @@ watch(() => props.isOpen, async (isOpen) => {
     lockBodyScroll()
     loading.value = true
     agreed.value = false
-    hasScrolledToBottom.value = false
+    hasScrolledTos.value = false
+    hasScrolledPrivacy.value = false
     scrollProgress.value = 0
     activeTab.value = 'tos'
 
@@ -291,7 +296,7 @@ watch(() => props.isOpen, async (isOpen) => {
       if (tosContentRef.value) {
         const { scrollHeight, clientHeight } = tosContentRef.value
         if (scrollHeight <= clientHeight) {
-          hasScrolledToBottom.value = true
+          hasScrolledTos.value = true
           scrollProgress.value = 100
         }
       }

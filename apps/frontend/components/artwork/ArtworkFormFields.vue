@@ -368,10 +368,14 @@
           </div>
         </div>
 
-        <!-- Character Selection (shown for FAN_ART type) -->
-        <div v-if="modelValue.copyrightType === 'FAN_ART'" class="sub-section">
-          <label class="sub-label">{{ $t('upload.fanArtCharacter') }}</label>
-          <p class="field-hint mb-2">{{ $t('upload.fanArtCharacterHint') }}</p>
+        <!-- Character Selection -->
+        <div v-if="modelValue.copyrightType === 'CREATOR' || modelValue.copyrightType === 'FAN_ART'" class="sub-section">
+          <label class="sub-label">
+            {{ modelValue.copyrightType === 'CREATOR' ? $t('upload.ownCharacter') : $t('upload.fanArtCharacter') }}
+          </label>
+          <p class="field-hint mb-2">
+            {{ modelValue.copyrightType === 'CREATOR' ? $t('upload.ownCharacterHint') : $t('upload.fanArtCharacterHint') }}
+          </p>
 
           <!-- Selected Character -->
           <div v-if="modelValue.character" class="flex items-center gap-3 p-3 bg-[var(--color-surface-secondary)] rounded-lg mb-2">
@@ -727,6 +731,7 @@ const emit = defineEmits<{
 }>()
 
 const api = useApi()
+const { user: currentUser } = useAuth()
 
 const showCreationInfo = ref(false)
 const showCopyrightInfo = ref(false)
@@ -818,7 +823,8 @@ const clearOriginalCreator = () => {
   updateField('originalCreatorAllowDownload', false)
 }
 
-// Search characters for fan art
+const { getSignedUrl } = useSignedImageUrlOnce()
+
 const searchCharacters = async (query: string) => {
   if (!query || query.length < 1) {
     characterSearchResults.value = []
@@ -827,10 +833,33 @@ const searchCharacters = async (query: string) => {
 
   isSearchingCharacters.value = true
   try {
-    const results = await api.get<{ characters: CharacterInfo[] }>('/api/ocs', {
-      params: { search: query, fanArtWelcome: true, limit: 10 },
+    const isOwnCharacter = props.modelValue.copyrightType === 'CREATOR'
+    const endpoint = isOwnCharacter && currentUser.value
+      ? `/api/users/${currentUser.value.username}/characters`
+      : '/api/ocs'
+    const results = await api.get<{ characters: any[] }>(endpoint, {
+      params: { search: query, limit: 10 },
     })
-    characterSearchResults.value = results.characters
+    characterSearchResults.value = await Promise.all(
+      results.characters.map(async (c: any) => {
+        const img = c.representativeArtwork?.images?.[0]
+        let avatarThumbnailUrl: string | null = null
+        if (img?.id) {
+          try {
+            avatarThumbnailUrl = await getSignedUrl(img.id, true)
+          } catch {
+            avatarThumbnailUrl = null
+          }
+        }
+        return {
+          id: c.id,
+          name: c.name,
+          avatarUrl: null,
+          avatarThumbnailUrl,
+          creator: c.creator,
+        }
+      })
+    )
   } catch (e) {
     console.error('Failed to search characters:', e)
     characterSearchResults.value = []

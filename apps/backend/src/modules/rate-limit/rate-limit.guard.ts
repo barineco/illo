@@ -51,7 +51,13 @@ export class RateLimitGuard implements CanActivate {
     );
 
     // Attach status to request for interceptor
-    request.rateLimitStatus = status;
+    // Preserve existing status if it's more restrictive (e.g. from HeadlessDetectionGuard)
+    const existing = request.rateLimitStatus;
+    if (existing?.degradeQuality && !status.degradeQuality) {
+      // Keep the more restrictive status
+    } else {
+      request.rateLimitStatus = status;
+    }
 
     // Never block - just set status and let request through
     // The response will have degraded quality if needed
