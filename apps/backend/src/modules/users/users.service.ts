@@ -1097,4 +1097,81 @@ export class UsersService {
       return []
     }
   }
+
+  /**
+   * Get top tags for a user (most frequently used tags in their artworks)
+   */
+  async getUserTopTags(
+    handle: string,
+    limit: number = 10,
+  ): Promise<Array<{ id: string; name: string; count: number }>> {
+    // Parse handle to get username and domain
+    const [username, domain] = handle.includes('@')
+      ? handle.split('@')
+      : [handle, '']
+
+    // Find user by username and domain
+    const user = await this.prisma.user.findFirst({
+      where: {
+        username: {
+          equals: username,
+          mode: 'insensitive',
+        },
+        domain: domain || '',
+      },
+      select: { id: true },
+    })
+
+    if (!user) {
+      throw new NotFoundException(`User @${handle} not found`)
+    }
+
+    // Get tag counts for this user's public/unlisted artworks
+    const tagCounts = await this.prisma.artworkTag.groupBy({
+      by: ['tagId'],
+      _count: {
+        tagId: true,
+      },
+      where: {
+        artwork: {
+          authorId: user.id,
+          isDeleted: false,
+          visibility: {
+            in: ['PUBLIC', 'UNLISTED'],
+          },
+        },
+      },
+      orderBy: {
+        _count: {
+          tagId: 'desc',
+        },
+      },
+      take: limit,
+    })
+
+    if (tagCounts.length === 0) {
+      return []
+    }
+
+    // Get tag details
+    const tagIds = tagCounts.map((tc) => tc.tagId)
+    const tags = await this.prisma.tag.findMany({
+      where: { id: { in: tagIds } },
+      select: { id: true, name: true },
+    })
+
+    // Map to result format with counts
+    const tagMap = new Map(tags.map((t) => [t.id, t]))
+    return tagCounts
+      .map((tc) => {
+        const tag = tagMap.get(tc.tagId)
+        if (!tag) return null
+        return {
+          id: tag.id,
+          name: tag.name,
+          count: tc._count.tagId,
+        }
+      })
+      .filter((t): t is NonNullable<typeof t> => t !== null)
+  }
 }

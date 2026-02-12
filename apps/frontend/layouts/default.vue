@@ -140,6 +140,18 @@
       <!-- Bottom Section: Theme & Language Settings -->
       <div class="border-t border-[var(--color-border)] p-3">
         <div :class="['flex items-center gap-2', isCollapsed ? 'flex-col' : 'justify-center']">
+          <!-- About / Instance Info -->
+          <IconButton
+            variant="ghost"
+            size="sm"
+            shape="rounded"
+            :aria-label="$t('about.pageTitle')"
+            :title="$t('about.pageTitle')"
+            @click="navigateTo('/about')"
+          >
+            <Icon name="InformationCircle" class="w-5 h-5" />
+          </IconButton>
+
           <!-- Theme Toggle -->
           <IconButton
             variant="ghost"

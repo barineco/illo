@@ -362,29 +362,29 @@ export class RateLimitService implements OnModuleInit {
 
   /**
    * Calculate interval score (0-50 points)
-   * Shorter intervals = higher score (more dangerous)
    */
   private calculateIntervalScore(avgIntervalMs: number): number {
     const avgSeconds = avgIntervalMs / 1000;
-    if (avgSeconds < 5) return 50;
-    if (avgSeconds < 10) return 40 + (10 - avgSeconds) * 2;
-    if (avgSeconds < 20) return 20 + (20 - avgSeconds) * 2;
-    if (avgSeconds < 60) return (60 - avgSeconds) / 2;
+    if (avgSeconds < 1) return 50;
+    if (avgSeconds < 2) return 45;
+    if (avgSeconds < 3) return 35;
+    if (avgSeconds < 5) return 25;
+    if (avgSeconds < 8) return 15;
+    if (avgSeconds < 15) return 5;
     return 0;
   }
 
   /**
    * Calculate regularity score from CV (0-50 points)
-   * Lower CV = higher score (more regular = more dangerous)
    */
   private calculateRegularityScore(cv: number): number {
-    if (cv < 1) return 50;
-    if (cv < 2) return 45;
-    if (cv < 3) return 40;
-    if (cv < 4) return 30;
-    if (cv < 5) return 20;
-    if (cv < 7) return 10;
-    if (cv < 10) return 5;
+    if (cv < 0.05) return 50;
+    if (cv < 0.10) return 45;
+    if (cv < 0.15) return 40;
+    if (cv < 0.25) return 30;
+    if (cv < 0.40) return 20;
+    if (cv < 0.60) return 10;
+    if (cv < 0.80) return 5;
     return 0;
   }
 
@@ -514,13 +514,13 @@ export class RateLimitService implements OnModuleInit {
   }
 
   /**
-   * Legacy algorithm: Determine rate limit tier based on thresholds
+   * Determine rate limit tier based on volume thresholds
    * Anonymous (non-logged-in) users have stricter limits
    */
   private determineTier(
     countPerWindow: number,
     countPerHour: number,
-    pattern: PatternAnalysis,
+    _pattern: PatternAnalysis,
     config: RateLimitConfig,
     isAnonymous: boolean = false,
   ): RateLimitTier {
@@ -531,6 +531,7 @@ export class RateLimitService implements OnModuleInit {
     const effectiveHardLimitPerWindow = Math.floor(config.hardLimitPerWindow * anonymousMultiplier);
     const effectiveSoftLimitPerHour = Math.floor(config.softLimitPerHour * anonymousMultiplier);
     const effectiveHardLimitPerHour = Math.floor(config.hardLimitPerHour * anonymousMultiplier);
+
     // Hard limit checks (any one triggers)
     if (
       countPerWindow > effectiveHardLimitPerWindow ||
@@ -539,25 +540,11 @@ export class RateLimitService implements OnModuleInit {
       return RateLimitTier.HARD_LIMIT;
     }
 
-    // Pattern-based hard limit (very regular = automation)
-    // Stricter CV threshold for anonymous users
-    const effectiveCvHardThreshold = isAnonymous ? config.cvHardThreshold * 1.5 : config.cvHardThreshold;
-    if (pattern.intervalCV < effectiveCvHardThreshold && pattern.sampleSize >= (isAnonymous ? 15 : 20)) {
-      return RateLimitTier.HARD_LIMIT;
-    }
-
     // Soft limit checks
     if (
       countPerWindow > effectiveSoftLimitPerWindow ||
       countPerHour > effectiveSoftLimitPerHour
     ) {
-      return RateLimitTier.SOFT_LIMIT;
-    }
-
-    // Pattern-based soft limit
-    // Stricter CV threshold for anonymous users
-    const effectiveCvSoftThreshold = isAnonymous ? config.cvSoftThreshold * 1.5 : config.cvSoftThreshold;
-    if (pattern.intervalCV < effectiveCvSoftThreshold && pattern.sampleSize >= (isAnonymous ? 10 : 15)) {
       return RateLimitTier.SOFT_LIMIT;
     }
 
@@ -570,15 +557,6 @@ export class RateLimitService implements OnModuleInit {
     );
 
     if (countPerWindow > warningWindowThreshold || countPerHour > warningHourThreshold) {
-      return RateLimitTier.WARNING;
-    }
-
-    // Pattern-based warning
-    // Stricter for anonymous users
-    const warningCVThreshold = isAnonymous
-      ? (effectiveCvSoftThreshold + 0.3) / 2
-      : (config.cvSoftThreshold + 0.3) / 2;
-    if (pattern.intervalCV < warningCVThreshold && pattern.sampleSize >= (isAnonymous ? 8 : 10)) {
       return RateLimitTier.WARNING;
     }
 
@@ -902,11 +880,11 @@ export class RateLimitService implements OnModuleInit {
    */
   private parseConfigFromRedis(hash: Record<string, string>): RateLimitConfig {
     return {
-      windowSeconds: parseInt(hash.windowSeconds) || 30,
-      softLimitPerWindow: parseInt(hash.softLimitPerWindow) || 8,
-      hardLimitPerWindow: parseInt(hash.hardLimitPerWindow) || 12,
-      softLimitPerHour: parseInt(hash.softLimitPerHour) || 150,
-      hardLimitPerHour: parseInt(hash.hardLimitPerHour) || 250,
+      windowSeconds: parseInt(hash.windowSeconds) || 60,
+      softLimitPerWindow: parseInt(hash.softLimitPerWindow) || 6,
+      hardLimitPerWindow: parseInt(hash.hardLimitPerWindow) || 10,
+      softLimitPerHour: parseInt(hash.softLimitPerHour) || 120,
+      hardLimitPerHour: parseInt(hash.hardLimitPerHour) || 200,
       cvSoftThreshold: parseFloat(hash.cvSoftThreshold) || 0.15,
       cvHardThreshold: parseFloat(hash.cvHardThreshold) || 0.08,
       softPenaltyMinutes: parseInt(hash.softPenaltyMinutes) || 5,

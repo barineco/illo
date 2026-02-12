@@ -5,6 +5,7 @@ import {
   Post,
   Param,
   Body,
+  Query,
   UseGuards,
   UseInterceptors,
   UploadedFile,
@@ -28,6 +29,8 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { CurrentUser } from '../auth/decorators/current-user.decorator'
 import { Public } from '../auth/decorators/public.decorator'
 import { ActorService } from '../federation/services/actor.service'
+import { OCsService } from '../ocs/ocs.service'
+import { OCQueryDto } from '../ocs/dto/oc-query.dto'
 
 @Controller('users')
 export class UsersController {
@@ -35,6 +38,7 @@ export class UsersController {
     private usersService: UsersService,
     @Inject(forwardRef(() => ActorService))
     private actorService: ActorService,
+    private ocsService: OCsService,
   ) {}
 
   /**
@@ -353,5 +357,36 @@ export class UsersController {
   async getUserTools(@Param('username') username: string) {
     const tools = await this.usersService.getToolsUsedByUsername(username)
     return { tools }
+  }
+
+  /**
+   * Get user's top tags (most frequently used tags in their artworks)
+   * GET /api/users/:username/top-tags
+   */
+  @Public()
+  @Get(':username/top-tags')
+  async getUserTopTags(
+    @Param('username') username: string,
+    @Query('limit') limit?: string,
+  ) {
+    const tags = await this.usersService.getUserTopTags(
+      username,
+      limit ? parseInt(limit, 10) : 10,
+    )
+    return { tags }
+  }
+
+  /**
+   * Get user's original characters
+   * GET /api/users/:username/characters
+   */
+  @Public()
+  @Get(':username/characters')
+  async getUserCharacters(
+    @Param('username') username: string,
+    @Query() query: OCQueryDto,
+    @CurrentUser('id') currentUserId?: string,
+  ) {
+    return this.ocsService.findByUser(username, query, currentUserId)
   }
 }

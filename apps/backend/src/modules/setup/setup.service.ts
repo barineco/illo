@@ -152,6 +152,7 @@ export class SetupService {
           role: UserRole.ADMIN,
           isActive: true,
           isVerified: true,
+          isEmailVerified: true, // Admin user is pre-verified
           // ActivityPub fields
           publicKey,
           privateKey,

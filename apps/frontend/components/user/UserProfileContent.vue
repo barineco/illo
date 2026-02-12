@@ -2,6 +2,35 @@
   <div>
     <!-- Artworks Tab -->
     <div v-if="selectedTab === 'artworks'">
+      <!-- Top Tags Filter -->
+      <div v-if="topTags.length > 0" class="mb-4">
+        <div class="flex flex-wrap gap-2">
+          <button
+            v-for="tag in topTags"
+            :key="tag.id"
+            type="button"
+            :class="[
+              'px-3 py-1.5 rounded-full text-sm font-medium transition-colors border',
+              selectedTagFilter === tag.name
+                ? 'bg-[var(--color-primary)] text-white border-[var(--color-primary)]'
+                : 'bg-[var(--color-surface)] text-[var(--color-text)] border-[var(--color-border)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]',
+            ]"
+            @click="toggleTagFilter(tag.name)"
+          >
+            {{ tag.name }}
+            <span class="ml-1 text-xs opacity-75">({{ tag.count }})</span>
+          </button>
+          <button
+            v-if="selectedTagFilter"
+            type="button"
+            class="px-3 py-1.5 rounded-full text-sm font-medium transition-colors text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+            @click="selectedTagFilter = null"
+          >
+            {{ $t('common.clear') }}
+          </button>
+        </div>
+      </div>
+
       <!-- Sort Options -->
       <div v-if="artworks.length > 0" class="mb-4 flex gap-2 flex-wrap">
         <button
@@ -48,6 +77,47 @@
           @click="loadMoreArtworks"
         >
           {{ loadingMoreArtworks ? $t('common.loading') : $t('home.loadMore') }}
+        </BaseButton>
+      </div>
+    </div>
+
+    <!-- Characters Tab -->
+    <div v-else-if="selectedTab === 'characters'">
+      <div v-if="isLoadingCharacters" class="text-center py-16">
+        <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[var(--color-border)] border-t-[var(--color-primary)]"></div>
+        <p class="mt-4 text-[var(--color-text-muted)]">{{ $t('common.loading') }}</p>
+      </div>
+      <div v-else-if="characters.length === 0" class="text-center py-16">
+        <Icon name="User" class="w-16 h-16 mx-auto text-[var(--color-text-muted)] mb-4" />
+        <p class="text-[var(--color-text-muted)] text-lg mb-4">{{ $t('user.noCharactersYet') }}</p>
+        <BaseButton
+          v-if="isOwnProfile"
+          variant="primary"
+          size="lg"
+          shape="pill"
+          @click="navigateTo('/characters/new')"
+        >
+          {{ $t('character.createFirst') }}
+        </BaseButton>
+      </div>
+      <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+        <CharacterCard
+          v-for="character in characters"
+          :key="character.id"
+          :character="character"
+        />
+      </div>
+
+      <!-- Load More Button for Characters -->
+      <div v-if="!isLoadingCharacters && characters.length > 0 && hasMoreCharacters" class="text-center mt-8 mb-4">
+        <BaseButton
+          variant="primary"
+          size="lg"
+          shape="rounded"
+          :disabled="loadingMoreCharacters"
+          @click="loadMoreCharacters"
+        >
+          {{ loadingMoreCharacters ? $t('common.loading') : $t('home.loadMore') }}
         </BaseButton>
       </div>
     </div>
@@ -220,7 +290,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import type { ArtworkCardData } from '~/composables/useArtworkTransform'
 
 // Extended type for artwork display with optional isDeleted
@@ -247,6 +317,27 @@ interface UserInList {
   displayName?: string
   avatarUrl?: string
   isFollowing?: boolean
+}
+
+interface TopTag {
+  id: string
+  name: string
+  count: number
+}
+
+interface Character {
+  id: string
+  name: string
+  avatarUrl?: string | null
+  avatarThumbnailUrl?: string | null
+  allowFanArt: boolean
+  fanArtCount: number
+  creator?: {
+    id: string
+    username: string
+    displayName?: string | null
+    avatarUrl?: string | null
+  }
 }
 
 const props = defineProps<{
@@ -302,11 +393,40 @@ const hasMoreArtworks = computed(() => {
 })
 
 const displayedArtworks = computed(() => {
+  // If tag filter is active, always use fetched sorted artworks
+  if (selectedTagFilter.value) {
+    return sortedArtworks.value
+  }
   if (artworkSort.value === 'latest' && !hasFetchedSortedArtworks.value) {
     return props.artworks
   }
   return sortedArtworks.value
 })
+
+const fetchTopTags = async () => {
+  try {
+    isLoadingTopTags.value = true
+    const response = await api.get<{ tags: TopTag[] }>(`/api/users/${props.username}/top-tags`, {
+      params: { limit: 10 },
+    })
+    topTags.value = response.tags || []
+  } catch (error) {
+    console.error('Failed to fetch top tags:', error)
+    topTags.value = []
+  } finally {
+    isLoadingTopTags.value = false
+  }
+}
+
+const toggleTagFilter = (tagName: string) => {
+  if (selectedTagFilter.value === tagName) {
+    selectedTagFilter.value = null
+  } else {
+    selectedTagFilter.value = tagName
+  }
+  // Re-fetch with tag filter
+  fetchSortedArtworks()
+}
 
 const fetchSortedArtworks = async (append = false) => {
   try {
@@ -322,13 +442,18 @@ const fetchSortedArtworks = async (append = false) => {
       apiSort = creationDateSortDesc.value ? 'creationDateDesc' : 'creationDateAsc'
     }
 
-    const response = await api.get<any>(`/api/artworks/user/${props.username}`, {
-      params: {
-        page: append ? artworkPage.value : 1,
-        limit: artworkLimit,
-        sort: apiSort,
-      },
-    })
+    const params: Record<string, any> = {
+      page: append ? artworkPage.value : 1,
+      limit: artworkLimit,
+      sort: apiSort,
+    }
+
+    // Add tag filter if selected
+    if (selectedTagFilter.value) {
+      params.tag = selectedTagFilter.value
+    }
+
+    const response = await api.get<any>(`/api/artworks/user/${props.username}`, params)
 
     const newArtworks = transformArtworks(response.artworks)
 
@@ -374,17 +499,24 @@ const loadMoreArtworks = async () => {
 
 const signedCollectionUrls = ref<Map<string, string>>(new Map())
 
+// Top tags for filtering
+const topTags = ref<TopTag[]>([])
+const selectedTagFilter = ref<string | null>(null)
+const isLoadingTopTags = ref(false)
+
 const collections = ref<Collection[]>([])
 const likedArtworks = ref<ArtworkCardInput[]>([])
 const bookmarkedArtworks = ref<ArtworkCardInput[]>([])
 const followers = ref<UserInList[]>([])
 const following = ref<UserInList[]>([])
+const characters = ref<Character[]>([])
 
 const isLoadingCollections = ref(false)
 const isLoadingLikes = ref(false)
 const isLoadingBookmarks = ref(false)
 const isLoadingFollowers = ref(false)
 const isLoadingFollowing = ref(false)
+const isLoadingCharacters = ref(false)
 
 // Pagination for likes and bookmarks
 const loadingMoreLikes = ref(false)
@@ -396,6 +528,12 @@ const loadingMoreBookmarks = ref(false)
 const hasMoreBookmarks = computed(() => bookmarkedArtworks.value.length > 0 && bookmarkedArtworks.value.length % bookmarksLimit === 0)
 const bookmarksPage = ref(1)
 const bookmarksLimit = 20
+
+// Pagination for characters
+const loadingMoreCharacters = ref(false)
+const hasMoreCharacters = computed(() => characters.value.length > 0 && characters.value.length % charactersLimit === 0)
+const charactersPage = ref(1)
+const charactersLimit = 20
 
 const getCollectionArtworkUrl = (artworkId: string, imageId: string, fallbackUrl: string) => {
   const cacheKey = `${artworkId}-${imageId}`
@@ -541,6 +679,40 @@ const fetchFollowing = async () => {
   }
 }
 
+const fetchCharacters = async (append = false) => {
+  try {
+    if (append) {
+      loadingMoreCharacters.value = true
+      charactersPage.value++
+    } else {
+      isLoadingCharacters.value = true
+      charactersPage.value = 1
+    }
+
+    const response = await api.get<{ characters: Character[] }>(`/api/users/${props.username}/characters`, {
+      params: {
+        page: charactersPage.value,
+        limit: charactersLimit,
+      },
+    })
+
+    const newCharacters = response.characters || []
+    characters.value = append ? [...characters.value, ...newCharacters] : newCharacters
+  } catch (error) {
+    console.error('Failed to fetch characters:', error)
+    if (!append) {
+      characters.value = []
+    }
+  } finally {
+    isLoadingCharacters.value = false
+    loadingMoreCharacters.value = false
+  }
+}
+
+const loadMoreCharacters = async () => {
+  await fetchCharacters(true)
+}
+
 const handleFollowToggle = async (targetUser: UserInList) => {
   try {
     const handle = targetUser.domain
@@ -566,7 +738,9 @@ const handleFollowToggle = async (targetUser: UserInList) => {
 }
 
 watch(() => props.selectedTab, (newTab) => {
-  if (newTab === 'collections' && collections.value.length === 0) {
+  if (newTab === 'characters' && characters.value.length === 0) {
+    fetchCharacters()
+  } else if (newTab === 'collections' && collections.value.length === 0) {
     fetchCollections()
   } else if (newTab === 'likes' && likedArtworks.value.length === 0) {
     fetchLikedArtworks()
@@ -582,4 +756,9 @@ watch(() => props.activeStat, (newStat) => {
     fetchFollowing()
   }
 }, { immediate: true })
+
+// Fetch top tags on component mount
+onMounted(() => {
+  fetchTopTags()
+})
 </script>

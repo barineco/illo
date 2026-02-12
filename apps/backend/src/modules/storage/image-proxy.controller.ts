@@ -348,8 +348,7 @@ export class ImageProxyController {
 
   /**
    * Check if the image request is from an allowed origin (hotlink protection)
-   * Uses Sec-Fetch-Site header (modern browsers) with Referer fallback
-   * Also considers headless browser detection results
+   * Uses Sec-Fetch-* headers (modern browsers) with Referer fallback
    */
   private isValidImageRequest(req: Request): boolean {
     // Check headless browser detection first
@@ -380,9 +379,30 @@ export class ImageProxyController {
     }
 
     const secFetchSite = req.headers['sec-fetch-site'] as string | undefined
+    const secFetchDest = req.headers['sec-fetch-dest'] as string | undefined
+    const secFetchMode = req.headers['sec-fetch-mode'] as string | undefined
+    const origin = req.headers['origin'] as string | undefined
     const referer = req.headers['referer'] as string | undefined
 
-    // 1. Sec-Fetch-Site check (modern browsers)
+    // 1. Sec-Fetch-Dest check
+    if (secFetchDest) {
+      const allowedDests = ['image', 'empty']
+      if (!allowedDests.includes(secFetchDest)) {
+        this.logger.debug(`Blocked request with Sec-Fetch-Dest: ${secFetchDest}`)
+        return false
+      }
+    }
+
+    // 2. Sec-Fetch-Mode check
+    if (secFetchMode) {
+      const blockedModes = ['navigate', 'websocket']
+      if (blockedModes.includes(secFetchMode)) {
+        this.logger.debug(`Blocked request with Sec-Fetch-Mode: ${secFetchMode}`)
+        return false
+      }
+    }
+
+    // 3. Sec-Fetch-Site check (modern browsers)
     if (secFetchSite) {
       // same-origin: request from the same origin (allowed)
       if (secFetchSite === 'same-origin') {
@@ -399,20 +419,54 @@ export class ImageProxyController {
         return false
       }
 
-      // cross-site: embedded from external site (blocked)
+      // cross-site: check against allowed origins
       if (secFetchSite === 'cross-site') {
+        if (origin) {
+          const allowedOrigins = this.getAllowedOrigins()
+          const isAllowedOrigin = allowedOrigins.some(allowed => {
+            try {
+              const allowedUrl = new URL(allowed)
+              const originUrl = new URL(origin)
+              return originUrl.hostname === allowedUrl.hostname
+            } catch {
+              return false
+            }
+          })
+          if (isAllowedOrigin) {
+            return true
+          }
+        }
         return false
       }
     }
 
-    // 2. Referer fallback (older browsers)
+    // 4. Origin header check (for CORS requests)
+    if (origin) {
+      const allowedOrigins = this.getAllowedOrigins()
+      const isAllowed = allowedOrigins.some(allowed => {
+        try {
+          const allowedUrl = new URL(allowed)
+          const originUrl = new URL(origin)
+          return originUrl.hostname === allowedUrl.hostname
+        } catch {
+          return false
+        }
+      })
+      if (isAllowed) {
+        return true
+      }
+      this.logger.debug(`Blocked request from Origin: ${origin}`)
+      return false
+    }
+
+    // 5. Referer fallback (older browsers)
     if (referer) {
       const allowedOrigins = this.getAllowedOrigins()
       try {
         const refererUrl = new URL(referer)
-        return allowedOrigins.some(origin => {
+        return allowedOrigins.some(originStr => {
           try {
-            const allowedUrl = new URL(origin)
+            const allowedUrl = new URL(originStr)
             return refererUrl.hostname === allowedUrl.hostname
           } catch {
             return false
@@ -423,8 +477,11 @@ export class ImageProxyController {
       }
     }
 
-    // 3. No headers = direct access (configurable)
+    // 6. No Sec-Fetch-Site and no Referer
     const allowNoReferer = this.configService.get<string>('IMAGE_ALLOW_NO_REFERER', 'false')
+    if (allowNoReferer !== 'true') {
+      this.logger.debug('Blocked request with no Sec-Fetch-Site and no Referer (possible extension)')
+    }
     return allowNoReferer === 'true'
   }
 

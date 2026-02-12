@@ -148,38 +148,6 @@
             </div>
           </div>
 
-          <!-- Pattern Detection -->
-          <div class="space-y-4">
-            <h3 class="font-medium text-[var(--color-text)]">{{ $t('admin.rateLimit.patternDetection') }}</h3>
-
-            <div>
-              <label class="block text-sm font-medium mb-1">{{ $t('admin.rateLimit.cvSoftThreshold') }}</label>
-              <input
-                v-model.number="config.cvSoftThreshold"
-                type="number"
-                min="0.01"
-                max="1"
-                step="0.01"
-                class="w-full px-3 py-2 bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg"
-                @change="updateConfig"
-              />
-              <p class="text-xs text-[var(--color-text-muted)] mt-1">{{ $t('admin.rateLimit.cvDesc') }}</p>
-            </div>
-
-            <div>
-              <label class="block text-sm font-medium mb-1">{{ $t('admin.rateLimit.cvHardThreshold') }}</label>
-              <input
-                v-model.number="config.cvHardThreshold"
-                type="number"
-                min="0.01"
-                max="1"
-                step="0.01"
-                class="w-full px-3 py-2 bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg"
-                @change="updateConfig"
-              />
-            </div>
-          </div>
-
           <!-- Penalty Duration -->
           <div class="space-y-4">
             <h3 class="font-medium text-[var(--color-text)]">{{ $t('admin.rateLimit.penaltyDuration') }}</h3>
@@ -295,7 +263,7 @@
                 <th class="text-left py-2 px-3">{{ $t('admin.rateLimit.ip') }}</th>
                 <th class="text-left py-2 px-3">{{ $t('admin.rateLimit.user') }}</th>
                 <th class="text-left py-2 px-3">{{ $t('admin.rateLimit.requests') }}</th>
-                <th class="text-left py-2 px-3">{{ $t('admin.rateLimit.cv') }}</th>
+                <th class="text-left py-2 px-3">{{ $t('admin.rateLimit.reason') }}</th>
               </tr>
             </thead>
             <tbody>
@@ -311,7 +279,7 @@
                 <td class="py-2 px-3 font-mono text-xs">{{ log.ipAddress }}</td>
                 <td class="py-2 px-3">{{ log.username || '-' }}</td>
                 <td class="py-2 px-3">{{ log.requestCount }}</td>
-                <td class="py-2 px-3">{{ log.intervalVariance?.toFixed(3) || '-' }}</td>
+                <td class="py-2 px-3 text-xs">{{ log.detectionReason || '-' }}</td>
               </tr>
             </tbody>
           </table>
@@ -454,13 +422,11 @@ const subTabs = [
 
 // Config state
 const config = ref({
-  windowSeconds: 30,
-  softLimitPerWindow: 8,
-  hardLimitPerWindow: 12,
-  softLimitPerHour: 150,
-  hardLimitPerHour: 250,
-  cvSoftThreshold: 0.15,
-  cvHardThreshold: 0.08,
+  windowSeconds: 60,
+  softLimitPerWindow: 6,
+  hardLimitPerWindow: 10,
+  softLimitPerHour: 120,
+  hardLimitPerHour: 200,
   softPenaltyMinutes: 5,
   hardPenaltyMinutes: 30,
   maxPenaltyMinutes: 120,

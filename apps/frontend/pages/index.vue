@@ -81,6 +81,28 @@
         {{ loadingMore ? $t('common.loading') : $t('home.loadMore') }}
       </BaseButton>
     </div>
+
+    <!-- Fan Art Welcome Section -->
+    <div v-if="fanArtWelcomeCharacters.length > 0" class="mt-12">
+      <div class="flex items-center justify-between mb-4">
+        <h2 class="text-xl font-bold text-[var(--color-text)]">
+          {{ $t('character.fanArtWelcomeSection') }}
+        </h2>
+        <NuxtLink
+          to="/characters"
+          class="text-[var(--color-primary)] hover:underline text-sm font-medium"
+        >
+          {{ $t('character.viewMore') }}
+        </NuxtLink>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+        <CharacterCard
+          v-for="character in fanArtWelcomeCharacters"
+          :key="character.id"
+          :character="character"
+        />
+      </div>
+    </div>
   </div>
 </template>
 
@@ -96,6 +118,24 @@ definePageMeta({
 const api = useApi()
 const { isAuthenticated } = useAuth()
 const { transformArtworks } = useArtworkTransform()
+
+// Fan Art Welcome Characters
+interface Character {
+  id: string
+  name: string
+  avatarUrl?: string | null
+  avatarThumbnailUrl?: string | null
+  allowFanArt: boolean
+  fanArtCount: number
+  creator?: {
+    id: string
+    username: string
+    displayName?: string | null
+    avatarUrl?: string | null
+  }
+}
+
+const fanArtWelcomeCharacters = ref<Character[]>([])
 
 // Categories change based on authentication status
 const categories = computed(() => {
@@ -214,9 +254,25 @@ const loadMore = async () => {
   await fetchArtworks(true)
 }
 
+// Fetch fan art welcome characters
+const fetchFanArtWelcomeCharacters = async () => {
+  try {
+    const response = await api.get<{ characters: Character[] }>('/api/ocs', {
+      params: {
+        fanArtWelcome: true,
+        limit: 6,
+      },
+    })
+    fanArtWelcomeCharacters.value = response.characters
+  } catch (e) {
+    console.error('Failed to fetch fan art welcome characters:', e)
+  }
+}
+
 // Fetch artworks on mount
 onMounted(() => {
   fetchArtworks()
+  fetchFanArtWelcomeCharacters()
 })
 
 // Watch category changes

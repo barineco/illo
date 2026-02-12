@@ -3,13 +3,14 @@
     <div class="max-w-4xl mx-auto px-4 py-8">
       <!-- Header -->
       <div class="mb-4">
-        <NuxtLink
-          to="/"
+        <button
+          type="button"
+          @click="goBack"
           class="inline-flex items-center gap-2 text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
         >
           <Icon name="ArrowLeft" class="w-5 h-5" />
           {{ $t('common.back') }}
-        </NuxtLink>
+        </button>
       </div>
 
       <!-- Content -->
@@ -47,6 +48,17 @@ definePageMeta({
 })
 
 const { locale } = useI18n()
+const router = useRouter()
+
+const goBack = () => {
+  // Check if there's history to go back to
+  if (window.history.length > 1) {
+    router.back()
+  } else {
+    // Fallback to home if no history
+    router.push('/')
+  }
+}
 
 // HTML is pre-generated at build time, no client-side parsing needed
 const htmlContent = computed(() => {
@@ -84,10 +96,16 @@ useHead({
   line-height: 1.75;
 }
 
-.prose :deep(ul),
+.prose :deep(ul) {
+  margin-bottom: 1rem;
+  padding-left: 1.5rem;
+  list-style-type: disc;
+}
+
 .prose :deep(ol) {
   margin-bottom: 1rem;
   padding-left: 1.5rem;
+  list-style-type: decimal;
 }
 
 .prose :deep(li) {

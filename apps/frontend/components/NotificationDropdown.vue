@@ -233,6 +233,8 @@ const getNotificationText = (notification: any) => {
       return t('notifications.replyAction')
     case 'FOLLOW':
       return t('notifications.followAction')
+    case 'CHARACTER_FAN_ART':
+      return t('notifications.characterFanArtAction', { name: notification.character?.name || '' })
     default:
       return ''
   }

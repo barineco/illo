@@ -9,7 +9,7 @@ import { InboxService } from '../federation/services/inbox.service'
 import { ActorService } from '../federation/services/actor.service'
 import { MutesService } from '../mutes/mutes.service'
 import { ContentFilters } from '../users/users.service'
-import { ArtworkType, AgeRating, Visibility, Prisma, CreationPeriodUnit, ArtworkMedium } from '@prisma/client'
+import { ArtworkType, AgeRating, Visibility, Prisma, CreationPeriodUnit, ArtworkMedium, CopyrightType } from '@prisma/client'
 
 export interface CreateArtworkDto {
   title: string
@@ -35,6 +35,17 @@ export interface CreateArtworkDto {
   // OG card crop coordinates (for link card from first image)
   ogCardCrop?: { x: number; y: number; width: number; height: number }
   ogCardBlur?: boolean
+  // Copyright/Rights holder information
+  copyrightHolder?: string
+  copyrightType?: CopyrightType
+  copyrightNote?: string
+  // Fan art original creator linking
+  originalCreatorId?: string
+  originalCreatorAllowDownload?: boolean
+  // Fan art character linking
+  characterId?: string  // ID of the original character for fan art
+  // Collection integration
+  collectionIds?: string[]  // IDs of existing collections to add artwork to
 }
 
 export interface ImageOperation {
@@ -68,6 +79,15 @@ export interface UpdateArtworkDto {
   // OG card crop coordinates (for link card from first image)
   ogCardCrop?: { x: number; y: number; width: number; height: number } | null
   ogCardBlur?: boolean
+  // Copyright/Rights holder information
+  copyrightHolder?: string | null
+  copyrightType?: CopyrightType
+  copyrightNote?: string | null
+  // Fan art original creator linking
+  originalCreatorId?: string | null
+  originalCreatorAllowDownload?: boolean
+  // Fan art character linking
+  characterId?: string | null  // ID of the original character for fan art
 }
 
 export interface OgCardCropRegion {
@@ -145,6 +165,15 @@ const ARTWORK_DETAIL_INCLUDE = {
       displayName: true,
       avatarUrl: true,
       isVerified: true,
+    },
+  },
+  originalCreator: {
+    select: {
+      id: true,
+      username: true,
+      domain: true,
+      displayName: true,
+      avatarUrl: true,
     },
   },
   tags: {
@@ -355,6 +384,15 @@ export class ArtworksService {
           ogCardCropWidth: createDto.ogCardCrop?.width ?? null,
           ogCardCropHeight: createDto.ogCardCrop?.height ?? null,
           ogCardBlur: createDto.ogCardBlur ?? false,
+          // Copyright/Rights holder information
+          copyrightHolder: createDto.copyrightHolder || null,
+          copyrightType: createDto.copyrightType ?? 'CREATOR',
+          copyrightNote: createDto.copyrightNote || null,
+          // Fan art original creator linking
+          originalCreatorId: createDto.originalCreatorId || null,
+          originalCreatorAllowDownload: createDto.originalCreatorAllowDownload ?? false,
+          // Fan art character linking
+          characterId: createDto.characterId || null,
           authorId: authorId,
           images: {
             create: uploadedImages,
@@ -439,6 +477,74 @@ export class ArtworksService {
       this.activityDeliveryService
         .sendCreateArtwork(fullArtwork.author, fullArtwork)
         .catch((err) => this.logger.error(`Failed to send Create Activity: ${err.message}`))
+    }
+
+    // Add artwork to collections if specified
+    if (createDto.collectionIds && createDto.collectionIds.length > 0) {
+      for (const collectionId of createDto.collectionIds) {
+        try {
+          // Verify collection belongs to the author
+          const collection = await this.prisma.collection.findFirst({
+            where: {
+              id: collectionId,
+              userId: authorId,
+            },
+          })
+
+          if (collection) {
+            await this.prisma.collectionArtwork.create({
+              data: {
+                collectionId,
+                artworkId: artwork.id,
+              },
+            })
+
+            // Update collection's artwork count
+            await this.prisma.collection.update({
+              where: { id: collectionId },
+              data: { artworkCount: { increment: 1 } },
+            })
+          }
+        } catch (error) {
+          // Log but don't fail the whole operation
+          this.logger.warn(`Failed to add artwork to collection ${collectionId}: ${error.message}`)
+        }
+      }
+    }
+
+    // Handle character fan art linking
+    if (createDto.characterId) {
+      try {
+        // Get character to find creator
+        const character = await this.prisma.originalCharacter.findUnique({
+          where: { id: createDto.characterId },
+          select: { id: true, creatorId: true, name: true },
+        })
+
+        if (character) {
+          // Increment fan art count
+          await this.prisma.originalCharacter.update({
+            where: { id: character.id },
+            data: { fanArtCount: { increment: 1 } },
+          })
+
+          // Create notification for character creator (if not self)
+          if (character.creatorId !== authorId) {
+            await this.prisma.notification.create({
+              data: {
+                userId: character.creatorId,
+                type: 'CHARACTER_FAN_ART',
+                actorId: authorId,
+                artworkId: artwork.id,
+                characterId: character.id,
+              },
+            })
+          }
+        }
+      } catch (error) {
+        // Log but don't fail the whole operation
+        this.logger.warn(`Failed to handle character fan art linking: ${error.message}`)
+      }
     }
 
     // Fetch artwork with tags (pass authorId so author can access their own artwork)
@@ -1117,6 +1223,23 @@ export class ArtworksService {
           ...(updateDto.ogCardBlur !== undefined && {
             ogCardBlur: updateDto.ogCardBlur,
           }),
+          // Copyright/Rights holder information
+          ...(updateDto.copyrightHolder !== undefined && {
+            copyrightHolder: updateDto.copyrightHolder || null,
+          }),
+          ...(updateDto.copyrightType !== undefined && {
+            copyrightType: updateDto.copyrightType,
+          }),
+          ...(updateDto.copyrightNote !== undefined && {
+            copyrightNote: updateDto.copyrightNote || null,
+          }),
+          // Fan art original creator linking
+          ...(updateDto.originalCreatorId !== undefined && {
+            originalCreatorId: updateDto.originalCreatorId || null,
+          }),
+          ...(updateDto.originalCreatorAllowDownload !== undefined && {
+            originalCreatorAllowDownload: updateDto.originalCreatorAllowDownload,
+          }),
         },
       })
 
@@ -1674,5 +1797,144 @@ export class ArtworksService {
       // Return existing data on error
       return this.getArtworkById(id)
     }
+  }
+
+  /**
+   * Check if user can download the artwork
+   * Downloads are allowed for:
+   * - Artwork author
+   * - Original creator (if originalCreatorAllowDownload is true)
+   */
+  async canDownloadArtwork(artworkId: string, userId: string): Promise<boolean> {
+    const artwork = await this.prisma.artwork.findUnique({
+      where: { id: artworkId },
+      select: {
+        authorId: true,
+        originalCreatorId: true,
+        originalCreatorAllowDownload: true,
+      },
+    })
+
+    if (!artwork) {
+      return false
+    }
+
+    // Author can always download
+    if (artwork.authorId === userId) {
+      return true
+    }
+
+    // Original creator can download if allowed
+    if (
+      artwork.originalCreatorId === userId &&
+      artwork.originalCreatorAllowDownload
+    ) {
+      return true
+    }
+
+    return false
+  }
+
+  /**
+   * Get download info for an artwork image
+   * Returns signed URL for downloading the original image
+   */
+  async getDownloadInfo(
+    artworkId: string,
+    imageId: string,
+    userId: string,
+  ): Promise<{ url: string; filename: string; mimeType: string }> {
+    // Check download permission
+    const canDownload = await this.canDownloadArtwork(artworkId, userId)
+    if (!canDownload) {
+      throw new ForbiddenException('You do not have permission to download this artwork')
+    }
+
+    // Get the image
+    const image = await this.prisma.artworkImage.findFirst({
+      where: {
+        id: imageId,
+        artworkId: artworkId,
+      },
+      include: {
+        artwork: {
+          select: {
+            title: true,
+          },
+        },
+      },
+    })
+
+    if (!image) {
+      throw new NotFoundException('Image not found')
+    }
+
+    // Generate signed URL for the original image (or standard if no original)
+    const variant = image.originalStorageKey ? 'original' : 'standard'
+    const signedUrl = this.imageSigningService.generateSignedUrlV2(imageId, variant)
+
+    // Generate filename
+    const safeTitle = (image.artwork.title || 'artwork')
+      .replace(/[^a-zA-Z0-9\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF]/g, '_')
+      .substring(0, 50)
+    const extension = image.mimeType.split('/')[1] || 'jpg'
+    const filename = `${safeTitle}_${imageId}.${extension}`
+
+    return {
+      url: signedUrl.url,
+      filename,
+      mimeType: image.mimeType,
+    }
+  }
+
+  /**
+   * Get all downloadable images for an artwork
+   */
+  async getArtworkDownloadInfos(
+    artworkId: string,
+    userId: string,
+  ): Promise<Array<{ imageId: string; url: string; filename: string; mimeType: string }>> {
+    // Check download permission
+    const canDownload = await this.canDownloadArtwork(artworkId, userId)
+    if (!canDownload) {
+      throw new ForbiddenException('You do not have permission to download this artwork')
+    }
+
+    // Get all images for the artwork
+    const images = await this.prisma.artworkImage.findMany({
+      where: { artworkId },
+      orderBy: { order: 'asc' },
+      include: {
+        artwork: {
+          select: {
+            title: true,
+          },
+        },
+      },
+    })
+
+    if (images.length === 0) {
+      throw new NotFoundException('No images found for this artwork')
+    }
+
+    return images.map((image, index) => {
+      const variant = image.originalStorageKey ? 'original' : 'standard'
+      const signedUrl = this.imageSigningService.generateSignedUrlV2(image.id, variant)
+
+      const safeTitle = (image.artwork.title || 'artwork')
+        .replace(/[^a-zA-Z0-9\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF]/g, '_')
+        .substring(0, 50)
+      const extension = image.mimeType.split('/')[1] || 'jpg'
+      const filename = images.length > 1
+        ? `${safeTitle}_${index + 1}.${extension}`
+        : `${safeTitle}.${extension}`
+
+      return {
+        imageId: image.id,
+        url: signedUrl.url,
+        filename,
+        mimeType: image.mimeType,
+      }
+    })
   }
 }

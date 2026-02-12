@@ -16,7 +16,7 @@ datasource db {
 
 enum InstanceMode {
   PERSONAL        // 個人用: adminユーザーページがホーム
-  FEDERATION_ONLY // open-illustboard連合のみ
+  FEDERATION_ONLY // illo連合のみ
   FULL_FEDIVERSE  // フルFediverse連合（将来用）
 }
 
@@ -227,6 +227,7 @@ model User {
 
   // Relations
   artworks          Artwork[]
+  fanArtsOfMe       Artwork[] @relation("OriginalCreator")  // Fan arts where this user is the original creator
   likes             Like[]
   bookmarks         Bookmark[]
   comments          Comment[]
@@ -267,6 +268,9 @@ model User {
   // Analytics
   viewLogs          ViewLog[]
 
+  // Original Characters
+  ownedCharacters   OriginalCharacter[] @relation("OwnedCharacters")
+
   @@unique([username, domain], name: "username_domain")
   @@index([username])
   @@index([email])
@@ -302,6 +306,16 @@ enum ArtworkMedium {
   TRADITIONAL
   THREE_D
   MIXED
+}
+
+// Copyright type for artworks (who holds the rights)
+enum CopyrightType {
+  CREATOR        // Uploader is the copyright holder
+  COMMISSION     // Commission client holds the copyright
+  LICENSED       // Licensed upload (permission granted)
+  CORPORATE      // Corporate/official
+  FAN_ART        // Fan art (original creator holds rights)
+  OTHER          // Other
 }
 
 enum BirthdayDisplay {
@@ -352,6 +366,20 @@ model Artwork {
   // Creator protection options
   disableRightClick Boolean  @default(true) @map("disable_right_click")
 
+  // Copyright/Rights holder information
+  copyrightHolder   String?       @db.VarChar(200) @map("copyright_holder")  // Name of copyright holder (if different from uploader)
+  copyrightType     CopyrightType @default(CREATOR) @map("copyright_type")
+  copyrightNote     String?       @db.Text @map("copyright_note")            // Additional notes about rights
+
+  // Fan art original creator linking
+  originalCreatorId            String?  @map("original_creator_id")          // User who created the original work (for fan art)
+  originalCreator              User?    @relation("OriginalCreator", fields: [originalCreatorId], references: [id], onDelete: SetNull)
+  originalCreatorAllowDownload Boolean  @default(false) @map("original_creator_allow_download")  // Allow original creator to download
+
+  // Original Character linking (for fan art)
+  characterId                  String?  @map("character_id")
+  character                    OriginalCharacter? @relation("CharacterFanArts", fields: [characterId], references: [id], onDelete: SetNull)
+
   // Link Card (OG image for social sharing)
   ogCardUrl     String?     @db.VarChar(500) @map("og_card_url")
   ogCardBlur    Boolean     @default(false) @map("og_card_blur")
@@ -385,6 +413,8 @@ model Artwork {
   notifications Notification[]
   reports       Report[]
   viewLogs      ViewLog[]
+  characterRepresentative OriginalCharacter[] @relation("CharacterRepresentative")
+  characterReferences     CharacterReferenceArtwork[] @relation("CharacterReferences")
 
   @@index([authorId])
   @@index([type])
@@ -396,6 +426,7 @@ model Artwork {
   @@index([likeCount])
   @@index([isDeleted])
   @@index([creationDate])
+  @@index([characterId])
   @@map("artworks")
 }
 
@@ -493,6 +524,16 @@ enum NotificationType {
   FOLLOW
   DIRECT_MESSAGE
   REACTION
+  CHARACTER_FAN_ART
+}
+
+// ============================================
+// Fan Art Permission for Original Characters
+// ============================================
+
+enum FanArtPermission {
+  EVERYONE
+  FOLLOWERS_ONLY
 }
 
 model Notification {
@@ -512,15 +553,18 @@ model Notification {
   follow    Follow?          @relation(fields: [followId], references: [id], onDelete: Cascade)
   messageId  String?          @unique
   message    Message?         @relation(fields: [messageId], references: [id], onDelete: Cascade)
-  reactionId String?          @unique
-  reaction   Reaction?        @relation(fields: [reactionId], references: [id], onDelete: Cascade)
-  isRead     Boolean          @default(false)
+  reactionId  String?          @unique
+  reaction    Reaction?        @relation(fields: [reactionId], references: [id], onDelete: Cascade)
+  characterId String?
+  character   OriginalCharacter? @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  isRead      Boolean          @default(false)
   readAt    DateTime?
   createdAt DateTime         @default(now())
 
   @@index([userId, isRead, createdAt])
   @@index([actorId])
   @@index([type])
+  @@index([characterId])
   @@map("notifications")
 }
 
@@ -793,12 +837,12 @@ model FederatedInstance {
   domain          String   @unique @db.VarChar(255)
 
   // Instance information
-  softwareName    String?  @db.VarChar(100)  // "open-illustboard", "mastodon", "pixelfed"
+  softwareName    String?  @db.VarChar(100)  // "illo", "mastodon", "pixelfed"
   softwareVersion String?  @db.VarChar(50)
 
   // Federation control
   isBlocked       Boolean  @default(false)  // Blocked from federation
-  isTrusted       Boolean  @default(false)  // Trusted open-illustboard instance
+  isTrusted       Boolean  @default(false)  // Trusted illo instance
 
   // Timestamps
   lastSeen        DateTime @default(now())
@@ -1260,14 +1304,14 @@ model RateLimitPenalty {
 model RateLimitConfig {
   id                    String    @id @default(cuid())
 
-  // Short window thresholds (default: 30 seconds)
-  windowSeconds         Int       @default(30)
-  softLimitPerWindow    Int       @default(8)
-  hardLimitPerWindow    Int       @default(12)
+  // Short window thresholds (default: 60 seconds)
+  windowSeconds         Int       @default(60)
+  softLimitPerWindow    Int       @default(6)
+  hardLimitPerWindow    Int       @default(10)
 
   // Hourly thresholds
-  softLimitPerHour      Int       @default(150)
-  hardLimitPerHour      Int       @default(250)
+  softLimitPerHour      Int       @default(120)
+  hardLimitPerHour      Int       @default(200)
 
   // Pattern detection thresholds (coefficient of variation) - legacy
   cvSoftThreshold       Float     @default(0.15)
@@ -1410,4 +1454,78 @@ model HeadlessDetectionLog {
   @@index([verdict, createdAt])
   @@index([totalScore, createdAt])
   @@map("headless_detection_logs")
+}
+
+// ============================================
+// Original Characters (OC)
+// ============================================
+
+model OriginalCharacter {
+  id              String    @id @default(cuid())
+  creatorId       String
+  creator         User      @relation("OwnedCharacters", fields: [creatorId], references: [id], onDelete: Cascade)
+
+  name            String    @db.VarChar(100)
+  description     String?   @db.Text
+
+  // Representative artwork (used as avatar/thumbnail)
+  representativeArtworkId  String?   @map("representative_artwork_id")
+  representativeArtwork    Artwork?  @relation("CharacterRepresentative", fields: [representativeArtworkId], references: [id], onDelete: SetNull)
+
+  // Fan art permission settings
+  allowFanArt          Boolean   @default(true) @map("allow_fan_art")
+  fanArtPermission     FanArtPermission @default(EVERYONE) @map("fan_art_permission")
+
+  // Guidelines
+  allowR18             Boolean   @default(false) @map("allow_r18")
+  allowCommercial      Boolean   @default(false) @map("allow_commercial")
+  requireCredit        Boolean   @default(true) @map("require_credit")
+  guidelines           String?   @db.Text
+
+  // Reference materials
+  referenceNotes       String?   @db.Text @map("reference_notes")
+  referenceVisibility  Visibility @default(PUBLIC) @map("reference_visibility")
+
+  // Tags
+  tags                 String[]
+
+  // Statistics
+  fanArtCount          Int       @default(0) @map("fan_art_count")
+
+  // Timestamps
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  // Relations
+  referenceArtworks CharacterReferenceArtwork[]
+  fanArts           Artwork[] @relation("CharacterFanArts")
+  notifications     Notification[]
+
+  @@index([creatorId])
+  @@index([representativeArtworkId])
+  @@index([allowFanArt, fanArtPermission])
+  @@index([createdAt])
+  @@map("original_characters")
+}
+
+// Reference artworks for a character (like CollectionArtwork)
+model CharacterReferenceArtwork {
+  id           String     @id @default(cuid())
+  characterId  String
+  artworkId    String
+  character    OriginalCharacter @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  artwork      Artwork    @relation("CharacterReferences", fields: [artworkId], references: [id], onDelete: Cascade)
+
+  // Order within references
+  order        Int       @default(0)
+  caption      String?   @db.VarChar(200)
+
+  // When added
+  addedAt      DateTime  @default(now())
+
+  @@unique([characterId, artworkId])
+  @@index([characterId])
+  @@index([artworkId])
+  @@index([order])
+  @@map("character_reference_artworks")
 }

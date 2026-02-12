@@ -25,7 +25,7 @@ import { Public } from '../auth/decorators/public.decorator'
 import { RateLimit } from '../rate-limit/decorators/rate-limit.decorator'
 import { RateLimitGuard } from '../rate-limit/rate-limit.guard'
 import { RateLimitInterceptor } from '../rate-limit/rate-limit.interceptor'
-import { ArtworkType, AgeRating, Visibility, RateLimitTier, CreationPeriodUnit, ArtworkMedium } from '@prisma/client'
+import { ArtworkType, AgeRating, Visibility, RateLimitTier, CreationPeriodUnit, ArtworkMedium, CopyrightType } from '@prisma/client'
 
 @Controller('artworks')
 export class ArtworksController {
@@ -96,6 +96,23 @@ export class ArtworksController {
       // OG card crop coordinates
       ogCardCrop,
       ogCardBlur,
+      // Copyright/Rights holder information
+      copyrightHolder: body.copyrightHolder || undefined,
+      copyrightType: body.copyrightType || undefined,
+      copyrightNote: body.copyrightNote || undefined,
+      // Fan art original creator linking
+      originalCreatorId: body.originalCreatorId || undefined,
+      originalCreatorAllowDownload: body.originalCreatorAllowDownload === 'true' || body.originalCreatorAllowDownload === true,
+      // Fan art character linking
+      characterId: body.characterId || undefined,
+      // Collection integration
+      collectionIds: body.collectionIds
+        ? (typeof body.collectionIds === 'string'
+            ? JSON.parse(body.collectionIds)
+            : Array.isArray(body.collectionIds)
+              ? body.collectionIds
+              : [body.collectionIds])
+        : undefined,
     }
 
     // Validate required fields
@@ -329,6 +346,23 @@ export class ArtworksController {
       // OG card crop coordinates and blur
       ogCardCrop,
       ogCardBlur,
+      // Copyright/Rights holder information
+      copyrightHolder: body.copyrightHolder !== undefined
+        ? (body.copyrightHolder === '' ? null : body.copyrightHolder)
+        : undefined,
+      copyrightType: body.copyrightType !== undefined
+        ? (body.copyrightType as CopyrightType)
+        : undefined,
+      copyrightNote: body.copyrightNote !== undefined
+        ? (body.copyrightNote === '' ? null : body.copyrightNote)
+        : undefined,
+      // Fan art original creator linking
+      originalCreatorId: body.originalCreatorId !== undefined
+        ? (body.originalCreatorId === '' ? null : body.originalCreatorId)
+        : undefined,
+      originalCreatorAllowDownload: body.originalCreatorAllowDownload !== undefined
+        ? (body.originalCreatorAllowDownload === 'true' || body.originalCreatorAllowDownload === true)
+        : undefined,
     }
 
     return this.artworksService.updateArtworkWithImages(id, user.id, updateDto, files)
@@ -425,5 +459,48 @@ export class ArtworksController {
       throw new BadRequestException('No image file provided')
     }
     return this.artworksService.uploadLinkCard(id, user.id, file, uploadDto)
+  }
+
+  /**
+   * GET /api/artworks/:id/download
+   * Get download info for all images in artwork
+   * Only accessible by artwork author or original creator (if allowed)
+   */
+  @Get(':id/download')
+  @UseGuards(JwtAuthGuard)
+  async getArtworkDownloadInfos(
+    @Param('id') id: string,
+    @CurrentUser() user: any,
+  ) {
+    return this.artworksService.getArtworkDownloadInfos(id, user.id)
+  }
+
+  /**
+   * GET /api/artworks/:id/download/:imageId
+   * Get download info for a specific image
+   * Only accessible by artwork author or original creator (if allowed)
+   */
+  @Get(':id/download/:imageId')
+  @UseGuards(JwtAuthGuard)
+  async getImageDownloadInfo(
+    @Param('id') id: string,
+    @Param('imageId') imageId: string,
+    @CurrentUser() user: any,
+  ) {
+    return this.artworksService.getDownloadInfo(id, imageId, user.id)
+  }
+
+  /**
+   * GET /api/artworks/:id/can-download
+   * Check if current user can download the artwork
+   */
+  @Get(':id/can-download')
+  @UseGuards(JwtAuthGuard)
+  async canDownloadArtwork(
+    @Param('id') id: string,
+    @CurrentUser() user: any,
+  ) {
+    const canDownload = await this.artworksService.canDownloadArtwork(id, user.id)
+    return { canDownload }
   }
 }

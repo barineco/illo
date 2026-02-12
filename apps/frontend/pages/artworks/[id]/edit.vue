@@ -168,6 +168,28 @@
         </p>
       </div>
 
+      <!-- Download Section -->
+      <div class="bg-[var(--color-surface)] rounded-lg p-6">
+        <div class="flex items-center gap-2 mb-3">
+          <Icon name="ArrowDownTray" class="w-5 h-5 text-[var(--color-primary)]" />
+          <h3 class="font-medium">{{ $t('artwork.downloadSection') }}</h3>
+        </div>
+        <p class="text-sm text-[var(--color-text-muted)] mb-4">
+          {{ $t('artwork.downloadSectionHint') }}
+        </p>
+        <BaseButton
+          variant="outline"
+          size="md"
+          shape="rounded"
+          :disabled="isDownloading || managedImages.filter(img => !img.isNew).length === 0"
+          :loading="isDownloading"
+          @click="handleDownload"
+        >
+          <Icon name="ArrowDownTray" class="w-5 h-5 mr-2" />
+          {{ managedImages.filter(img => !img.isNew).length > 1 ? $t('artwork.downloadAll') : $t('artwork.downloadOriginal') }}
+        </BaseButton>
+      </div>
+
       <!-- Submit Buttons -->
       <div class="flex gap-4 justify-between">
         <BaseButton
@@ -226,6 +248,7 @@ const artworkId = computed(() => route.params.id as string)
 const loading = ref(true)
 const error = ref<string | null>(null)
 const isSubmitting = ref(false)
+const isDownloading = ref(false)
 const uploadProgress = ref(0)
 const submitError = ref<string | null>(null)
 const fileInput = ref<HTMLInputElement | null>(null)
@@ -259,6 +282,13 @@ const form = ref<ArtworkFormData>({
   medium: undefined,
   externalUrl: '',
   toolsUsed: [],
+  // Copyright/Rights information
+  copyrightType: undefined,
+  copyrightHolder: '',
+  copyrightNote: '',
+  originalCreatorId: undefined,
+  originalCreator: undefined,
+  originalCreatorAllowDownload: false,
 })
 
 const tagsInput = ref('')
@@ -410,6 +440,18 @@ const fetchArtwork = async () => {
       medium: data.medium || undefined,
       externalUrl: data.externalUrl || '',
       toolsUsed: data.toolsUsed ? JSON.parse(data.toolsUsed) : [],
+      // Copyright/Rights information
+      copyrightType: data.copyrightType || undefined,
+      copyrightHolder: data.copyrightHolder || '',
+      copyrightNote: data.copyrightNote || '',
+      originalCreatorId: data.originalCreatorId || undefined,
+      originalCreator: data.originalCreator ? {
+        id: data.originalCreator.id,
+        username: data.originalCreator.username,
+        displayName: data.originalCreator.displayName || data.originalCreator.username,
+        avatarUrl: data.originalCreator.avatarUrl,
+      } : undefined,
+      originalCreatorAllowDownload: data.originalCreatorAllowDownload ?? false,
     }
 
     tagsInput.value = data.tags?.map((t: any) => t.name).join(', ') || ''
@@ -593,6 +635,23 @@ const handleSubmit = async () => {
       formData.append('toolsUsed', JSON.stringify(form.value.toolsUsed))
     }
 
+    // Add copyright/rights information
+    if (form.value.copyrightType) {
+      formData.append('copyrightType', form.value.copyrightType)
+    }
+    if (form.value.copyrightHolder) {
+      formData.append('copyrightHolder', form.value.copyrightHolder)
+    }
+    if (form.value.copyrightNote) {
+      formData.append('copyrightNote', form.value.copyrightNote)
+    }
+    if (form.value.originalCreatorId) {
+      formData.append('originalCreatorId', form.value.originalCreatorId)
+    }
+    if (form.value.originalCreatorAllowDownload) {
+      formData.append('originalCreatorAllowDownload', String(form.value.originalCreatorAllowDownload))
+    }
+
     // Add new image files
     for (const img of managedImages.value) {
       if (img.isNew && img.file) {
@@ -664,6 +723,43 @@ const handleSubmit = async () => {
 }
 
 // Delete artwork
+// Download original images
+const handleDownload = async () => {
+  if (isDownloading.value) return
+
+  try {
+    isDownloading.value = true
+
+    // Fetch download info from API
+    const downloadInfos = await api.get<Array<{ imageId: string; url: string; filename: string }>>(
+      `/api/artworks/${artworkId.value}/download`
+    )
+
+    // Download each image
+    for (const info of downloadInfos) {
+      try {
+        const response = await fetch(info.url)
+        const blob = await response.blob()
+        const url = URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = info.filename
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
+        URL.revokeObjectURL(url)
+      } catch (e) {
+        console.error(`Failed to download image ${info.imageId}:`, e)
+      }
+    }
+  } catch (e: any) {
+    console.error('Failed to get download info:', e)
+    alert(e.message || t('artwork.downloadFailed'))
+  } finally {
+    isDownloading.value = false
+  }
+}
+
 const handleDelete = async () => {
   if (!confirm(t('artwork.deleteConfirm'))) {
     return

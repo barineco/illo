@@ -31,6 +31,7 @@ import { HeadlessDetectionModule } from './modules/headless-detection/headless-d
 import { ReactionsModule } from './modules/reactions/reactions.module'
 import { MlsModule } from './modules/mls/mls.module'
 import { TosModule } from './modules/tos/tos.module'
+import { OCsModule } from './modules/ocs/ocs.module'
 import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard'
 
 @Module({
@@ -67,6 +68,7 @@ import { JwtAuthGuard } from './modules/auth/guards/jwt-auth.guard'
     ReactionsModule,
     MlsModule,
     TosModule,
+    OCsModule,
   ],
   controllers: [AppController],
   providers: [

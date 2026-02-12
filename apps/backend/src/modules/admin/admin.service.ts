@@ -94,7 +94,7 @@ export class AdminService {
       ]
     }
 
-    const [users, total] = await Promise.all([
+    const [users, total, stats] = await Promise.all([
       this.prisma.user.findMany({
         where,
         skip: (page - 1) * limit,
@@ -152,6 +152,28 @@ export class AdminService {
         },
       }),
       this.prisma.user.count({ where }),
+      // Get overall stats (not affected by filters)
+      Promise.all([
+        this.prisma.user.count(),
+        this.prisma.user.count({ where: { domain: '' } }),
+        this.prisma.user.count({ where: { domain: { not: '' } } }),
+        this.prisma.user.count({
+          where: { isActive: false, rejectedAt: null, approvedAt: null },
+        }),
+        this.prisma.user.count({
+          where: { isActive: true, suspendedAt: null },
+        }),
+        this.prisma.user.count({ where: { suspendedAt: { not: null } } }),
+        this.prisma.user.count({ where: { rejectedAt: { not: null } } }),
+      ]).then(([total, local, remote, pending, active, suspended, rejected]) => ({
+        total,
+        local,
+        remote,
+        pending,
+        active,
+        suspended,
+        rejected,
+      })),
     ])
 
     return {
@@ -159,6 +181,7 @@ export class AdminService {
       total,
       page,
       totalPages: Math.ceil(total / limit),
+      stats,
     }
   }
 

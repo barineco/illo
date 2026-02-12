@@ -11,4 +11,13 @@ export class InstanceController {
   getContactInfo() {
     return this.instanceService.getContactInfo()
   }
+
+  /**
+   * GET /api/instance/info
+   */
+  @Public()
+  @Get('info')
+  async getPublicInstanceInfo() {
+    return this.instanceService.getPublicInstanceInfo()
+  }
 }

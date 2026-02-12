@@ -443,7 +443,7 @@
           <!-- License Information -->
           <div
             v-if="mockArtwork.license"
-            class="bg-[var(--color-surface)] rounded-lg p-4 border border-[var(--color-border)]"
+            class="bg-[var(--color-surface)] rounded-lg p-4 border border-[var(--color-border)] mb-6"
           >
             <div class="flex items-center gap-2 mb-2">
               <Icon name="Scale" class="w-4 h-4 text-[var(--color-primary)]" />
@@ -481,6 +481,58 @@
               </div>
             </div>
           </div>
+
+          <!-- Copyright/Rights Information -->
+          <div
+            v-if="hasCopyrightInfo"
+            class="bg-[var(--color-surface)] rounded-lg p-4 border border-[var(--color-border)] mb-6"
+          >
+            <div class="flex items-center gap-2 mb-2">
+              <Icon name="Shield" class="w-4 h-4 text-[var(--color-primary)]" />
+              <h3 class="font-medium text-sm">{{ $t('artwork.copyrightInfo') }}</h3>
+            </div>
+            <div class="text-sm space-y-2">
+              <!-- Copyright Type -->
+              <div v-if="mockArtwork.copyrightType && mockArtwork.copyrightType !== 'CREATOR'">
+                <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-[var(--color-info-bg)] text-[var(--color-info-text)] rounded text-xs">
+                  {{ $t(`artwork.copyrightType.${mockArtwork.copyrightType}`) }}
+                </span>
+              </div>
+
+              <!-- Copyright Holder -->
+              <div v-if="mockArtwork.copyrightHolder">
+                <span class="text-[var(--color-text-muted)]">{{ $t('artwork.copyrightHolder') }}:</span>
+                <span class="ml-2">{{ mockArtwork.copyrightHolder }}</span>
+              </div>
+
+              <!-- Original Creator (for Fan Art) -->
+              <div v-if="mockArtwork.originalCreator">
+                <span class="text-[var(--color-text-muted)]">{{ $t('artwork.originalCreator') }}:</span>
+                <NuxtLink
+                  :to="`/users/${mockArtwork.originalCreator.username}`"
+                  class="ml-2 inline-flex items-center gap-2 text-[var(--color-primary)] hover:underline"
+                >
+                  <div class="w-5 h-5 rounded-full bg-[var(--color-surface-secondary)] overflow-hidden flex-shrink-0">
+                    <img
+                      v-if="mockArtwork.originalCreator.avatarUrl"
+                      :src="mockArtwork.originalCreator.avatarUrl"
+                      :alt="mockArtwork.originalCreator.username"
+                      class="w-full h-full object-cover"
+                    />
+                    <Icon v-else name="UserCircle" class="w-full h-full text-[var(--color-text-muted)]" />
+                  </div>
+                  {{ mockArtwork.originalCreator.displayName || mockArtwork.originalCreator.username }}
+                </NuxtLink>
+              </div>
+
+              <!-- Copyright Note -->
+              <div v-if="mockArtwork.copyrightNote" class="mt-2 pt-2 border-t border-[var(--color-border)]">
+                <div class="text-xs text-[var(--color-text-muted)] mb-1">{{ $t('artwork.copyrightNote') }}</div>
+                <div class="text-[var(--color-text)] whitespace-pre-wrap">{{ mockArtwork.copyrightNote }}</div>
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
     </div>
@@ -586,6 +638,18 @@ const { data: artworkData, error: fetchError, status } = await useAsyncData(
         externalUrl: data.externalUrl || null,
         toolsUsed: data.toolsUsed ? JSON.parse(data.toolsUsed) : [],
         filterSetting: data.filterSetting || 'show',
+        // Copyright/Rights information
+        copyrightType: data.copyrightType || null,
+        copyrightHolder: data.copyrightHolder || null,
+        copyrightNote: data.copyrightNote || null,
+        originalCreatorId: data.originalCreatorId || null,
+        originalCreator: data.originalCreator ? {
+          id: data.originalCreator.id,
+          username: data.originalCreator.username,
+          displayName: data.originalCreator.displayName || data.originalCreator.username,
+          avatarUrl: data.originalCreator.avatarUrl,
+        } : null,
+        originalCreatorAllowDownload: data.originalCreatorAllowDownload || false,
       }
     } catch (e: any) {
       throw e
@@ -1109,6 +1173,17 @@ const hasCreationMetadata = computed(() => {
     mockArtwork.value.projectName ||
     mockArtwork.value.isCommission ||
     mockArtwork.value.externalUrl
+  )
+})
+
+// Check if copyright/rights info should be displayed
+const hasCopyrightInfo = computed(() => {
+  if (!mockArtwork.value) return false
+  return (
+    (mockArtwork.value.copyrightType && mockArtwork.value.copyrightType !== 'CREATOR') ||
+    mockArtwork.value.copyrightHolder ||
+    mockArtwork.value.originalCreator ||
+    mockArtwork.value.copyrightNote
   )
 })
 

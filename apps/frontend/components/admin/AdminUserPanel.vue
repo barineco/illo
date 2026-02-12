@@ -353,6 +353,17 @@ const currentPage = ref(1)
 const totalPages = ref(1)
 const total = ref(0)
 
+// Stats from backend (all users, not just current page)
+const userStats = ref({
+  total: 0,
+  local: 0,
+  remote: 0,
+  pending: 0,
+  active: 0,
+  suspended: 0,
+  rejected: 0,
+})
+
 const userFilters = reactive({
   status: 'all' as 'all' | 'pending' | 'active' | 'suspended' | 'rejected',
   location: 'all' as 'all' | 'local' | 'remote',
@@ -373,15 +384,6 @@ const tierModal = reactive({
   currentTier: 'NONE' as 'NONE' | 'TIER_1' | 'TIER_2' | 'TIER_3'
 })
 
-const userStats = computed(() => ({
-  total: total.value,
-  local: users.value.filter(u => !u.domain).length,
-  remote: users.value.filter(u => !!u.domain).length,
-  pending: users.value.filter(u => isPending(u)).length,
-  active: users.value.filter(u => isActive(u)).length,
-  suspended: users.value.filter(u => isSuspended(u)).length,
-  rejected: users.value.filter(u => isRejected(u)).length
-}))
 
 const usersEmptyMessage = computed(() => {
   if (userFilters.status === 'pending') return t('admin.noPendingUsers')
@@ -432,6 +434,11 @@ const loadUsers = async () => {
     users.value = response.users
     total.value = response.total
     totalPages.value = response.totalPages
+
+    // Update stats from backend
+    if (response.stats) {
+      userStats.value = response.stats
+    }
 
     await fetchSignedArtworkUrls(response.users)
   } catch (error: any) {

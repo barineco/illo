@@ -16,6 +16,15 @@
           v-model:tags-input="tagsInput"
         />
 
+        <!-- コレクション選択 -->
+        <div class="form-section">
+          <label class="section-label">
+            {{ $t('upload.addToCollection') }}
+            <span class="label-hint">({{ $t('linkCard.optional') }})</span>
+          </label>
+          <CollectionSelector v-model="selectedCollectionIds" />
+        </div>
+
         <!-- リンクカード画像 -->
         <div class="form-section">
           <label class="section-label">
@@ -86,6 +95,7 @@ import type { ArtworkFormData } from '~/components/artwork/ArtworkFormFields.vue
 import type { CropCoordinates } from '~/components/CropperModal.vue'
 
 const { t } = useI18n()
+const route = useRoute()
 
 definePageMeta({
   middleware: 'auth',
@@ -93,6 +103,7 @@ definePageMeta({
 
 const api = useApi()
 const { isAuthenticated } = useAuth()
+const { getSignedUrl } = useSignedImageUrlOnce()
 
 const images = ref<File[]>([])
 const linkCardCropCoordinates = ref<CropCoordinates | null>(null)
@@ -123,6 +134,7 @@ watch(firstImage, (file) => {
   }
 })
 const tagsInput = ref('')
+const selectedCollectionIds = ref<string[]>([])
 const isSubmitting = ref(false)
 const uploadProgress = ref(0)
 const error = ref('')
@@ -147,6 +159,16 @@ const form = ref<ArtworkFormData>({
   medium: undefined,
   externalUrl: '',
   toolsUsed: [],
+  // Copyright/Rights information
+  copyrightType: undefined,
+  copyrightHolder: '',
+  copyrightNote: '',
+  originalCreatorId: undefined,
+  originalCreator: undefined,
+  originalCreatorAllowDownload: false,
+  // Fan art character
+  characterId: undefined,
+  character: undefined,
 })
 
 const parsedTags = computed(() => {
@@ -233,6 +255,31 @@ const handleSubmit = async () => {
       formData.append('toolsUsed', JSON.stringify(form.value.toolsUsed))
     }
 
+    // 権利情報を追加
+    if (form.value.copyrightType) {
+      formData.append('copyrightType', form.value.copyrightType)
+    }
+    if (form.value.copyrightHolder) {
+      formData.append('copyrightHolder', form.value.copyrightHolder)
+    }
+    if (form.value.copyrightNote) {
+      formData.append('copyrightNote', form.value.copyrightNote)
+    }
+    if (form.value.originalCreatorId) {
+      formData.append('originalCreatorId', form.value.originalCreatorId)
+    }
+    if (form.value.originalCreatorAllowDownload) {
+      formData.append('originalCreatorAllowDownload', String(form.value.originalCreatorAllowDownload))
+    }
+    if (form.value.characterId) {
+      formData.append('characterId', form.value.characterId)
+    }
+
+    // コレクションを追加
+    if (selectedCollectionIds.value.length > 0) {
+      formData.append('collectionIds', JSON.stringify(selectedCollectionIds.value))
+    }
+
     // 画像を追加
     images.value.forEach((file) => {
       formData.append('images', file)
@@ -292,13 +339,61 @@ const fetchToolsSettings = async () => {
   }
 }
 
+// Fetch character from query parameter
+const fetchCharacterFromQuery = async () => {
+  const characterId = route.query.characterId as string | undefined
+  if (!characterId) return
+
+  try {
+    interface CharacterResponse {
+      id: string
+      name: string
+      allowFanArt: boolean
+      representativeArtwork?: {
+        id: string
+        images?: { id: string; thumbnailUrl?: string | null }[]
+      } | null
+      creator?: {
+        id: string
+        username: string
+        displayName?: string | null
+      }
+    }
+    const character = await api.get<CharacterResponse>(`/api/ocs/${characterId}`)
+    if (character.allowFanArt) {
+      form.value.characterId = character.id
+      // Get signed URL for avatar from representative artwork
+      let avatarUrl: string | null = null
+      const firstImage = character.representativeArtwork?.images?.[0]
+      if (firstImage) {
+        try {
+          avatarUrl = await getSignedUrl(firstImage.id, true)
+        } catch {
+          avatarUrl = firstImage.thumbnailUrl || null
+        }
+      }
+      form.value.character = {
+        id: character.id,
+        name: character.name,
+        avatarUrl,
+        creator: character.creator,
+      }
+    }
+  } catch (e) {
+    console.error('Failed to fetch character from query:', e)
+  }
+}
+
 // 認証チェック
-onMounted(() => {
+onMounted(async () => {
   if (!isAuthenticated.value) {
     navigateTo('/login')
   } else {
-    // Fetch default tools if authenticated
-    fetchToolsSettings()
+    // Fetch default tools and character from query in parallel
+    await Promise.all([
+      fetchToolsSettings(),
+      fetchCharacterFromQuery(),
+    ])
   }
 })
 </script>

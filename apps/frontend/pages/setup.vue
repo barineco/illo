@@ -236,7 +236,7 @@
 import { ref, onMounted } from 'vue'
 import { ExclamationTriangleIcon } from '@heroicons/vue/20/solid'
 import { EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outline'
-import type { InitialSetupDto, InstanceMode } from '@open-illustboard/shared'
+import type { InitialSetupDto, InstanceMode } from '@illo/shared'
 
 const { t } = useI18n()
 const { isCapsLockOn, handleKeyEvent, resetCapsLock } = useCapsLock()

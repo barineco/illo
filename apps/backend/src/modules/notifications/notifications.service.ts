@@ -169,6 +169,22 @@ export class NotificationsService {
               content: true,
             },
           },
+          character: {
+            select: {
+              id: true,
+              name: true,
+              representativeArtwork: {
+                select: {
+                  id: true,
+                  images: {
+                    take: 1,
+                    orderBy: { order: 'asc' },
+                    select: { thumbnailUrl: true },
+                  },
+                },
+              },
+            },
+          },
         },
         orderBy: { createdAt: 'desc' },
         skip,

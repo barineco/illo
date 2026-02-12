@@ -232,17 +232,245 @@
           />
         </div>
       </div>
-    </div>
 
-    <!-- Creation Info Section (Collapsible) -->
-    <div class="form-section">
+      <!-- Copyright/Rights Information (nested toggle) -->
       <button
         type="button"
-        class="section-header-toggle"
+        class="section-header-toggle mt-4"
+        @click="showCopyrightInfo = !showCopyrightInfo"
+      >
+        <label class="section-label cursor-pointer">
+          {{ showCopyrightInfo ? $t('upload.copyrightSettings') : $t('upload.copyrightSettingsCollapsed') }}
+        </label>
+        <Icon
+          :name="showCopyrightInfo ? 'ChevronUp' : 'ChevronDown'"
+          class="w-5 h-5 text-[var(--color-text-muted)] ml-auto"
+        />
+      </button>
+
+      <div v-if="showCopyrightInfo" class="creation-info-content">
+        <!-- Copyright Type -->
+        <div class="sub-section">
+          <label class="sub-label">{{ $t('upload.copyrightType') }}</label>
+          <p class="field-hint mb-2">{{ $t('upload.copyrightTypeHint') }}</p>
+          <select
+            :value="modelValue.copyrightType || 'CREATOR'"
+            @change="updateField('copyrightType', ($event.target as HTMLSelectElement).value as CopyrightType)"
+            class="input-field"
+          >
+            <option value="CREATOR">{{ $t('upload.copyrightTypeCreator') }}</option>
+            <option value="COMMISSION">{{ $t('upload.copyrightTypeCommission') }}</option>
+            <option value="LICENSED">{{ $t('upload.copyrightTypeLicensed') }}</option>
+            <option value="CORPORATE">{{ $t('upload.copyrightTypeCorporate') }}</option>
+            <option value="FAN_ART">{{ $t('upload.copyrightTypeFanArt') }}</option>
+            <option value="OTHER">{{ $t('upload.copyrightTypeOther') }}</option>
+          </select>
+        </div>
+
+        <!-- Copyright Holder (shown for non-CREATOR types) -->
+        <div v-if="modelValue.copyrightType && modelValue.copyrightType !== 'CREATOR'" class="sub-section">
+          <label for="copyrightHolder" class="sub-label">{{ $t('upload.copyrightHolder') }}</label>
+          <input
+            id="copyrightHolder"
+            :value="modelValue.copyrightHolder"
+            @input="updateField('copyrightHolder', ($event.target as HTMLInputElement).value)"
+            type="text"
+            class="input-field"
+            maxlength="200"
+            :placeholder="$t('upload.copyrightHolderPlaceholder')"
+          />
+          <p class="field-hint">{{ $t('upload.copyrightHolderHint') }}</p>
+        </div>
+
+        <!-- Original Creator (shown for FAN_ART type) -->
+        <div v-if="modelValue.copyrightType === 'FAN_ART'" class="sub-section">
+          <label class="sub-label">{{ $t('upload.originalCreator') }}</label>
+          <p class="field-hint mb-2">{{ $t('upload.originalCreatorHint') }}</p>
+
+          <!-- Selected Original Creator -->
+          <div v-if="modelValue.originalCreator" class="flex items-center gap-3 p-3 bg-[var(--color-surface-secondary)] rounded-lg mb-2">
+            <div class="w-10 h-10 rounded-full bg-[var(--color-surface)] flex items-center justify-center overflow-hidden flex-shrink-0">
+              <img
+                v-if="modelValue.originalCreator.avatarUrl"
+                :src="modelValue.originalCreator.avatarUrl"
+                :alt="modelValue.originalCreator.displayName || modelValue.originalCreator.username"
+                class="w-full h-full object-cover"
+              />
+              <Icon v-else name="UserCircle" class="w-6 h-6 text-[var(--color-text-muted)]" />
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-medium truncate">{{ modelValue.originalCreator.displayName || modelValue.originalCreator.username }}</div>
+              <div class="text-sm text-[var(--color-text-muted)] truncate">@{{ modelValue.originalCreator.username }}</div>
+            </div>
+            <button
+              type="button"
+              @click="clearOriginalCreator"
+              class="p-1.5 hover:bg-[var(--color-hover)] rounded transition-colors text-[var(--color-text-muted)] hover:text-[var(--color-danger)]"
+            >
+              <Icon name="XMark" class="w-5 h-5" />
+            </button>
+          </div>
+
+          <!-- User Search Input -->
+          <div v-else class="relative">
+            <input
+              v-model="originalCreatorSearch"
+              type="text"
+              class="input-field"
+              :placeholder="$t('upload.originalCreatorPlaceholder')"
+              @focus="showUserDropdown = true"
+              @blur="handleUserDropdownBlur"
+            />
+            <!-- Search Results Dropdown -->
+            <div
+              v-if="showUserDropdown && (originalCreatorSearchResults.length > 0 || isSearchingUsers)"
+              class="absolute z-10 w-full mt-1 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg shadow-lg max-h-60 overflow-y-auto"
+            >
+              <div v-if="isSearchingUsers" class="p-3 text-center text-[var(--color-text-muted)]">
+                <div class="inline-block animate-spin rounded-full h-4 w-4 border-2 border-[var(--color-border)] border-t-[var(--color-primary)]"></div>
+              </div>
+              <button
+                v-for="user in originalCreatorSearchResults"
+                :key="user.id"
+                type="button"
+                class="w-full flex items-center gap-3 p-3 hover:bg-[var(--color-hover)] transition-colors text-left"
+                @mousedown.prevent="selectOriginalCreator(user)"
+              >
+                <div class="w-8 h-8 rounded-full bg-[var(--color-surface-secondary)] flex items-center justify-center overflow-hidden flex-shrink-0">
+                  <img
+                    v-if="user.avatarUrl"
+                    :src="user.avatarUrl"
+                    :alt="user.displayName || user.username"
+                    class="w-full h-full object-cover"
+                  />
+                  <Icon v-else name="UserCircle" class="w-5 h-5 text-[var(--color-text-muted)]" />
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="font-medium truncate">{{ user.displayName || user.username }}</div>
+                  <div class="text-sm text-[var(--color-text-muted)] truncate">@{{ user.username }}</div>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Allow Original Creator to Download -->
+          <div v-if="modelValue.originalCreator" class="mt-3">
+            <div class="toggle-option">
+              <div class="toggle-content">
+                <span class="toggle-title">{{ $t('upload.originalCreatorAllowDownload') }}</span>
+                <p class="field-hint">{{ $t('upload.originalCreatorAllowDownloadHint') }}</p>
+              </div>
+              <ToggleSwitch
+                :model-value="modelValue.originalCreatorAllowDownload || false"
+                @update:model-value="updateField('originalCreatorAllowDownload', $event)"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Character Selection (shown for FAN_ART type) -->
+        <div v-if="modelValue.copyrightType === 'FAN_ART'" class="sub-section">
+          <label class="sub-label">{{ $t('upload.fanArtCharacter') }}</label>
+          <p class="field-hint mb-2">{{ $t('upload.fanArtCharacterHint') }}</p>
+
+          <!-- Selected Character -->
+          <div v-if="modelValue.character" class="flex items-center gap-3 p-3 bg-[var(--color-surface-secondary)] rounded-lg mb-2">
+            <div class="w-10 h-10 rounded-full bg-[var(--color-surface)] flex items-center justify-center overflow-hidden flex-shrink-0">
+              <img
+                v-if="modelValue.character.avatarThumbnailUrl || modelValue.character.avatarUrl"
+                :src="modelValue.character.avatarThumbnailUrl || modelValue.character.avatarUrl || ''"
+                :alt="modelValue.character.name"
+                class="w-full h-full object-cover"
+              />
+              <Icon v-else name="User" class="w-6 h-6 text-[var(--color-text-muted)]" />
+            </div>
+            <div class="flex-1 min-w-0">
+              <div class="font-medium truncate">{{ modelValue.character.name }}</div>
+              <div v-if="modelValue.character.creator" class="text-sm text-[var(--color-text-muted)] truncate">
+                @{{ modelValue.character.creator.username }}
+              </div>
+            </div>
+            <button
+              type="button"
+              @click="clearCharacter"
+              class="p-1.5 hover:bg-[var(--color-hover)] rounded transition-colors text-[var(--color-text-muted)] hover:text-[var(--color-danger)]"
+            >
+              <Icon name="XMark" class="w-5 h-5" />
+            </button>
+          </div>
+
+          <!-- Character Search Input -->
+          <div v-else class="relative">
+            <input
+              v-model="characterSearch"
+              type="text"
+              class="input-field"
+              :placeholder="$t('upload.fanArtCharacterPlaceholder')"
+              @focus="showCharacterDropdown = true"
+              @blur="handleCharacterDropdownBlur"
+            />
+            <!-- Search Results Dropdown -->
+            <div
+              v-if="showCharacterDropdown && (characterSearchResults.length > 0 || isSearchingCharacters)"
+              class="absolute z-10 w-full mt-1 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg shadow-lg max-h-60 overflow-y-auto"
+            >
+              <div v-if="isSearchingCharacters" class="p-3 text-center text-[var(--color-text-muted)]">
+                <div class="inline-block animate-spin rounded-full h-4 w-4 border-2 border-[var(--color-border)] border-t-[var(--color-primary)]"></div>
+              </div>
+              <button
+                v-for="character in characterSearchResults"
+                :key="character.id"
+                type="button"
+                class="w-full flex items-center gap-3 p-3 hover:bg-[var(--color-hover)] transition-colors text-left"
+                @mousedown.prevent="selectCharacter(character)"
+              >
+                <div class="w-8 h-8 rounded-full bg-[var(--color-surface-secondary)] flex items-center justify-center overflow-hidden flex-shrink-0">
+                  <img
+                    v-if="character.avatarThumbnailUrl || character.avatarUrl"
+                    :src="character.avatarThumbnailUrl || character.avatarUrl || ''"
+                    :alt="character.name"
+                    class="w-full h-full object-cover"
+                  />
+                  <Icon v-else name="User" class="w-5 h-5 text-[var(--color-text-muted)]" />
+                </div>
+                <div class="flex-1 min-w-0">
+                  <div class="font-medium truncate">{{ character.name }}</div>
+                  <div v-if="character.creator" class="text-sm text-[var(--color-text-muted)] truncate">
+                    @{{ character.creator.username }}
+                  </div>
+                </div>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Copyright Note -->
+        <div class="sub-section">
+          <label for="copyrightNote" class="sub-label">{{ $t('upload.copyrightNote') }}</label>
+          <textarea
+            id="copyrightNote"
+            :value="modelValue.copyrightNote"
+            @input="updateField('copyrightNote', ($event.target as HTMLTextAreaElement).value)"
+            class="input-field"
+            rows="3"
+            maxlength="2000"
+            :placeholder="$t('upload.copyrightNotePlaceholder')"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- Creation Info Section -->
+    <div class="form-section">
+      <label class="section-label">{{ $t('upload.creationInfoSection') }}</label>
+
+      <!-- Creation Info (toggle) -->
+      <button
+        type="button"
+        class="section-header-toggle mt-3"
         @click="showCreationInfo = !showCreationInfo"
       >
         <label class="section-label cursor-pointer">{{ $t('upload.creationInfo') }}</label>
-        <span class="text-sm text-[var(--color-text-muted)]">({{ $t('upload.optional') }})</span>
         <Icon
           :name="showCreationInfo ? 'ChevronUp' : 'ChevronDown'"
           class="w-5 h-5 text-[var(--color-text-muted)] ml-auto"
@@ -430,10 +658,30 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 
 export type CreationPeriodUnit = 'HOURS' | 'DAYS' | 'WEEKS' | 'MONTHS'
 export type ArtworkMedium = 'DIGITAL' | 'TRADITIONAL' | 'THREE_D' | 'MIXED'
+export type CopyrightType = 'CREATOR' | 'COMMISSION' | 'LICENSED' | 'CORPORATE' | 'FAN_ART' | 'OTHER'
+
+export interface OriginalCreatorInfo {
+  id: string
+  username: string
+  displayName?: string
+  avatarUrl?: string
+}
+
+export interface CharacterInfo {
+  id: string
+  name: string
+  avatarUrl?: string | null
+  avatarThumbnailUrl?: string | null
+  creator?: {
+    id: string
+    username: string
+    displayName?: string | null
+  }
+}
 
 export interface ArtworkFormData {
   title: string
@@ -455,6 +703,17 @@ export interface ArtworkFormData {
   medium?: ArtworkMedium
   externalUrl?: string
   toolsUsed?: string[]
+  // Copyright/Rights information
+  copyrightType?: CopyrightType
+  copyrightHolder?: string
+  copyrightNote?: string
+  // Fan art original creator
+  originalCreatorId?: string
+  originalCreator?: OriginalCreatorInfo
+  originalCreatorAllowDownload?: boolean
+  // Fan art character
+  characterId?: string
+  character?: CharacterInfo
 }
 
 const props = defineProps<{
@@ -467,7 +726,35 @@ const emit = defineEmits<{
   'update:tagsInput': [value: string]
 }>()
 
+const api = useApi()
+
 const showCreationInfo = ref(false)
+const showCopyrightInfo = ref(false)
+
+// User search for original creator
+const originalCreatorSearch = ref('')
+const originalCreatorSearchResults = ref<OriginalCreatorInfo[]>([])
+const isSearchingUsers = ref(false)
+const showUserDropdown = ref(false)
+
+// Blur handlers for dropdowns (need to delay so that click on dropdown item works)
+const handleUserDropdownBlur = () => {
+  window.setTimeout(() => {
+    showUserDropdown.value = false
+  }, 200)
+}
+
+// Character search for fan art
+const characterSearch = ref('')
+const characterSearchResults = ref<CharacterInfo[]>([])
+const isSearchingCharacters = ref(false)
+const showCharacterDropdown = ref(false)
+
+const handleCharacterDropdownBlur = () => {
+  window.setTimeout(() => {
+    showCharacterDropdown.value = false
+  }, 200)
+}
 
 const parsedTags = computed(() => {
   if (!props.tagsInput.trim()) return []
@@ -483,6 +770,101 @@ const updateField = <K extends keyof ArtworkFormData>(field: K, value: ArtworkFo
     [field]: value,
   })
 }
+
+// Search users for original creator selection
+const searchUsers = async (query: string) => {
+  if (!query || query.length < 2) {
+    originalCreatorSearchResults.value = []
+    return
+  }
+
+  isSearchingUsers.value = true
+  try {
+    const results = await api.get<{ users: any[] }>('/api/users/search', {
+      params: { q: query, limit: 5 },
+    })
+    originalCreatorSearchResults.value = results.users.map((u: any) => ({
+      id: u.id,
+      username: u.username,
+      displayName: u.displayName || u.username,
+      avatarUrl: u.avatarUrl,
+    }))
+  } catch (e) {
+    console.error('Failed to search users:', e)
+    originalCreatorSearchResults.value = []
+  } finally {
+    isSearchingUsers.value = false
+  }
+}
+
+// Debounced user search
+let searchTimeout: ReturnType<typeof setTimeout> | null = null
+watch(originalCreatorSearch, (query) => {
+  if (searchTimeout) clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => searchUsers(query), 300)
+})
+
+const selectOriginalCreator = (user: OriginalCreatorInfo) => {
+  updateField('originalCreatorId', user.id)
+  updateField('originalCreator', user)
+  originalCreatorSearch.value = ''
+  showUserDropdown.value = false
+  originalCreatorSearchResults.value = []
+}
+
+const clearOriginalCreator = () => {
+  updateField('originalCreatorId', undefined)
+  updateField('originalCreator', undefined)
+  updateField('originalCreatorAllowDownload', false)
+}
+
+// Search characters for fan art
+const searchCharacters = async (query: string) => {
+  if (!query || query.length < 1) {
+    characterSearchResults.value = []
+    return
+  }
+
+  isSearchingCharacters.value = true
+  try {
+    const results = await api.get<{ characters: CharacterInfo[] }>('/api/ocs', {
+      params: { search: query, fanArtWelcome: true, limit: 10 },
+    })
+    characterSearchResults.value = results.characters
+  } catch (e) {
+    console.error('Failed to search characters:', e)
+    characterSearchResults.value = []
+  } finally {
+    isSearchingCharacters.value = false
+  }
+}
+
+// Debounced character search
+let characterSearchTimeout: ReturnType<typeof setTimeout> | null = null
+watch(characterSearch, (query) => {
+  if (characterSearchTimeout) clearTimeout(characterSearchTimeout)
+  characterSearchTimeout = setTimeout(() => searchCharacters(query), 300)
+})
+
+const selectCharacter = (character: CharacterInfo) => {
+  updateField('characterId', character.id)
+  updateField('character', character)
+  characterSearch.value = ''
+  showCharacterDropdown.value = false
+  characterSearchResults.value = []
+}
+
+const clearCharacter = () => {
+  updateField('characterId', undefined)
+  updateField('character', undefined)
+}
+
+// Auto-expand copyright section if data exists
+watch(() => props.modelValue.copyrightType, (type) => {
+  if (type && type !== 'CREATOR') {
+    showCopyrightInfo.value = true
+  }
+}, { immediate: true })
 </script>
 
 <style scoped>
