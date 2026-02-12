@@ -63,7 +63,7 @@ export class RemoteFetchService {
       this.logger.warn('BASE_URL is not set, using default domain')
     }
 
-    this.defaultUserAgent = `open-illustboard/1.0 (${domain})`
+    this.defaultUserAgent = `illo/1.0 (${domain})`
   }
 
   /**
@@ -301,10 +301,10 @@ export class RemoteFetchService {
   }
 
   /**
-   * アクターがopen-illustboardインスタンスからのものか検証
+   * アクターがilloインスタンスからのものか検証
    *
    * @param actor - ActivityPub Actor
-   * @returns open-illustboardインスタンスの場合true
+   * @returns illoインスタンスの場合true
    */
   isOpenIllustboardActor(actor: RemoteObject): boolean {
     // attachment配列をチェック
@@ -313,7 +313,7 @@ export class RemoteFetchService {
         if (
           item.type === 'PropertyValue' &&
           item.name === 'Software' &&
-          item.value === 'open-illustboard'
+          (item.value === 'illo' || item.value === 'open-illustboard')
         ) {
           return true
         }
@@ -425,7 +425,7 @@ export class RemoteFetchService {
         Host: urlObj.hostname,
       }
 
-      // HTTP署名を追加（open-illustboardインスタンス間の場合）
+      // HTTP署名を追加（illoインスタンス間の場合）
       if (useSignature && options.keyId && options.privateKey) {
         const signatureHeaders = await this.httpSignatureService.signRequest({
           keyId: options.keyId,

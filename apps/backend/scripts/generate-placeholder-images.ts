@@ -24,12 +24,12 @@ const placeholders: PlaceholderConfig[] = [
   {
     filename: 'protected-image-ja.jpg',
     text: 'この画像は保護されています',
-    subtext: 'open-illustboard でご覧ください',
+    subtext: 'illo でご覧ください',
   },
   {
     filename: 'protected-image-en.jpg',
     text: 'This image is protected',
-    subtext: 'View on open-illustboard',
+    subtext: 'View on illo',
   },
 ]
 

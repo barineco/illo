@@ -97,7 +97,7 @@ export class ArtworksActivityPubController {
       '@context': [
         'https://www.w3.org/ns/activitystreams',
         {
-          illustboard: 'https://open-illustboard.org/ns#',
+          illustboard: 'https://github.com/barineco/illo/ns#',
           'illustboard:disableRightClick': {
             '@id': 'illustboard:disableRightClick',
             '@type': '@json',

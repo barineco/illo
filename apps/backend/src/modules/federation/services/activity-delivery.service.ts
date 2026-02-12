@@ -452,7 +452,7 @@ export class ActivityDeliveryService {
           message,
           toRecipients,
         )
-        this.logger.log(`Sending encrypted DM to ${recipient.domain} (open-illustboard)`)
+        this.logger.log(`Sending encrypted DM to ${recipient.domain} (illo)`)
       } else {
         activity = this.buildPlainDirectMessageActivity(
           actorUrl,

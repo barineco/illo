@@ -100,7 +100,7 @@ cmd_export_keys() {
 
     load_env
 
-    echo "# open-illustboard Secret Keys Export"
+    echo "# illo Secret Keys Export"
     echo "# Generated: $(date)"
     echo "# KEEP THIS FILE SECURE!"
     echo ""

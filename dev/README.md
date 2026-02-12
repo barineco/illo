@@ -119,8 +119,8 @@ touch dev/.env.fed-dev-2
 
 OrbStackを使用している場合、デフォルト設定で自動的に動作します。
 
-- Instance 1: `https://nginx-feddev.illustboard-feddev-1.orb.local`（デフォルト）
-- Instance 2: `https://nginx-feddev.illustboard-feddev-2.orb.local`（デフォルト）
+- Instance 1: `https://nginx-feddev.illo-feddev-1.orb.local`（デフォルト）
+- Instance 2: `https://nginx-feddev.illo-feddev-2.orb.local`（デフォルト）
 
 環境変数ファイルは不要です。docker-compose.ymlにデフォルト値が設定されています。
 

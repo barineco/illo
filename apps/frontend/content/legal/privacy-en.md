@@ -198,6 +198,6 @@ For questions or concerns about privacy, please contact the instance administrat
 
 ---
 
-## Appendix: About Open Source
+## Appendix: About Source Code
 
-The source code of the Service is publicly available. If you wish to review privacy-related implementations, please see the repository.
+The source code of the Service is publicly available under the illo Platform License v1.0.0. If you wish to review privacy-related implementations, please see the repository.

@@ -28,13 +28,13 @@ export class NodeInfoCheckService {
   }
 
   /**
-   * Check if a domain is running open-illustboard software
+   * Check if a domain is running illo software
    *
    * @param domain - The domain to check (e.g., "example.com")
-   * @returns true if the instance is running open-illustboard
+   * @returns true if the instance is running illo
    */
   async isOpenIllustboard(domain: string): Promise<boolean> {
-    this.logger.debug(`Checking if ${domain} is open-illustboard`)
+    this.logger.debug(`Checking if ${domain} is illo`)
 
     // Check in-memory cache first
     const cached = this.cache.get(domain)
@@ -49,7 +49,7 @@ export class NodeInfoCheckService {
     })
 
     if (instance) {
-      const isOIB = instance.softwareName === 'open-illustboard'
+      const isOIB = instance.softwareName === 'illo' || instance.softwareName === 'open-illustboard'
       this.logger.debug(`DB cache for ${domain}: softwareName=${instance.softwareName}, isOpenIllustboard=${isOIB}`)
 
       // Update in-memory cache
@@ -151,7 +151,7 @@ export class NodeInfoCheckService {
     softwareName: string | null,
     softwareVersion: string | null,
   ): Promise<boolean> {
-    const isOpenIllustboard = softwareName === 'open-illustboard'
+    const isOpenIllustboard = softwareName === 'illo' || softwareName === 'open-illustboard'
 
     // Update in-memory cache
     this.cache.set(domain, { isOpenIllustboard, fetchedAt: Date.now() })
@@ -182,7 +182,7 @@ export class NodeInfoCheckService {
 
   /**
    * Check if all participants in a list support E2E encryption
-   * (i.e., are all running open-illustboard)
+   * (i.e., are all running illo)
    *
    * @param domains - List of domains to check
    * @returns Object with encryption support status

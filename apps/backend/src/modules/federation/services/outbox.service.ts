@@ -216,9 +216,9 @@ export class OutboxService {
         })) || [],
     }
 
-    // Add open-illustboard extension properties
+    // Add illo extension properties
     // These are namespaced to avoid conflicts with other ActivityPub implementations
-    // Non-illustboard servers will simply ignore these properties
+    // Non-illo servers will simply ignore these properties
     note['illustboard:disableRightClick'] = artwork.disableRightClick ?? true
     if (artwork.customLicenseUrl) {
       note['illustboard:customLicenseUrl'] = artwork.customLicenseUrl

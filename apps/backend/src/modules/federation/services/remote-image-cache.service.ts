@@ -60,7 +60,7 @@ export class RemoteImageCacheService {
   }
 
   /**
-   * リモートURLをfederation URL に変換（open-illustboardインスタンス間の場合）
+   * リモートURLをfederation URL に変換（illoインスタンス間の場合）
    * /api/images/:id パターンを /api/federation/images/:id に変換
    *
    * @param url - リモート画像URL
@@ -197,7 +197,7 @@ export class RemoteImageCacheService {
       return { success: false, imageId: artworkImageId, error: 'No valid remote URL' }
     }
 
-    // open-illustboardインスタンス間の場合、federation URLに変換（standard版を取得）
+    // illoインスタンス間の場合、federation URLに変換（standard版を取得）
     const remoteUrl = this.convertToFederationUrl(originalRemoteUrl, 'standard')
     this.logger.debug(`Fetching remote image: original=${originalRemoteUrl}, converted=${remoteUrl}`)
 
@@ -319,7 +319,7 @@ export class RemoteImageCacheService {
       return { success: false, imageId: artworkImageId, error: 'No valid remote URL' }
     }
 
-    // open-illustboardインスタンス間の場合、federation URLに変換（original版を取得）
+    // illoインスタンス間の場合、federation URLに変換（original版を取得）
     const remoteUrl = this.convertToFederationUrl(originalRemoteUrl, 'original')
 
     try {
@@ -762,7 +762,7 @@ export class RemoteImageCacheService {
       return null
     }
 
-    // open-illustboardインスタンス間の場合、federation URLに変換
+    // illoインスタンス間の場合、federation URLに変換
     // variant によって取得するエンドポイントが異なる:
     // - thumbnail: /api/federation/images/:id (認証不要)
     // - standard:  /api/federation/images/:id/standard (HTTP署名必須)

@@ -141,12 +141,12 @@ export class ActorService {
       },
       manuallyApprovesFollowers: false,
       discoverable: true,
-      // Add open-illustboard software metadata for instance trust verification
+      // Add illo software metadata for instance trust verification
       attachment: [
         {
           type: 'PropertyValue',
           name: 'Software',
-          value: 'open-illustboard',
+          value: 'illo',
         },
       ],
     }

@@ -32,7 +32,7 @@ PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$PROJECT_ROOT"
 
 # PID files
-PID_DIR="/tmp/illustboard-dev"
+PID_DIR="/tmp/illo-dev"
 FRONTEND_PID="$PID_DIR/frontend.pid"
 BACKEND_PID="$PID_DIR/backend.pid"
 
@@ -170,17 +170,17 @@ cleanup_dev_processes() {
 
 start_infrastructure() {
     print_info "Starting infrastructure (Docker)..."
-    docker compose -p illustboard-localdev -f dev/docker compose.local-dev.yml up -d
+    docker compose -p illo-localdev -f dev/docker compose.local-dev.yml up -d
 
     print_info "Waiting for services to be ready..."
     sleep 5
 
-    docker compose -p illustboard-localdev -f dev/docker compose.local-dev.yml ps
+    docker compose -p illo-localdev -f dev/docker compose.local-dev.yml ps
 }
 
 stop_infrastructure() {
     print_info "Stopping infrastructure (Docker)..."
-    docker compose -p illustboard-localdev -f dev/docker compose.local-dev.yml down
+    docker compose -p illo-localdev -f dev/docker compose.local-dev.yml down
 }
 
 ################################################################################
@@ -564,13 +564,13 @@ show_logs() {
             fi
             ;;
         postgres|redis|minio|mailhog)
-            docker compose -p illustboard-localdev -f dev/docker compose.local-dev.yml logs -f "$service"
+            docker compose -p illo-localdev -f dev/docker compose.local-dev.yml logs -f "$service"
             ;;
         "")
             print_info "Showing all logs..."
             print_info "Press Ctrl+C to stop"
             sleep 1
-            docker compose -p illustboard-localdev -f dev/docker compose.local-dev.yml logs -f &
+            docker compose -p illo-localdev -f dev/docker compose.local-dev.yml logs -f &
             tail -f "$FRONTEND_LOG" "$BACKEND_LOG" 2>/dev/null
             ;;
         *)
@@ -587,7 +587,7 @@ show_status() {
 
     # Infrastructure status
     echo "Infrastructure (Docker):"
-    docker compose -p illustboard-localdev -f dev/docker compose.local-dev.yml ps
+    docker compose -p illo-localdev -f dev/docker compose.local-dev.yml ps
 
     echo ""
 
@@ -634,7 +634,7 @@ reset_environment() {
     if [[ $REPLY =~ ^[Yy]$ ]]; then
         print_info "Resetting development environment..."
         stop_services
-        docker compose -p illustboard-localdev -f dev/docker compose.local-dev.yml down -v
+        docker compose -p illo-localdev -f dev/docker compose.local-dev.yml down -v
         rm -rf "$LOG_DIR"/*
         print_success "Environment reset complete"
         print_info "Starting fresh environment..."
@@ -645,7 +645,7 @@ reset_environment() {
 }
 
 show_help() {
-    echo "open-illustboard Development Environment Manager"
+    echo "illo Development Environment Manager"
     echo ""
     echo "Usage: ./dev/local-dev.sh <command>"
     echo ""

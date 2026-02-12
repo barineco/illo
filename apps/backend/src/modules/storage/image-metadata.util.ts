@@ -127,7 +127,7 @@ function generateDublinCoreXMP(
         xmlns:xmp="http://ns.adobe.com/xap/1.0/"
         xmlns:xmpRights="http://ns.adobe.com/xap/1.0/rights/"
         xmlns:cc="http://creativecommons.org/ns#"
-        xmlns:illustboard="http://open-illustboard.org/ns/1.0/">
+        xmlns:illustboard="https://github.com/barineco/illo/ns/1.0/">
       <dc:title>
         <rdf:Alt>
           <rdf:li xml:lang="x-default">${escapeXml(input.artworkTitle)}</rdf:li>
@@ -216,7 +216,7 @@ export function generateSVGMetadata(input: MetadataInput): string {
            xmlns:dc="http://purl.org/dc/elements/1.1/"
            xmlns:cc="http://creativecommons.org/ns#"
            xmlns:xmp="http://ns.adobe.com/xap/1.0/"
-           xmlns:illustboard="http://open-illustboard.org/ns/1.0/">
+           xmlns:illustboard="https://github.com/barineco/illo/ns/1.0/">
     <rdf:Description>
       <dc:title>${escapeXml(input.artworkTitle)}</dc:title>
       <dc:creator>${escapeXml(authorName)}</dc:creator>

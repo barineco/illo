@@ -7,7 +7,7 @@
 #   1. Federation Test Instance 1 (Full Docker, port 13000)
 #   2. Federation Test Instance 2 (Full Docker, port 23000)
 #
-# This allows local testing of federation features between two open-illustboard
+# This allows local testing of federation features between two illo
 # instances without requiring external servers or tunneling services.
 #
 # Architecture:
@@ -16,14 +16,14 @@
 #     - Backend: Docker (internal)
 #     - Frontend: Docker (internal)
 #     - Access: http://localhost:13000 (Nginx)
-#     - OrbStack domain: http://nginx-feddev.illustboard-feddev-1.orb.local
+#     - OrbStack domain: http://nginx-feddev.illo-feddev-1.orb.local
 #
 #   Federation Test Instance 2:
 #     - Infrastructure: Docker (ports 25432, 26379, 29000, 29001, 21025, 28025) [+20000 offset]
 #     - Backend: Docker (internal)
 #     - Frontend: Docker (internal)
 #     - Access: http://localhost:23000 (Nginx)
-#     - OrbStack domain: http://nginx-feddev.illustboard-feddev-2.orb.local
+#     - OrbStack domain: http://nginx-feddev.illo-feddev-2.orb.local
 #
 # Usage:
 #   ./dev/fed-dev.sh start              Start both federation test instances
@@ -232,14 +232,14 @@ start_feddev1_instance() {
         print_info "Cleaning up existing processes..."
 
         # Stop any running federation test containers first
-        docker-compose -p illustboard-feddev-1 -f dev/docker-compose.fed-dev-1.yml down 2>/dev/null || true
+        docker-compose -p illo-feddev-1 -f dev/docker-compose.fed-dev-1.yml down 2>/dev/null || true
 
         # Kill any remaining processes on those ports
         kill_port_processes "${conflicting_ports[@]}"
     fi
 
     # Start federation test instance 1 (quiet progress to avoid output spam)
-    docker-compose -p illustboard-feddev-1 -f dev/docker-compose.fed-dev-1.yml $FEDDEV1_ENV_OPTION up -d --quiet-pull 2>&1
+    docker-compose -p illo-feddev-1 -f dev/docker-compose.fed-dev-1.yml $FEDDEV1_ENV_OPTION up -d --quiet-pull 2>&1
 
     # Wait for services to be ready
     sleep 3
@@ -262,14 +262,14 @@ start_feddev1_instance() {
 # Stop federation test instance 1
 stop_feddev1_instance() {
     print_feddev1 "Stopping federation test instance 1..."
-    docker-compose -p illustboard-feddev-1 -f dev/docker-compose.fed-dev-1.yml down
+    docker-compose -p illo-feddev-1 -f dev/docker-compose.fed-dev-1.yml down
     print_success "Federation test instance 1 stopped"
 }
 
 # Check federation test instance 1 status
 check_feddev1_instance_status() {
     echo -e "${MAGENTA}=== Federation Test Instance 1 Status ===${NC}"
-    docker-compose -p illustboard-feddev-1 -f dev/docker-compose.fed-dev-1.yml ps
+    docker-compose -p illo-feddev-1 -f dev/docker-compose.fed-dev-1.yml ps
 }
 
 ################################################################################
@@ -297,14 +297,14 @@ start_feddev2_instance() {
         print_info "Cleaning up existing processes..."
 
         # Stop any running federation test containers first
-        docker-compose -p illustboard-feddev-2 -f dev/docker-compose.fed-dev-2.yml down 2>/dev/null || true
+        docker-compose -p illo-feddev-2 -f dev/docker-compose.fed-dev-2.yml down 2>/dev/null || true
 
         # Kill any remaining processes on those ports
         kill_port_processes "${conflicting_ports[@]}"
     fi
 
     # Start federation test instance 2 (quiet progress to avoid output spam)
-    docker-compose -p illustboard-feddev-2 -f dev/docker-compose.fed-dev-2.yml $FEDDEV2_ENV_OPTION up -d --quiet-pull 2>&1
+    docker-compose -p illo-feddev-2 -f dev/docker-compose.fed-dev-2.yml $FEDDEV2_ENV_OPTION up -d --quiet-pull 2>&1
 
     # Wait for services to be ready
     sleep 3
@@ -327,14 +327,14 @@ start_feddev2_instance() {
 # Stop federation test instance 2
 stop_feddev2_instance() {
     print_feddev2 "Stopping federation test instance 2..."
-    docker-compose -p illustboard-feddev-2 -f dev/docker-compose.fed-dev-2.yml down
+    docker-compose -p illo-feddev-2 -f dev/docker-compose.fed-dev-2.yml down
     print_success "Federation test instance 2 stopped"
 }
 
 # Check federation test instance 2 status
 check_feddev2_instance_status() {
     echo -e "${CYAN}=== Federation Test Instance 2 Status ===${NC}"
-    docker-compose -p illustboard-feddev-2 -f dev/docker-compose.fed-dev-2.yml ps
+    docker-compose -p illo-feddev-2 -f dev/docker-compose.fed-dev-2.yml ps
 }
 
 ################################################################################
@@ -359,8 +359,8 @@ reset_feddev_databases() {
 
     # Remove volumes
     print_info "Removing Docker volumes..."
-    docker-compose -p illustboard-feddev-1 -f dev/docker-compose.fed-dev-1.yml down -v
-    docker-compose -p illustboard-feddev-2 -f dev/docker-compose.fed-dev-2.yml down -v
+    docker-compose -p illo-feddev-1 -f dev/docker-compose.fed-dev-1.yml down -v
+    docker-compose -p illo-feddev-2 -f dev/docker-compose.fed-dev-2.yml down -v
 
     print_success "Federation test databases reset complete"
     print_info "Run 'fed-dev start' to restart with fresh databases"
@@ -448,18 +448,18 @@ rebuild_feddev_images() {
         if [ "$inst" = "1" ]; then
             if [ "$svc" = "all" ]; then
                 print_feddev1 "Rebuilding all services for instance 1..."
-                docker-compose  -p illustboard-feddev-1 -f dev/docker-compose.fed-dev-1.yml build $cache_flag
+                docker-compose  -p illo-feddev-1 -f dev/docker-compose.fed-dev-1.yml build $cache_flag
             else
                 print_feddev1 "Rebuilding $svc for instance 1..."
-                docker-compose  -p illustboard-feddev-1 -f dev/docker-compose.fed-dev-1.yml build $cache_flag ${svc}-feddev
+                docker-compose  -p illo-feddev-1 -f dev/docker-compose.fed-dev-1.yml build $cache_flag ${svc}-feddev
             fi
         else
             if [ "$svc" = "all" ]; then
                 print_feddev2 "Rebuilding all services for instance 2..."
-                docker-compose  -p illustboard-feddev-2 -f dev/docker-compose.fed-dev-2.yml build $cache_flag
+                docker-compose  -p illo-feddev-2 -f dev/docker-compose.fed-dev-2.yml build $cache_flag
             else
                 print_feddev2 "Rebuilding $svc for instance 2..."
-                docker-compose  -p illustboard-feddev-2 -f dev/docker-compose.fed-dev-2.yml build $cache_flag ${svc}-feddev
+                docker-compose  -p illo-feddev-2 -f dev/docker-compose.fed-dev-2.yml build $cache_flag ${svc}-feddev
             fi
         fi
     }
@@ -607,21 +607,21 @@ cmd_restart() {
                 print_feddev1 "Restarting all services for instance 1..."
                 if [ -n "$recreate_flag" ]; then
                     # Use --quiet-pull to reduce output noise, redirect verbose output
-                    docker-compose -p illustboard-feddev-1 -f dev/docker-compose.fed-dev-1.yml $FEDDEV1_ENV_OPTION up -d --quiet-pull $recreate_flag > "$output_file" 2>&1 || exit_code=$?
+                    docker-compose -p illo-feddev-1 -f dev/docker-compose.fed-dev-1.yml $FEDDEV1_ENV_OPTION up -d --quiet-pull $recreate_flag > "$output_file" 2>&1 || exit_code=$?
                 else
-                    docker-compose -p illustboard-feddev-1 -f dev/docker-compose.fed-dev-1.yml restart > "$output_file" 2>&1 || exit_code=$?
+                    docker-compose -p illo-feddev-1 -f dev/docker-compose.fed-dev-1.yml restart > "$output_file" 2>&1 || exit_code=$?
                 fi
             else
                 print_feddev1 "Restarting $svc for instance 1..."
                 if [ -n "$recreate_flag" ]; then
-                    docker-compose -p illustboard-feddev-1 -f dev/docker-compose.fed-dev-1.yml $FEDDEV1_ENV_OPTION up -d --quiet-pull $recreate_flag ${svc}-feddev > "$output_file" 2>&1 || exit_code=$?
+                    docker-compose -p illo-feddev-1 -f dev/docker-compose.fed-dev-1.yml $FEDDEV1_ENV_OPTION up -d --quiet-pull $recreate_flag ${svc}-feddev > "$output_file" 2>&1 || exit_code=$?
                 else
-                    docker-compose -p illustboard-feddev-1 -f dev/docker-compose.fed-dev-1.yml restart ${svc}-feddev > "$output_file" 2>&1 || exit_code=$?
+                    docker-compose -p illo-feddev-1 -f dev/docker-compose.fed-dev-1.yml restart ${svc}-feddev > "$output_file" 2>&1 || exit_code=$?
                 fi
             fi
             # Show summary instead of verbose output
             if [ $exit_code -eq 0 ]; then
-                local running=$(docker-compose -p illustboard-feddev-1 -f dev/docker-compose.fed-dev-1.yml ps --format "{{.Name}}" 2>/dev/null | wc -l | tr -d ' ')
+                local running=$(docker-compose -p illo-feddev-1 -f dev/docker-compose.fed-dev-1.yml ps --format "{{.Name}}" 2>/dev/null | wc -l | tr -d ' ')
                 print_feddev1 "✓ $running containers running"
             else
                 print_error "Instance 1 restart failed:"
@@ -631,21 +631,21 @@ cmd_restart() {
             if [ "$svc" = "all" ]; then
                 print_feddev2 "Restarting all services for instance 2..."
                 if [ -n "$recreate_flag" ]; then
-                    docker-compose -p illustboard-feddev-2 -f dev/docker-compose.fed-dev-2.yml $FEDDEV2_ENV_OPTION up -d --quiet-pull $recreate_flag > "$output_file" 2>&1 || exit_code=$?
+                    docker-compose -p illo-feddev-2 -f dev/docker-compose.fed-dev-2.yml $FEDDEV2_ENV_OPTION up -d --quiet-pull $recreate_flag > "$output_file" 2>&1 || exit_code=$?
                 else
-                    docker-compose -p illustboard-feddev-2 -f dev/docker-compose.fed-dev-2.yml restart > "$output_file" 2>&1 || exit_code=$?
+                    docker-compose -p illo-feddev-2 -f dev/docker-compose.fed-dev-2.yml restart > "$output_file" 2>&1 || exit_code=$?
                 fi
             else
                 print_feddev2 "Restarting $svc for instance 2..."
                 if [ -n "$recreate_flag" ]; then
-                    docker-compose -p illustboard-feddev-2 -f dev/docker-compose.fed-dev-2.yml $FEDDEV2_ENV_OPTION up -d --quiet-pull $recreate_flag ${svc}-feddev > "$output_file" 2>&1 || exit_code=$?
+                    docker-compose -p illo-feddev-2 -f dev/docker-compose.fed-dev-2.yml $FEDDEV2_ENV_OPTION up -d --quiet-pull $recreate_flag ${svc}-feddev > "$output_file" 2>&1 || exit_code=$?
                 else
-                    docker-compose -p illustboard-feddev-2 -f dev/docker-compose.fed-dev-2.yml restart ${svc}-feddev > "$output_file" 2>&1 || exit_code=$?
+                    docker-compose -p illo-feddev-2 -f dev/docker-compose.fed-dev-2.yml restart ${svc}-feddev > "$output_file" 2>&1 || exit_code=$?
                 fi
             fi
             # Show summary instead of verbose output
             if [ $exit_code -eq 0 ]; then
-                local running=$(docker-compose -p illustboard-feddev-2 -f dev/docker-compose.fed-dev-2.yml ps --format "{{.Name}}" 2>/dev/null | wc -l | tr -d ' ')
+                local running=$(docker-compose -p illo-feddev-2 -f dev/docker-compose.fed-dev-2.yml ps --format "{{.Name}}" 2>/dev/null | wc -l | tr -d ' ')
                 print_feddev2 "✓ $running containers running"
             else
                 print_error "Instance 2 restart failed:"
@@ -692,13 +692,13 @@ cmd_logs() {
 
     case "$instance" in
         1)
-            local container="illustboard-feddev1-${service}-feddev"
+            local container="illo-feddev1-${service}-feddev"
             print_feddev1 "Showing ${service} logs for instance 1 (Ctrl+C to exit)..."
             echo ""
             docker logs "$container" --tail=100 -f 2>&1
             ;;
         2)
-            local container="illustboard-feddev2-${service}-feddev"
+            local container="illo-feddev2-${service}-feddev"
             print_feddev2 "Showing ${service} logs for instance 2 (Ctrl+C to exit)..."
             echo ""
             docker logs "$container" --tail=100 -f 2>&1
@@ -706,8 +706,8 @@ cmd_logs() {
         "")
             print_info "Showing backend logs from both instances (Ctrl+C to exit)..."
             echo ""
-            (docker logs illustboard-feddev1-backend-fedtest --tail=50 -f 2>&1 | sed 's/^/[Fed1] /') &
-            (docker logs illustboard-feddev2-backend-fedtest --tail=50 -f 2>&1 | sed 's/^/[Fed2] /') &
+            (docker logs illo-feddev1-backend-fedtest --tail=50 -f 2>&1 | sed 's/^/[Fed1] /') &
+            (docker logs illo-feddev2-backend-fedtest --tail=50 -f 2>&1 | sed 's/^/[Fed2] /') &
             wait
             ;;
         *)
@@ -763,8 +763,8 @@ cmd_help() {
     echo ""
     echo "Federation Testing Workflow:"
     echo "  1. Run './dev/fed-dev.sh start' to start both instances (OrbStack recommended)"
-    echo "  2. Access instance 1 at https://nginx-feddev.illustboard-feddev-1.orb.local"
-    echo "  3. Access instance 2 at https://nginx-feddev.illustboard-feddev-2.orb.local"
+    echo "  2. Access instance 1 at https://nginx-feddev.illo-feddev-1.orb.local"
+    echo "  3. Access instance 2 at https://nginx-feddev.illo-feddev-2.orb.local"
     echo "  4. Test federation features between the two instances"
     echo "  5. Run './dev/fed-dev.sh stop' when done"
     echo ""

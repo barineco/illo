@@ -154,6 +154,6 @@ For questions about these Terms, please contact the instance administrator.
 
 ---
 
-## Appendix: About Open Source
+## Appendix: About Source Code
 
-The Service is published as open source software (AGPL-3.0 license + additional terms). While the source code is public, operating forked versions that remove or disable these Terms or protection features is prohibited.
+The Service is published as source-available software under the illo Platform License v1.0.0. While the source code is publicly available, this is not an open source license. Operating forked versions that remove or disable these Terms, creator protection features, or competing with the Service is prohibited under the license terms.

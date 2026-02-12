@@ -10,13 +10,13 @@
 #   - Accessible via http://localhost:13000 (Nginx reverse proxy)
 #   - Infrastructure ports: PostgreSQL (15432), Redis (16379), MinIO (19000/19001), MailHog (11025/18025)
 #   - Backend/Frontend run inside containers (no host access)
-#   - Separate volumes and network: open-illustboard-feddev-1
+#   - Separate volumes and network: illo-feddev-1
 
 services:
   # PostgreSQL Database (Federation Test)
   postgres-feddev:
     image: postgres:16-alpine
-    container_name: illustboard-feddev1-postgres-feddev
+    container_name: illo-feddev1-postgres-feddev
     environment:
       POSTGRES_USER: illustboard_user_fed
       POSTGRES_PASSWORD: illustboard_pass_fed
@@ -31,12 +31,12 @@ services:
       retries: 5
     restart: unless-stopped
     networks:
-      - open-illustboard-feddev-1
+      - illo-feddev-1
 
   # Redis Cache (Federation Test)
   redis-feddev:
     image: redis:7-alpine
-    container_name: illustboard-feddev1-redis-feddev
+    container_name: illo-feddev1-redis-feddev
     # No host port exposure - accessed only within Docker network
     volumes:
       - redis_data_feddev1:/data
@@ -47,12 +47,12 @@ services:
       retries: 5
     restart: unless-stopped
     networks:
-      - open-illustboard-feddev-1
+      - illo-feddev-1
 
   # MinIO Object Storage (Federation Test)
   minio-feddev:
     image: minio/minio:latest
-    container_name: illustboard-feddev1-minio-feddev
+    container_name: illo-feddev1-minio-feddev
     command: server /data --console-address ":9001"
     environment:
       MINIO_ROOT_USER: minioadmin_fed
@@ -68,24 +68,24 @@ services:
       retries: 3
     restart: unless-stopped
     networks:
-      - open-illustboard-feddev-1
+      - illo-feddev-1
 
   # MailHog (Email Testing - Federation Test)
   mailhog-feddev:
     image: mailhog/mailhog:latest
-    container_name: illustboard-feddev1-mailhog-feddev
+    container_name: illo-feddev1-mailhog-feddev
     ports:
       # SMTP - No host exposure (internal Docker network only)
       - "18025:8025"  # Web UI for email debugging (+10000 offset)
     networks:
-      - open-illustboard-feddev-1
+      - illo-feddev-1
 
   # Backend Service (Federation Test - Production Mode)
   backend-feddev:
     build:
       context: ..
       dockerfile: apps/backend/Dockerfile
-    container_name: illustboard-feddev1-backend-feddev
+    container_name: illo-feddev1-backend-feddev
     environment:
       # Database
       DATABASE_URL: postgresql://illustboard_user_fed:illustboard_pass_fed@postgres-feddev:5432/illustboard_db_fed
@@ -100,21 +100,21 @@ services:
       MINIO_SECRET_KEY: minioadmin_fed
       MINIO_BUCKET: illustboard
       # Public URL serves MinIO content through nginx reverse proxy at /illustboard/
-      # Recommended: OrbStack HTTPS (https://nginx-feddev.illustboard-feddev-1.orb.local)
+      # Recommended: OrbStack HTTPS (https://nginx-feddev.illo-feddev-1.orb.local)
       # Alternative: Cloudflare Tunnel or localhost (http://localhost:13000)
-      MINIO_PUBLIC_URL: ${MINIO_PUBLIC_URL:-https://nginx-feddev.illustboard-feddev-1.orb.local}
+      MINIO_PUBLIC_URL: ${MINIO_PUBLIC_URL:-https://nginx-feddev.illo-feddev-1.orb.local}
       # Backend
       PORT: 11104
       NODE_ENV: production
       # Disable SSL verification for .orb.local domains (development only)
       NODE_TLS_REJECT_UNAUTHORIZED: 0
-      FRONTEND_URL: ${FRONTEND_URL:-https://nginx-feddev.illustboard-feddev-1.orb.local}
+      FRONTEND_URL: ${FRONTEND_URL:-https://nginx-feddev.illo-feddev-1.orb.local}
       # JWT - Development defaults (CHANGE IN PRODUCTION!)
       # Generate with: node -e "console.log(require('crypto').randomBytes(64).toString('base64'))"
       JWT_SECRET: ${JWT_SECRET:-DEV_SECRET_feddev1_DO_NOT_USE_IN_PRODUCTION_0123456789abcdef}
       JWT_EXPIRES_IN: 7d
       # ActivityPub / Federation
-      BASE_URL: ${BASE_URL:-https://nginx-feddev.illustboard-feddev-1.orb.local}
+      BASE_URL: ${BASE_URL:-https://nginx-feddev.illo-feddev-1.orb.local}
       # Encryption - Development defaults (CHANGE IN PRODUCTION!)
       # Generate with: node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
       ENCRYPTION_KEY: ${ENCRYPTION_KEY:-0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef}
@@ -164,7 +164,7 @@ services:
         condition: service_healthy
     restart: unless-stopped
     networks:
-      - open-illustboard-feddev-1
+      - illo-feddev-1
 
   # Frontend Service (Federation Test - Production Mode)
   frontend-feddev:
@@ -173,7 +173,7 @@ services:
       dockerfile: apps/frontend/Dockerfile
       args:
         NUXT_PUBLIC_API_BASE: ""
-    container_name: illustboard-feddev1-frontend-feddev
+    container_name: illo-feddev1-frontend-feddev
     environment:
       # For SSR: use internal Docker service name (server-only)
       API_BASE_SERVER: "http://backend-feddev:11104"
@@ -191,14 +191,14 @@ services:
       - backend-feddev
     restart: unless-stopped
     networks:
-      - open-illustboard-feddev-1
+      - illo-feddev-1
 
   # Nginx Reverse Proxy (Federation Test)
   nginx-feddev:
     image: nginx:alpine
-    container_name: illustboard-feddev1-nginx-feddev
+    container_name: illo-feddev1-nginx-feddev
     labels:
-      - "dev.orbstack.domains=nginx-feddev.illustboard-feddev-1.orb.local"
+      - "dev.orbstack.domains=nginx-feddev.illo-feddev-1.orb.local"
     ports:
       - "13000:80"    # Main HTTP access (+10000 offset from 3000)
     volumes:
@@ -208,7 +208,7 @@ services:
       - backend-feddev
     restart: unless-stopped
     networks:
-      - open-illustboard-feddev-1
+      - illo-feddev-1
 
 volumes:
   postgres_data_feddev1:
@@ -219,5 +219,5 @@ volumes:
     driver: local
 
 networks:
-  open-illustboard-feddev-1:
+  illo-feddev-1:
     driver: bridge

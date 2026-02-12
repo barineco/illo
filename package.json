@@ -1,10 +1,10 @@
 {
   "name": "illo",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
   "description": "self-hosted illustration platform",
   "author": "maughtchiner <barineco@proton.me>",
-  "license": "AGPL-3.0",
+  "license": "SEE LICENSE IN LICENSE",
   "engines": {
     "node": ">=20.0.0",
     "pnpm": ">=9.0.0"

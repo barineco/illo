@@ -109,13 +109,13 @@ export class FederationSearchService {
         return null
       }
 
-      // FEDERATION_ONLYモードの場合、open-illustboardインスタンスのみ許可
+      // FEDERATION_ONLYモードの場合、illoインスタンスのみ許可
       const instanceSettings = await this.prisma.instanceSettings.findFirst()
       if (instanceSettings?.instanceMode === 'FEDERATION_ONLY') {
         const isOpenIllustboard = this.remoteFetch.isOpenIllustboardActor(actor)
         if (!isOpenIllustboard) {
           this.logger.warn(
-            `Rejecting non-open-illustboard actor in FEDERATION_ONLY mode: ${actor.id}`,
+            `Rejecting non-illo actor in FEDERATION_ONLY mode: ${actor.id}`,
           )
           return null
         }

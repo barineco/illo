@@ -2,7 +2,7 @@ services:
   # PostgreSQL Database
   postgres-localdev:
     image: postgres:16-alpine
-    container_name: illustboard-localdev-postgres-localdev
+    container_name: illo-localdev-postgres-localdev
     environment:
       POSTGRES_USER: illustboard_user
       POSTGRES_PASSWORD: illustboard_pass
@@ -18,12 +18,12 @@ services:
       retries: 5
     restart: unless-stopped
     networks:
-      - open-illustboard-localdev
+      - illo-localdev
 
   # Redis Cache
   redis-localdev:
     image: redis:7-alpine
-    container_name: illustboard-localdev-redis-localdev
+    container_name: illo-localdev-redis-localdev
     ports:
       - "6379:6379"
     volumes:
@@ -35,12 +35,12 @@ services:
       retries: 5
     restart: unless-stopped
     networks:
-      - open-illustboard-localdev
+      - illo-localdev
 
   # MinIO Object Storage
   minio-localdev:
     image: minio/minio:latest
-    container_name: illustboard-localdev-minio-localdev
+    container_name: illo-localdev-minio-localdev
     command: server /data --console-address ":9001"
     environment:
       MINIO_ROOT_USER: minioadmin
@@ -57,17 +57,17 @@ services:
       retries: 3
     restart: unless-stopped
     networks:
-      - open-illustboard-localdev
+      - illo-localdev
 
   # MailHog (Email Testing)
   mailhog-localdev:
     image: mailhog/mailhog:latest
-    container_name: illustboard-localdev-mailhog-localdev
+    container_name: illo-localdev-mailhog-localdev
     ports:
       - "8025:8025"  # Web UI only (SMTP port 1025 is internal only)
     restart: unless-stopped
     networks:
-      - open-illustboard-localdev
+      - illo-localdev
 
 volumes:
   postgres_data_localdev:
@@ -78,5 +78,5 @@ volumes:
     driver: local
 
 networks:
-  open-illustboard-localdev:
+  illo-localdev:
     driver: bridge

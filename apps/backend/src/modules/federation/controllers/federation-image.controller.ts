@@ -33,16 +33,16 @@ import { Public } from '../../auth/decorators/public.decorator'
  * 2. GET /api/federation/images/:imageId/standard
  *    - Returns STANDARD (2048px) version
  *    - Requires HTTP Signature authentication
- *    - Only open-illustboard instances are allowed
+ *    - Only illo instances are allowed
  *
  * 3. GET /api/federation/images/:imageId/original
  *    - Returns ORIGINAL version
  *    - Requires HTTP Signature authentication
- *    - Only open-illustboard instances are allowed
+ *    - Only illo instances are allowed
  *
  * Security:
  * - External crawlers can only access thumbnails (320px)
- * - High-resolution images are protected behind HTTP signature + open-illustboard verification
+ * - High-resolution images are protected behind HTTP signature + illo verification
  */
 @Controller('federation/images')
 export class FederationImageController {
@@ -93,8 +93,8 @@ export class FederationImageController {
    * Get standard image for federation (2048px)
    * GET /api/federation/images/:imageId/standard
    *
-   * Requires HTTP Signature authentication from an open-illustboard instance.
-   * This endpoint is used when remote open-illustboard users view artwork details.
+   * Requires HTTP Signature authentication from an illo instance.
+   * This endpoint is used when remote illo users view artwork details.
    */
   @Public()
   @Get(':imageId/standard')
@@ -110,7 +110,7 @@ export class FederationImageController {
       throw new NotFoundException('Remote images cannot be served through this endpoint')
     }
 
-    // Verify HTTP Signature and open-illustboard instance
+    // Verify HTTP Signature and illo instance
     await this.verifyOpenIllustboardRequest(req)
 
     // PUBLIC/UNLISTED: serve standard version
@@ -118,7 +118,7 @@ export class FederationImageController {
       return this.serveStandard(image, res)
     }
 
-    // FOLLOWERS_ONLY/PRIVATE: not available even for open-illustboard instances (for now)
+    // FOLLOWERS_ONLY/PRIVATE: not available even for illo instances (for now)
     throw new ForbiddenException('This artwork is not available for federation')
   }
 
@@ -126,8 +126,8 @@ export class FederationImageController {
    * Get original image for federation
    * GET /api/federation/images/:imageId/original
    *
-   * Requires HTTP Signature authentication from an open-illustboard instance.
-   * This endpoint is used when remote open-illustboard users view original resolution.
+   * Requires HTTP Signature authentication from an illo instance.
+   * This endpoint is used when remote illo users view original resolution.
    */
   @Public()
   @Get(':imageId/original')
@@ -143,7 +143,7 @@ export class FederationImageController {
       throw new NotFoundException('Remote images cannot be served through this endpoint')
     }
 
-    // Verify HTTP Signature and open-illustboard instance
+    // Verify HTTP Signature and illo instance
     await this.verifyOpenIllustboardRequest(req)
 
     // PUBLIC/UNLISTED: serve original version
@@ -151,7 +151,7 @@ export class FederationImageController {
       return this.serveOriginal(image, res)
     }
 
-    // FOLLOWERS_ONLY/PRIVATE: not available even for open-illustboard instances (for now)
+    // FOLLOWERS_ONLY/PRIVATE: not available even for illo instances (for now)
     throw new ForbiddenException('This artwork is not available for federation')
   }
 
@@ -184,7 +184,7 @@ export class FederationImageController {
   }
 
   /**
-   * Verify HTTP Signature and ensure the requester is an open-illustboard instance
+   * Verify HTTP Signature and ensure the requester is an illo instance
    */
   private async verifyOpenIllustboardRequest(req: Request): Promise<any> {
     const signatureHeader = req.headers['signature'] as string
@@ -195,10 +195,10 @@ export class FederationImageController {
     try {
       const actor = await this.verifyHttpSignature(req)
 
-      // Verify the actor is from an open-illustboard instance
+      // Verify the actor is from an illo instance
       if (!this.remoteFetchService.isOpenIllustboardActor(actor)) {
-        this.logger.warn(`Rejected non-open-illustboard actor: ${actor.id}`)
-        throw new ForbiddenException('Only open-illustboard instances can access high-resolution images')
+        this.logger.warn(`Rejected non-illo actor: ${actor.id}`)
+        throw new ForbiddenException('Only illo instances can access high-resolution images')
       }
 
       return actor
@@ -243,7 +243,7 @@ export class FederationImageController {
         'Content-Length': finalData.length.toString(),
         'Cache-Control': 'public, max-age=86400',
         'X-Content-Type-Options': 'nosniff',
-        'X-Federation-Source': 'open-illustboard',
+        'X-Federation-Source': 'illo',
         'X-Image-Variant': 'thumbnail',
       })
 
@@ -279,7 +279,7 @@ export class FederationImageController {
         'Content-Length': finalData.length.toString(),
         'Cache-Control': 'private, max-age=3600',
         'X-Content-Type-Options': 'nosniff',
-        'X-Federation-Source': 'open-illustboard',
+        'X-Federation-Source': 'illo',
         'X-Image-Variant': 'standard',
       })
 
@@ -319,7 +319,7 @@ export class FederationImageController {
         'Content-Length': finalData.length.toString(),
         'Cache-Control': 'private, max-age=3600',
         'X-Content-Type-Options': 'nosniff',
-        'X-Federation-Source': 'open-illustboard',
+        'X-Federation-Source': 'illo',
         'X-Image-Variant': 'original',
       })
 

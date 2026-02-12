@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 ################################################################################
-# install.sh - Production Environment Manager for open-illustboard
+# install.sh - Production Environment Manager for illo
 #
 # This script manages the production deployment using docker-compose.yml.
 #

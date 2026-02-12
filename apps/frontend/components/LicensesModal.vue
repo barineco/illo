@@ -16,19 +16,13 @@
               {{ $t('licenses.projectLicense') }}
             </h3>
             <div class="bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg p-4">
-              <p class="font-medium mb-2">open-illustboard</p>
+              <p class="font-medium mb-2">illo</p>
               <p class="text-sm text-[var(--color-text-muted)] mb-2">
-                {{ $t('licenses.agplDescription') }}
+                {{ $t('licenses.projectDescription') }}
               </p>
-              <a
-                href="https://www.gnu.org/licenses/agpl-3.0.html"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="text-sm text-[var(--color-primary)] hover:underline inline-flex items-center gap-1"
-              >
-                AGPL-3.0 License
-                <Icon name="ArrowTopRightOnSquare" class="w-4 h-4" />
-              </a>
+              <span class="text-sm text-[var(--color-primary)] inline-flex items-center gap-1">
+                illo Platform License v1.0.0
+              </span>
             </div>
           </section>
 

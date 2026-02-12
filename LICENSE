@@ -1,59 +1,174 @@
-GNU AFFERO GENERAL PUBLIC LICENSE
-Version 3, 19 November 2007
+# illo Platform License v1.0.0
 
-Copyright (C) 2025-2026 illo contributors
+Effective Date: February 11, 2026
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU Affero General Public License as published
-by the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
+## Purpose
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU Affero General Public License for more details.
+This license lets you view, learn from, and use this software freely
+for non-competing purposes, while ensuring that any deployment of this
+software maintains the creator protection features and policies that
+are central to its mission.
 
-You should have received a copy of the GNU Affero General Public License
-along with this program.  If not, see <https://www.gnu.org/licenses/>.
+## Acceptance
 
-================================================================================
-ADDITIONAL TERMS pursuant to Section 7 of the GNU Affero General Public License
-================================================================================
+To receive this license, you must agree to all its terms. If you do not
+agree, you may not use, modify, or distribute the software.
 
-The following additional terms apply to this software:
+## Definitions
 
-1. ATTRIBUTION REQUIREMENT
+- **"Licensor"** means the original author(s) and copyright holder(s)
+  of this software.
 
-   If you modify this software and make it available over a network, you must
-   retain visible attribution to "illo" in the user interface. This
-   attribution must include either:
-   - A "Powered by illo" notice in the footer or about page
-   - A link to https://github.com/barineco/illo
+- **"Software"** means the illo platform software and all associated
+  source code, documentation, and assets made available under this
+  license.
 
-2. TERMS OF SERVICE INTEGRITY
+- **"Creator Protection Features"** means the technical measures
+  designed to protect uploaded works and their creators, including but
+  not limited to:
+  - Signed URL access control for artwork files
+  - Rate limiting to prevent mass downloads
+  - Detection and blocking of unauthorized access
+  - Scraping and crawling prevention mechanisms
+  - AI training opt-out enforcement
+  - Age-restricted content gating and verification
+  - Federation image quality restrictions (thumbnail-only for
+    non-illo instances)
 
-   You may NOT remove, disable, weaken, or circumvent the Terms of Service
-   agreement functionality that requires users to acknowledge and accept terms
-   before registration. Specifically:
-   - The ToS agreement checkbox during user registration MUST remain functional
-   - The scroll-to-read enforcement mechanism MUST NOT be removed or bypassed
-   - Instance administrators MUST be able to configure their own ToS content
+- **"Terms of Service Requirements"** means the policies governing
+  user conduct and content protection, including but not limited to:
+  - Prohibition of unauthorized scraping and crawling
+  - Prohibition of unauthorized reposting
+  - Prohibition of unauthorized AI/ML training use
+  - Prohibition of circumventing technical protections
+  - Content guidelines and age-restriction requirements
+  - Creator copyright ownership guarantees
 
-3. ARTIST PROTECTION FEATURES
+- **"Deployment"** means making the Software available for use by
+  third parties over a network, whether publicly or within a private
+  organization.
 
-   You may NOT remove, disable, or weaken security features designed to protect
-   artists' content, including but not limited to:
-   - Image encryption and signed URL mechanisms
-   - Right-click protection options
-   - Rate limiting for image access
-   - Scraping prevention measures
+## Grant of Rights
 
-4. TRADEMARK
+Subject to the conditions below, the Licensor grants you a
+non-exclusive, worldwide, royalty-free license to:
 
-   "illo" and associated logos are trademarks. You may not use these
-   marks in derivative works except to indicate compatibility or origin.
+1. **View and Study** — Read and learn from the source code.
 
-These additional terms are applied under Section 7 of the AGPL-3.0.
+2. **Modify** — Make changes and create derivative works based on the
+   Software for any Permitted Purpose.
 
-For the full text of the GNU Affero General Public License, see:
-https://www.gnu.org/licenses/agpl-3.0.html
+3. **Deploy** — Run the Software or derivative works as a service,
+   subject to the Deployment Conditions below.
+
+4. **Distribute** — Distribute copies of the Software, including
+   modified versions, provided that:
+   - Recipients receive a copy of this license.
+   - You clearly state any modifications you have made.
+   - The distribution complies with all conditions of this license.
+
+## Permitted Purpose
+
+You may use the Software for any purpose except:
+
+1. **Competition** — You may not use the Software to provide a product
+   or service that competes with the Software or any product or service
+   the Licensor provides using the Software. Products and services
+   compete even when provided through different technical means,
+   interfaces, or platforms; offered free of charge; or marketed under
+   a different name.
+
+2. **Removal of Protections** — You may not remove, disable, weaken,
+   or circumvent any Creator Protection Features or Terms of Service
+   Requirements as defined above.
+
+## Deployment Conditions
+
+If you Deploy the Software or any derivative work, you must:
+
+1. **Maintain Creator Protection Features** — All Creator Protection
+   Features must remain functional and enabled. You may enhance these
+   features but may not reduce their effectiveness.
+
+2. **Maintain Equivalent Terms of Service** — Your deployment must
+   enforce terms of service that provide protections equal to or
+   greater than the Terms of Service Requirements defined above. At a
+   minimum, your terms of service must:
+   - Prohibit unauthorized scraping and crawling of creator works
+   - Prohibit unauthorized reposting of creator works
+   - Prohibit unauthorized use of creator works for AI/ML training
+   - Prohibit circumvention of technical protection measures
+   - Guarantee that creators retain copyright of their uploaded works
+   - Require appropriate age-restriction mechanisms for adult content
+
+3. **Disclose Source** — You must make the complete source code of your
+   deployment (including modifications) available to users of your
+   service under this same license, or provide a written offer to do
+   so.
+
+4. **Attribution** — You must visibly credit the original illo project
+   in your deployment (e.g., in an about page or footer).
+
+## Noncompete Exceptions
+
+- If the Licensor discontinues a product or service for one year or
+  longer, this license does not prohibit competition with that
+  discontinued product or service.
+
+- This license does not restrict your use of the Software for internal
+  tools that are not made available to third parties.
+
+## Cure Period
+
+The first time you are notified in writing that you have violated any
+of these terms, your licenses can continue if you come into full
+compliance with these terms within 32 days of receiving that notice.
+The Licensor may extend this period at their discretion.
+
+## No Sublicensing
+
+You may not sublicense the Software. Anyone who receives a copy of the
+Software from you receives their license directly from the Licensor
+under the terms of this license.
+
+## Patent License
+
+The Licensor grants you a license, under any patent claims the Licensor
+can license or becomes able to license, to make, have made, use, sell,
+offer for sale, import, and have imported the Software, only for
+Permitted Purposes. If you make any written claim that the Software
+infringes any patent, this patent license terminates immediately.
+
+## Trademark
+
+"illo" and associated logos are trademarks of the Licensor. You may not
+use these marks in derivative works except to indicate compatibility or
+origin.
+
+## No Warranty
+
+**The Software is provided "as is", without warranty of any kind,
+express or implied.** The Licensor will not be liable for any damages
+arising from these terms or the use or nature of the Software, to the
+fullest extent permitted by law.
+
+## Termination
+
+Your license terminates immediately if you violate any term of this
+license and do not cure the violation within the Cure Period, or if
+this is not your first violation.
+
+## Governing Provisions
+
+If any provision of this license is found unenforceable, the remaining
+provisions remain in effect. No provision of this license shall be
+interpreted to reduce the protections afforded to creators and their
+works.
+
+---
+
+Copyright (c) 2026 illo contributors
+
+This is not an Open Source license as defined by the Open Source
+Initiative. This is a source-available license designed to protect
+creators and their works.

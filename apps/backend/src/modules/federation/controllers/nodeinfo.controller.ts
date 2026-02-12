@@ -70,9 +70,9 @@ export class NodeInfoController {
     return {
       version: '2.1',
       software: {
-        name: 'open-illustboard',
+        name: 'illo',
         version: '0.1.0',
-        repository: 'https://github.com/open-illustboard/open-illustboard',
+        repository: 'https://github.com/barineco/illo',
       },
       protocols: ['activitypub'],
       services: {

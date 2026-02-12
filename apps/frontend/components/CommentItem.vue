@@ -137,7 +137,7 @@
 </template>
 
 <script setup lang="ts">
-import type { CommentWithUser } from '@open-illustboard/shared'
+import type { CommentWithUser } from '@illo/shared'
 
 const { t } = useI18n()
 
