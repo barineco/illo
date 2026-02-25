@@ -74,12 +74,19 @@ export class SetupService {
     }
 
     // Validate mode transition (only PERSONAL -> FEDERATION_ONLY allowed)
-    if (settings.instanceMode === InstanceMode.PERSONAL && newMode !== InstanceMode.FEDERATION_ONLY) {
-      throw new BadRequestException('Invalid mode transition. Can only change from PERSONAL to FEDERATION_ONLY')
+    if (
+      settings.instanceMode === InstanceMode.PERSONAL &&
+      newMode !== InstanceMode.FEDERATION_ONLY
+    ) {
+      throw new BadRequestException(
+        'Invalid mode transition. Can only change from PERSONAL to FEDERATION_ONLY',
+      )
     }
 
     if (settings.instanceMode === InstanceMode.FEDERATION_ONLY) {
-      throw new BadRequestException('Instance mode is already FEDERATION_ONLY and cannot be changed')
+      throw new BadRequestException(
+        'Instance mode is already FEDERATION_ONLY and cannot be changed',
+      )
     }
 
     // Update instance settings
@@ -130,10 +137,13 @@ export class SetupService {
     const passwordHash = await bcrypt.hash(dto.adminPassword, 10)
 
     // Generate Ed25519 key pair for ActivityPub
-    const { publicKey, privateKey } = await this.httpSignatureService.generateKeyPair()
+    const { publicKey, privateKey } =
+      await this.httpSignatureService.generateKeyPair()
 
     // Build ActivityPub URLs
-    const baseUrl = dto.publicUrl || this.configService.get<string>('BASE_URL', 'http://localhost:11104')
+    const baseUrl =
+      dto.publicUrl ||
+      this.configService.get<string>('BASE_URL', 'http://localhost:11104')
     const actorUrl = `${baseUrl}/users/${dto.adminUsername}`
     const inbox = `${actorUrl}/inbox`
     const outbox = `${actorUrl}/outbox`
@@ -175,8 +185,7 @@ export class SetupService {
           adminUserId: adminUser.id,
           description: dto.description || null,
           isSetupComplete: true,
-          allowRegistration:
-            dto.instanceMode === InstanceMode.FEDERATION_ONLY,
+          allowRegistration: dto.instanceMode === InstanceMode.FEDERATION_ONLY,
           requireApproval: true,
         },
         update: {
@@ -186,8 +195,7 @@ export class SetupService {
           adminUserId: adminUser.id,
           description: dto.description || null,
           isSetupComplete: true,
-          allowRegistration:
-            dto.instanceMode === InstanceMode.FEDERATION_ONLY,
+          allowRegistration: dto.instanceMode === InstanceMode.FEDERATION_ONLY,
           requireApproval: true,
         },
       })
@@ -227,7 +235,9 @@ export class SetupService {
     })
 
     if (!user || user.role !== UserRole.ADMIN) {
-      throw new ForbiddenException('Only admins can update registration settings')
+      throw new ForbiddenException(
+        'Only admins can update registration settings',
+      )
     }
 
     // Prepare update data
@@ -255,10 +265,7 @@ export class SetupService {
   /**
    * Update SEO settings (admin only)
    */
-  async updateSeoSettings(
-    userId: string,
-    allowSearchEngineIndexing: boolean,
-  ) {
+  async updateSeoSettings(userId: string, allowSearchEngineIndexing: boolean) {
     // Verify user is admin
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
@@ -298,7 +305,8 @@ export class SetupService {
     }
 
     // Prepare update data
-    const updateData: { instanceName?: string; description?: string | null } = {}
+    const updateData: { instanceName?: string; description?: string | null } =
+      {}
     if (instanceName !== undefined) {
       if (!instanceName.trim()) {
         throw new BadRequestException('Instance name cannot be empty')

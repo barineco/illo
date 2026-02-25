@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common'
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+} from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { authenticator } from 'otplib'
 import * as QRCode from 'qrcode'
@@ -27,11 +31,7 @@ export class TwoFactorService {
    */
   generateSecret(username: string): { secret: string; otpauth: string } {
     const secret = authenticator.generateSecret()
-    const otpauth = authenticator.keyuri(
-      username,
-      this.instanceName,
-      secret,
-    )
+    const otpauth = authenticator.keyuri(username, this.instanceName, secret)
 
     return { secret, otpauth }
   }
@@ -183,7 +183,9 @@ export class TwoFactorService {
 
     // First try TOTP (decrypt secret first)
     try {
-      const decryptedSecret = this.encryptionService.decrypt(user.twoFactorSecret)
+      const decryptedSecret = this.encryptionService.decrypt(
+        user.twoFactorSecret,
+      )
 
       if (this.verifyTOTP(decryptedSecret, code)) {
         return { success: true, usedBackupCode: false }
@@ -221,7 +223,9 @@ export class TwoFactorService {
   /**
    * Regenerate backup codes
    */
-  async regenerateBackupCodes(userId: string): Promise<{ backupCodes: string[] }> {
+  async regenerateBackupCodes(
+    userId: string,
+  ): Promise<{ backupCodes: string[] }> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
     })

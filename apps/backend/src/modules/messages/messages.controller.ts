@@ -12,7 +12,10 @@ import {
 import { MessagesService } from './messages.service'
 import { CreateConversationDto } from './dto/create-conversation.dto'
 import { SendMessageDto } from './dto/send-message.dto'
-import { ConversationQueryDto, MessageQueryDto } from './dto/conversation-query.dto'
+import {
+  ConversationQueryDto,
+  MessageQueryDto,
+} from './dto/conversation-query.dto'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { CurrentUser } from '../auth/decorators/current-user.decorator'
 

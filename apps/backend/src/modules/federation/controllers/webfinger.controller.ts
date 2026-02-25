@@ -30,7 +30,9 @@ export class WebFingerController {
 
       // If domain doesn't match our local domain, it's a remote user
       if (parsed.domain !== localDomain) {
-        throw new NotFoundException('Remote users not available via WebFinger on this instance')
+        throw new NotFoundException(
+          'Remote users not available via WebFinger on this instance',
+        )
       }
     }
 

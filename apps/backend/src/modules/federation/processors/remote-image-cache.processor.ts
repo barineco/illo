@@ -44,19 +44,24 @@ export class RemoteImageCacheProcessor extends WorkerHost {
     }
   }
 
-  private async processArtworkImageCache(job: Job<CacheImageJobData>): Promise<any> {
+  private async processArtworkImageCache(
+    job: Job<CacheImageJobData>,
+  ): Promise<any> {
     const { artworkImageId } = job.data
 
     if (!artworkImageId) {
       throw new Error('Missing artworkImageId for artwork_image job')
     }
 
-    const result = await this.remoteImageCacheService.cacheRemoteImage(artworkImageId)
+    const result =
+      await this.remoteImageCacheService.cacheRemoteImage(artworkImageId)
 
     if (result.success) {
       this.logger.log(`Cached artwork image: ${artworkImageId}`)
     } else {
-      this.logger.warn(`Failed to cache artwork image: ${artworkImageId} - ${result.error}`)
+      this.logger.warn(
+        `Failed to cache artwork image: ${artworkImageId} - ${result.error}`,
+      )
     }
 
     return result

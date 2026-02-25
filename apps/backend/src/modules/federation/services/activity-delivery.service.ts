@@ -52,7 +52,9 @@ export class ActivityDeliveryService {
    */
   async sendFollow(follower: User, targetUser: User): Promise<boolean> {
     if (!targetUser.inbox || !targetUser.actorUrl) {
-      this.logger.warn(`Target user ${targetUser.username}@${targetUser.domain} has no inbox`)
+      this.logger.warn(
+        `Target user ${targetUser.username}@${targetUser.domain} has no inbox`,
+      )
       return false
     }
 
@@ -76,7 +78,9 @@ export class ActivityDeliveryService {
    */
   async sendUndoFollow(follower: User, targetUser: User): Promise<boolean> {
     if (!targetUser.inbox || !targetUser.actorUrl) {
-      this.logger.warn(`Target user ${targetUser.username}@${targetUser.domain} has no inbox`)
+      this.logger.warn(
+        `Target user ${targetUser.username}@${targetUser.domain} has no inbox`,
+      )
       return false
     }
 
@@ -102,7 +106,11 @@ export class ActivityDeliveryService {
   /**
    * Send a Like activity to a remote inbox
    */
-  async sendLike(liker: User, artworkApObjectId: string, targetInbox: string): Promise<boolean> {
+  async sendLike(
+    liker: User,
+    artworkApObjectId: string,
+    targetInbox: string,
+  ): Promise<boolean> {
     const publicUrl = await this.actorService.getPublicUrl()
     const actorUrl = `${publicUrl}/users/${liker.username}`
     const activityId = `${actorUrl}#likes/${encodeURIComponent(artworkApObjectId)}/${Date.now()}`
@@ -121,7 +129,11 @@ export class ActivityDeliveryService {
   /**
    * Send an Undo Like activity to a remote inbox
    */
-  async sendUndoLike(liker: User, artworkApObjectId: string, targetInbox: string): Promise<boolean> {
+  async sendUndoLike(
+    liker: User,
+    artworkApObjectId: string,
+    targetInbox: string,
+  ): Promise<boolean> {
     const publicUrl = await this.actorService.getPublicUrl()
     const actorUrl = `${publicUrl}/users/${liker.username}`
     const activityId = `${actorUrl}#undo-like/${encodeURIComponent(artworkApObjectId)}/${Date.now()}`
@@ -207,14 +219,17 @@ export class ActivityDeliveryService {
     const { author } = artwork
 
     if (!author.domain || !author.inbox) {
-      this.logger.debug(`Artwork author ${author.username} is local or has no inbox, skipping`)
+      this.logger.debug(
+        `Artwork author ${author.username} is local or has no inbox, skipping`,
+      )
       return false
     }
 
     const publicUrl = await this.actorService.getPublicUrl()
     const actorUrl = `${publicUrl}/users/${commenter.username}`
     const noteId = `${publicUrl}/comments/${comment.id}`
-    const artworkUrl = artwork.apObjectId || `${publicUrl}/artworks/${artwork.id}`
+    const artworkUrl =
+      artwork.apObjectId || `${publicUrl}/artworks/${artwork.id}`
     const activityId = `${noteId}#create`
 
     // Build the Note object
@@ -246,8 +261,14 @@ export class ActivityDeliveryService {
   /**
    * Send an Accept activity in response to a Follow
    */
-  async sendAcceptFollow(localUser: User, followActivity: any): Promise<boolean> {
-    const actorUrl = typeof followActivity.actor === 'string' ? followActivity.actor : followActivity.actor?.id
+  async sendAcceptFollow(
+    localUser: User,
+    followActivity: any,
+  ): Promise<boolean> {
+    const actorUrl =
+      typeof followActivity.actor === 'string'
+        ? followActivity.actor
+        : followActivity.actor?.id
     if (!actorUrl) {
       this.logger.warn('Cannot send Accept: missing actor in Follow activity')
       return false
@@ -258,7 +279,9 @@ export class ActivityDeliveryService {
     })
 
     if (!remoteUser?.inbox) {
-      this.logger.warn(`Cannot send Accept: remote user has no inbox: ${actorUrl}`)
+      this.logger.warn(
+        `Cannot send Accept: remote user has no inbox: ${actorUrl}`,
+      )
       return false
     }
 
@@ -291,7 +314,9 @@ export class ActivityDeliveryService {
     artwork: Artwork & { images: any[]; tags: any[]; visibility: string },
   ): Promise<void> {
     if (artwork.visibility === 'PRIVATE') {
-      this.logger.debug(`Skipping Update activity for PRIVATE artwork ${artwork.id}`)
+      this.logger.debug(
+        `Skipping Update activity for PRIVATE artwork ${artwork.id}`,
+      )
       return
     }
 
@@ -308,13 +333,16 @@ export class ActivityDeliveryService {
     })
 
     if (followers.length === 0) {
-      this.logger.debug(`No remote followers to notify for artwork ${artwork.id}`)
+      this.logger.debug(
+        `No remote followers to notify for artwork ${artwork.id}`,
+      )
       return
     }
 
     const publicUrl = await this.actorService.getPublicUrl()
     const actorUrl = `${publicUrl}/users/${author.username}`
-    const objectUrl = artwork.apObjectId || `${publicUrl}/artworks/${artwork.id}`
+    const objectUrl =
+      artwork.apObjectId || `${publicUrl}/artworks/${artwork.id}`
 
     const note = this.outboxService.artworkToNote(artwork, actorUrl, publicUrl)
 
@@ -332,8 +360,11 @@ export class ActivityDeliveryService {
     // Deliver to all remote followers' inboxes (async, don't wait)
     for (const follow of followers) {
       if (follow.follower.inbox) {
-        this.deliverActivity(author, follow.follower.inbox, activity).catch((err) =>
-          this.logger.error(`Failed to deliver Update to ${follow.follower.inbox}: ${err.message}`),
+        this.deliverActivity(author, follow.follower.inbox, activity).catch(
+          (err) =>
+            this.logger.error(
+              `Failed to deliver Update to ${follow.follower.inbox}: ${err.message}`,
+            ),
         )
       }
     }
@@ -357,7 +388,9 @@ export class ActivityDeliveryService {
     artwork: Artwork & { images: any[]; tags: any[]; visibility: string },
   ): Promise<void> {
     if (artwork.visibility === 'PRIVATE') {
-      this.logger.debug(`Skipping Create activity for PRIVATE artwork ${artwork.id}`)
+      this.logger.debug(
+        `Skipping Create activity for PRIVATE artwork ${artwork.id}`,
+      )
       return
     }
 
@@ -374,7 +407,9 @@ export class ActivityDeliveryService {
     })
 
     if (followers.length === 0) {
-      this.logger.debug(`No remote followers to notify for new artwork ${artwork.id}`)
+      this.logger.debug(
+        `No remote followers to notify for new artwork ${artwork.id}`,
+      )
       return
     }
 
@@ -397,8 +432,11 @@ export class ActivityDeliveryService {
 
     for (const follow of followers) {
       if (follow.follower.inbox) {
-        this.deliverActivity(author, follow.follower.inbox, activity).catch((err) =>
-          this.logger.error(`Failed to deliver Create to ${follow.follower.inbox}: ${err.message}`),
+        this.deliverActivity(author, follow.follower.inbox, activity).catch(
+          (err) =>
+            this.logger.error(
+              `Failed to deliver Create to ${follow.follower.inbox}: ${err.message}`,
+            ),
         )
       }
     }
@@ -425,7 +463,8 @@ export class ActivityDeliveryService {
     const domains = remoteRecipients
       .filter((r) => r.domain)
       .map((r) => r.domain as string)
-    const encryptionSupport = await this.nodeInfoCheck.checkEncryptionSupport(domains)
+    const encryptionSupport =
+      await this.nodeInfoCheck.checkEncryptionSupport(domains)
 
     const toRecipients = remoteRecipients
       .filter((r) => r.actorUrl)
@@ -440,7 +479,8 @@ export class ActivityDeliveryService {
       }
 
       const isEncryptionSupported =
-        recipient.domain && encryptionSupport.supportedDomains.includes(recipient.domain)
+        recipient.domain &&
+        encryptionSupport.supportedDomains.includes(recipient.domain)
 
       let activity: any
 
@@ -461,10 +501,16 @@ export class ActivityDeliveryService {
           message,
           toRecipients,
         )
-        this.logger.log(`Sending plain DM to ${recipient.domain} (non-OIB instance)`)
+        this.logger.log(
+          `Sending plain DM to ${recipient.domain} (non-OIB instance)`,
+        )
       }
 
-      const success = await this.deliverActivity(sender, recipient.inbox, activity)
+      const success = await this.deliverActivity(
+        sender,
+        recipient.inbox,
+        activity,
+      )
       results.push({ success, encrypted: isEncryptionSupported ?? false })
     }
 
@@ -513,7 +559,9 @@ export class ActivityDeliveryService {
     message: Message,
     toRecipients: string[],
   ): any {
-    const contentBase64 = Buffer.from(message.content, 'utf8').toString('base64')
+    const contentBase64 = Buffer.from(message.content, 'utf8').toString(
+      'base64',
+    )
 
     return {
       '@context': [AP_CONTEXT, MLS_CONTEXT],
@@ -547,7 +595,9 @@ export class ActivityDeliveryService {
     activity: any,
   ): Promise<boolean> {
     if (!sender.privateKey) {
-      this.logger.error(`Sender ${sender.username} has no private key for signing`)
+      this.logger.error(
+        `Sender ${sender.username} has no private key for signing`,
+      )
       return false
     }
 
@@ -609,14 +659,20 @@ export class ActivityDeliveryService {
       data: { bullmqJobId: job.id },
     })
 
-    this.logger.log(`Queued ${activityType} delivery to ${inboxUrl} (job: ${job.id})`)
+    this.logger.log(
+      `Queued ${activityType} delivery to ${inboxUrl} (job: ${job.id})`,
+    )
     return false
   }
 
   /**
    * Attempt a single delivery to a remote inbox
    */
-  private async attemptDelivery(sender: User, inboxUrl: string, activity: any): Promise<boolean> {
+  private async attemptDelivery(
+    sender: User,
+    inboxUrl: string,
+    activity: any,
+  ): Promise<boolean> {
     try {
       const publicUrl = await this.actorService.getPublicUrl()
       const keyId = `${publicUrl}/users/${sender.username}#main-key`
@@ -649,14 +705,18 @@ export class ActivityDeliveryService {
           Host: host,
           Date: signatureHeaders.date,
           Signature: signatureHeaders.signature,
-          ...(signatureHeaders.digest ? { Digest: signatureHeaders.digest } : {}),
+          ...(signatureHeaders.digest
+            ? { Digest: signatureHeaders.digest }
+            : {}),
         },
         body,
       })
 
       if (!response.ok) {
         const text = await response.text().catch(() => '')
-        this.logger.warn(`Failed to deliver activity to ${inboxUrl}: ${response.status} ${text}`)
+        this.logger.warn(
+          `Failed to deliver activity to ${inboxUrl}: ${response.status} ${text}`,
+        )
         return false
       }
 
@@ -687,7 +747,9 @@ export class ActivityDeliveryService {
     })
 
     if (followers.length === 0) {
-      this.logger.debug(`No remote followers to notify for profile update of ${user.username}`)
+      this.logger.debug(
+        `No remote followers to notify for profile update of ${user.username}`,
+      )
       return
     }
 
@@ -711,13 +773,18 @@ export class ActivityDeliveryService {
 
     for (const follow of followers) {
       if (follow.follower.inbox) {
-        this.deliverActivity(user, follow.follower.inbox, activity).catch((err) =>
-          this.logger.error(`Failed to deliver Profile Update to ${follow.follower.inbox}: ${err.message}`),
+        this.deliverActivity(user, follow.follower.inbox, activity).catch(
+          (err) =>
+            this.logger.error(
+              `Failed to deliver Profile Update to ${follow.follower.inbox}: ${err.message}`,
+            ),
         )
       }
     }
 
-    this.logger.log(`Sent Update activity for profile of ${user.username} to ${followers.length} remote followers`)
+    this.logger.log(
+      `Sent Update activity for profile of ${user.username} to ${followers.length} remote followers`,
+    )
   }
 
   /**
@@ -762,7 +829,9 @@ export class ActivityDeliveryService {
       return []
     }
 
-    this.logger.log(`Sending Delete activity for artwork ${artworkId} to ${remoteFollowers.length} followers`)
+    this.logger.log(
+      `Sending Delete activity for artwork ${artworkId} to ${remoteFollowers.length} followers`,
+    )
 
     const fullAuthor = await this.prisma.user.findUnique({
       where: { id: author.id },
@@ -780,7 +849,9 @@ export class ActivityDeliveryService {
     )
 
     const successCount = results.filter((r) => r).length
-    this.logger.log(`Delivered Delete to ${successCount}/${remoteFollowers.length} followers`)
+    this.logger.log(
+      `Delivered Delete to ${successCount}/${remoteFollowers.length} followers`,
+    )
 
     return results
   }

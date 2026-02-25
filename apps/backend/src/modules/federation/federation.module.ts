@@ -28,7 +28,13 @@ import { RemoteImageCacheProcessor } from './processors/remote-image-cache.proce
 import { NodeInfoCheckService } from './services/nodeinfo-check.service'
 
 @Module({
-  imports: [ConfigModule, PrismaModule, StorageModule, forwardRef(() => UsersModule), forwardRef(() => MessagesModule)],
+  imports: [
+    ConfigModule,
+    PrismaModule,
+    StorageModule,
+    forwardRef(() => UsersModule),
+    forwardRef(() => MessagesModule),
+  ],
   controllers: [
     WebFingerController,
     ActivityPubController,

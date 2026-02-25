@@ -12,7 +12,12 @@ import {
 } from '@nestjs/common'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { MutesService } from './mutes.service'
-import { CreateUserMuteDto, CreateWordMuteDto, UpdateWordMuteDto, CreateTagMuteDto } from './dto'
+import {
+  CreateUserMuteDto,
+  CreateWordMuteDto,
+  UpdateWordMuteDto,
+  CreateTagMuteDto,
+} from './dto'
 
 @Controller('mutes')
 @UseGuards(JwtAuthGuard)
@@ -43,10 +48,7 @@ export class MutesController {
    * Unmute a user
    */
   @Delete('users/:username')
-  async unmuteUser(
-    @Request() req,
-    @Param('username') username: string,
-  ) {
+  async unmuteUser(@Request() req, @Param('username') username: string) {
     const { user, domain } = this.parseUsername(username)
     return this.mutesService.unmuteUser(req.user.id, user, domain)
   }
@@ -56,10 +58,7 @@ export class MutesController {
    * Check if a user is muted
    */
   @Get('users/:username/check')
-  async checkUserMute(
-    @Request() req,
-    @Param('username') username: string,
-  ) {
+  async checkUserMute(@Request() req, @Param('username') username: string) {
     const { user, domain } = this.parseUsername(username)
     return this.mutesService.checkUserMuteStatus(req.user.id, user, domain)
   }
@@ -90,10 +89,7 @@ export class MutesController {
    * Create a word mute
    */
   @Post('words')
-  async createWordMute(
-    @Request() req,
-    @Body() dto: CreateWordMuteDto,
-  ) {
+  async createWordMute(@Request() req, @Body() dto: CreateWordMuteDto) {
     return this.mutesService.createWordMute(req.user.id, dto)
   }
 
@@ -124,10 +120,7 @@ export class MutesController {
    * Delete a word mute
    */
   @Delete('words/:id')
-  async deleteWordMute(
-    @Request() req,
-    @Param('id') id: string,
-  ) {
+  async deleteWordMute(@Request() req, @Param('id') id: string) {
     return this.mutesService.deleteWordMute(req.user.id, id)
   }
 
@@ -153,10 +146,7 @@ export class MutesController {
    * Unmute a tag
    */
   @Delete('tags/:tagName')
-  async unmuteTag(
-    @Request() req,
-    @Param('tagName') tagName: string,
-  ) {
+  async unmuteTag(@Request() req, @Param('tagName') tagName: string) {
     return this.mutesService.unmuteTag(req.user.id, tagName)
   }
 

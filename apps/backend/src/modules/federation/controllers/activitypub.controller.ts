@@ -73,13 +73,17 @@ export class ActivityPubController {
     // Verify HTTP signature
     const isValid = await this.inboxService.verifyRequest(req, body)
     if (!isValid) {
-      this.logger.warn(`Invalid or missing HTTP signature for inbox POST to ${username}`)
-      this.logger.warn(`Request headers: ${JSON.stringify({
-        signature: req.headers.signature,
-        date: req.headers.date,
-        host: req.headers.host,
-        digest: req.headers.digest,
-      })}`)
+      this.logger.warn(
+        `Invalid or missing HTTP signature for inbox POST to ${username}`,
+      )
+      this.logger.warn(
+        `Request headers: ${JSON.stringify({
+          signature: req.headers.signature,
+          date: req.headers.date,
+          host: req.headers.host,
+          digest: req.headers.digest,
+        })}`,
+      )
       throw new BadRequestException('Invalid or missing HTTP signature')
     }
 
@@ -157,24 +161,34 @@ export class ActivityPubController {
 
     // If no page requested, return the collection summary
     if (page === undefined) {
-      const collection = await this.followersCollectionService.getFollowersCollection(username)
+      const collection =
+        await this.followersCollectionService.getFollowersCollection(username)
       return res.json(collection)
     }
 
     // If page=true or page=1, return first page
     if (page === 'true' || page === '1') {
-      const pageData = await this.followersCollectionService.getFollowersPage(username, 1)
+      const pageData = await this.followersCollectionService.getFollowersPage(
+        username,
+        1,
+      )
       return res.json(pageData)
     }
 
     // Parse page number
     const pageNum = parseInt(page, 10)
     if (isNaN(pageNum) || pageNum < 1) {
-      const pageData = await this.followersCollectionService.getFollowersPage(username, 1)
+      const pageData = await this.followersCollectionService.getFollowersPage(
+        username,
+        1,
+      )
       return res.json(pageData)
     }
 
-    const pageData = await this.followersCollectionService.getFollowersPage(username, pageNum)
+    const pageData = await this.followersCollectionService.getFollowersPage(
+      username,
+      pageNum,
+    )
     return res.json(pageData)
   }
 
@@ -196,24 +210,34 @@ export class ActivityPubController {
 
     // If no page requested, return the collection summary
     if (page === undefined) {
-      const collection = await this.followersCollectionService.getFollowingCollection(username)
+      const collection =
+        await this.followersCollectionService.getFollowingCollection(username)
       return res.json(collection)
     }
 
     // If page=true or page=1, return first page
     if (page === 'true' || page === '1') {
-      const pageData = await this.followersCollectionService.getFollowingPage(username, 1)
+      const pageData = await this.followersCollectionService.getFollowingPage(
+        username,
+        1,
+      )
       return res.json(pageData)
     }
 
     // Parse page number
     const pageNum = parseInt(page, 10)
     if (isNaN(pageNum) || pageNum < 1) {
-      const pageData = await this.followersCollectionService.getFollowingPage(username, 1)
+      const pageData = await this.followersCollectionService.getFollowingPage(
+        username,
+        1,
+      )
       return res.json(pageData)
     }
 
-    const pageData = await this.followersCollectionService.getFollowingPage(username, pageNum)
+    const pageData = await this.followersCollectionService.getFollowingPage(
+      username,
+      pageNum,
+    )
     return res.json(pageData)
   }
 }

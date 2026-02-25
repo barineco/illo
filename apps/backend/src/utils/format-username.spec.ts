@@ -21,20 +21,18 @@ describe('formatUserHandle', () => {
   })
 
   it('formats local user with explicit null domain', () => {
-    expect(formatUserHandle({ username: 'alice', domain: null })).toBe(
-      '@alice',
-    )
+    expect(formatUserHandle({ username: 'alice', domain: null })).toBe('@alice')
   })
 
   it('formats remote user object', () => {
-    expect(
-      formatUserHandle({ username: 'bob', domain: 'example.com' }),
-    ).toBe('@bob@example.com')
+    expect(formatUserHandle({ username: 'bob', domain: 'example.com' })).toBe(
+      '@bob@example.com',
+    )
   })
 
   it('formats user with undefined domain', () => {
-    expect(
-      formatUserHandle({ username: 'carol', domain: undefined }),
-    ).toBe('@carol')
+    expect(formatUserHandle({ username: 'carol', domain: undefined })).toBe(
+      '@carol',
+    )
   })
 })

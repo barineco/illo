@@ -81,47 +81,6 @@
       </div>
     </div>
 
-    <!-- Characters Tab -->
-    <div v-else-if="selectedTab === 'characters'">
-      <div v-if="isLoadingCharacters" class="text-center py-16">
-        <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[var(--color-border)] border-t-[var(--color-primary)]"></div>
-        <p class="mt-4 text-[var(--color-text-muted)]">{{ $t('common.loading') }}</p>
-      </div>
-      <div v-else-if="characters.length === 0" class="text-center py-16">
-        <Icon name="User" class="w-16 h-16 mx-auto text-[var(--color-text-muted)] mb-4" />
-        <p class="text-[var(--color-text-muted)] text-lg mb-4">{{ $t('user.noCharactersYet') }}</p>
-        <BaseButton
-          v-if="isOwnProfile"
-          variant="primary"
-          size="lg"
-          shape="pill"
-          @click="navigateTo('/characters/new')"
-        >
-          {{ $t('character.createFirst') }}
-        </BaseButton>
-      </div>
-      <div v-else class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-        <CharacterCard
-          v-for="character in characters"
-          :key="character.id"
-          :character="character"
-        />
-      </div>
-
-      <!-- Load More Button for Characters -->
-      <div v-if="!isLoadingCharacters && characters.length > 0 && hasMoreCharacters" class="text-center mt-8 mb-4">
-        <BaseButton
-          variant="primary"
-          size="lg"
-          shape="rounded"
-          :disabled="loadingMoreCharacters"
-          @click="loadMoreCharacters"
-        >
-          {{ loadingMoreCharacters ? $t('common.loading') : $t('home.loadMore') }}
-        </BaseButton>
-      </div>
-    </div>
-
     <!-- Collections Tab -->
     <div v-else-if="selectedTab === 'collections'">
       <div v-if="isLoadingCollections" class="text-center py-16">
@@ -325,21 +284,6 @@ interface TopTag {
   count: number
 }
 
-interface Character {
-  id: string
-  name: string
-  avatarUrl?: string | null
-  avatarThumbnailUrl?: string | null
-  allowFanArt: boolean
-  fanArtCount: number
-  creator?: {
-    id: string
-    username: string
-    displayName?: string | null
-    avatarUrl?: string | null
-  }
-}
-
 const props = defineProps<{
   selectedTab: string
   username: string
@@ -509,14 +453,11 @@ const likedArtworks = ref<ArtworkCardInput[]>([])
 const bookmarkedArtworks = ref<ArtworkCardInput[]>([])
 const followers = ref<UserInList[]>([])
 const following = ref<UserInList[]>([])
-const characters = ref<Character[]>([])
-
 const isLoadingCollections = ref(false)
 const isLoadingLikes = ref(false)
 const isLoadingBookmarks = ref(false)
 const isLoadingFollowers = ref(false)
 const isLoadingFollowing = ref(false)
-const isLoadingCharacters = ref(false)
 
 // Pagination for likes and bookmarks
 const loadingMoreLikes = ref(false)
@@ -528,12 +469,6 @@ const loadingMoreBookmarks = ref(false)
 const hasMoreBookmarks = computed(() => bookmarkedArtworks.value.length > 0 && bookmarkedArtworks.value.length % bookmarksLimit === 0)
 const bookmarksPage = ref(1)
 const bookmarksLimit = 20
-
-// Pagination for characters
-const loadingMoreCharacters = ref(false)
-const hasMoreCharacters = computed(() => characters.value.length > 0 && characters.value.length % charactersLimit === 0)
-const charactersPage = ref(1)
-const charactersLimit = 20
 
 const getCollectionArtworkUrl = (artworkId: string, imageId: string, fallbackUrl: string) => {
   const cacheKey = `${artworkId}-${imageId}`
@@ -679,40 +614,6 @@ const fetchFollowing = async () => {
   }
 }
 
-const fetchCharacters = async (append = false) => {
-  try {
-    if (append) {
-      loadingMoreCharacters.value = true
-      charactersPage.value++
-    } else {
-      isLoadingCharacters.value = true
-      charactersPage.value = 1
-    }
-
-    const response = await api.get<{ characters: Character[] }>(`/api/users/${props.username}/characters`, {
-      params: {
-        page: charactersPage.value,
-        limit: charactersLimit,
-      },
-    })
-
-    const newCharacters = response.characters || []
-    characters.value = append ? [...characters.value, ...newCharacters] : newCharacters
-  } catch (error) {
-    console.error('Failed to fetch characters:', error)
-    if (!append) {
-      characters.value = []
-    }
-  } finally {
-    isLoadingCharacters.value = false
-    loadingMoreCharacters.value = false
-  }
-}
-
-const loadMoreCharacters = async () => {
-  await fetchCharacters(true)
-}
-
 const handleFollowToggle = async (targetUser: UserInList) => {
   try {
     const handle = targetUser.domain
@@ -738,9 +639,7 @@ const handleFollowToggle = async (targetUser: UserInList) => {
 }
 
 watch(() => props.selectedTab, (newTab) => {
-  if (newTab === 'characters' && characters.value.length === 0) {
-    fetchCharacters()
-  } else if (newTab === 'collections' && collections.value.length === 0) {
+  if (newTab === 'collections' && collections.value.length === 0) {
     fetchCollections()
   } else if (newTab === 'likes' && likedArtworks.value.length === 0) {
     fetchLikedArtworks()

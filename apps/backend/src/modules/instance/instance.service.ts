@@ -50,7 +50,8 @@ export class InstanceService {
     }
 
     // Get admin username if adminUserId is set
-    let adminUsername: string | null = process.env.INSTANCE_ADMIN_USERNAME || null
+    let adminUsername: string | null =
+      process.env.INSTANCE_ADMIN_USERNAME || null
     if (settings.adminUserId) {
       const adminUser = await this.prisma.user.findUnique({
         where: { id: settings.adminUserId },

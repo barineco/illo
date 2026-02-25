@@ -8,7 +8,13 @@ import { MutesModule } from '../mutes/mutes.module'
 import { UsersModule } from '../users/users.module'
 
 @Module({
-  imports: [PrismaModule, StorageModule, FederationModule, forwardRef(() => MutesModule), forwardRef(() => UsersModule)],
+  imports: [
+    PrismaModule,
+    StorageModule,
+    FederationModule,
+    forwardRef(() => MutesModule),
+    forwardRef(() => UsersModule),
+  ],
   controllers: [ArtworksController],
   providers: [ArtworksService],
   exports: [ArtworksService],

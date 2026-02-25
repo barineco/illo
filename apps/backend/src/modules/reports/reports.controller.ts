@@ -24,10 +24,7 @@ export class ReportsController {
    * Create a new report
    */
   @Post()
-  async createReport(
-    @Request() req,
-    @Body() dto: CreateReportDto,
-  ) {
+  async createReport(@Request() req, @Body() dto: CreateReportDto) {
     return this.reportsService.createReport(req.user.id, dto)
   }
 

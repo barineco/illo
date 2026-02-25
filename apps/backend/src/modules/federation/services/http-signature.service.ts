@@ -172,8 +172,12 @@ export class HttpSignatureService {
     signedHeaders?: string[]
   }): string {
     const { method, path, headers } = params
-    const signedHeaders =
-      params.signedHeaders || ['(request-target)', 'host', 'date', 'digest']
+    const signedHeaders = params.signedHeaders || [
+      '(request-target)',
+      'host',
+      'date',
+      'digest',
+    ]
 
     const lines: string[] = []
 

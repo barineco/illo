@@ -17,14 +17,18 @@ export class NodeInfoCheckService {
   private readonly isDevelopment: boolean
 
   // In-memory cache with TTL (15 minutes)
-  private readonly cache = new Map<string, { isOpenIllustboard: boolean; fetchedAt: number }>()
+  private readonly cache = new Map<
+    string,
+    { isOpenIllustboard: boolean; fetchedAt: number }
+  >()
   private readonly CACHE_TTL_MS = 15 * 60 * 1000 // 15 minutes
 
   constructor(
     private prisma: PrismaService,
     private configService: ConfigService,
   ) {
-    this.isDevelopment = this.configService.get<string>('NODE_ENV') !== 'production'
+    this.isDevelopment =
+      this.configService.get<string>('NODE_ENV') !== 'production'
   }
 
   /**
@@ -39,7 +43,9 @@ export class NodeInfoCheckService {
     // Check in-memory cache first
     const cached = this.cache.get(domain)
     if (cached && Date.now() - cached.fetchedAt < this.CACHE_TTL_MS) {
-      this.logger.debug(`Cache hit for ${domain}: isOpenIllustboard=${cached.isOpenIllustboard}`)
+      this.logger.debug(
+        `Cache hit for ${domain}: isOpenIllustboard=${cached.isOpenIllustboard}`,
+      )
       return cached.isOpenIllustboard
     }
 
@@ -49,16 +55,25 @@ export class NodeInfoCheckService {
     })
 
     if (instance) {
-      const isOIB = instance.softwareName === 'illo' || instance.softwareName === 'open-illustboard'
-      this.logger.debug(`DB cache for ${domain}: softwareName=${instance.softwareName}, isOpenIllustboard=${isOIB}`)
+      const isOIB =
+        instance.softwareName === 'illo' ||
+        instance.softwareName === 'open-illustboard'
+      this.logger.debug(
+        `DB cache for ${domain}: softwareName=${instance.softwareName}, isOpenIllustboard=${isOIB}`,
+      )
 
       // Update in-memory cache
-      this.cache.set(domain, { isOpenIllustboard: isOIB, fetchedAt: Date.now() })
+      this.cache.set(domain, {
+        isOpenIllustboard: isOIB,
+        fetchedAt: Date.now(),
+      })
 
       // If lastSeen is recent (within 1 day), trust the cached value
       const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000)
       if (instance.lastSeen > oneDayAgo) {
-        this.logger.debug(`Using cached value for ${domain} (lastSeen: ${instance.lastSeen})`)
+        this.logger.debug(
+          `Using cached value for ${domain} (lastSeen: ${instance.lastSeen})`,
+        )
         return isOIB
       }
     }
@@ -103,7 +118,9 @@ export class NodeInfoCheckService {
       const wellKnownResponse = await fetch(wellKnownUrl, fetchOptions)
 
       if (!wellKnownResponse.ok) {
-        this.logger.warn(`Failed to fetch NodeInfo well-known for ${domain}: ${wellKnownResponse.status}`)
+        this.logger.warn(
+          `Failed to fetch NodeInfo well-known for ${domain}: ${wellKnownResponse.status}`,
+        )
         return this.cacheResult(domain, null, null)
       }
 
@@ -126,7 +143,9 @@ export class NodeInfoCheckService {
       const nodeInfoResponse = await fetch(nodeInfoLink.href, fetchOptions)
 
       if (!nodeInfoResponse.ok) {
-        this.logger.warn(`Failed to fetch NodeInfo for ${domain}: ${nodeInfoResponse.status}`)
+        this.logger.warn(
+          `Failed to fetch NodeInfo for ${domain}: ${nodeInfoResponse.status}`,
+        )
         return this.cacheResult(domain, null, null)
       }
 
@@ -134,11 +153,15 @@ export class NodeInfoCheckService {
       const softwareName = nodeInfo.software?.name?.toLowerCase() || null
       const softwareVersion = nodeInfo.software?.version || null
 
-      this.logger.log(`NodeInfo for ${domain}: ${softwareName} ${softwareVersion}`)
+      this.logger.log(
+        `NodeInfo for ${domain}: ${softwareName} ${softwareVersion}`,
+      )
 
       return this.cacheResult(domain, softwareName, softwareVersion)
     } catch (error) {
-      this.logger.error(`Error fetching NodeInfo for ${domain}: ${error.message}`)
+      this.logger.error(
+        `Error fetching NodeInfo for ${domain}: ${error.message}`,
+      )
       return this.cacheResult(domain, null, null)
     }
   }
@@ -151,7 +174,8 @@ export class NodeInfoCheckService {
     softwareName: string | null,
     softwareVersion: string | null,
   ): Promise<boolean> {
-    const isOpenIllustboard = softwareName === 'illo' || softwareName === 'open-illustboard'
+    const isOpenIllustboard =
+      softwareName === 'illo' || softwareName === 'open-illustboard'
 
     // Update in-memory cache
     this.cache.set(domain, { isOpenIllustboard, fetchedAt: Date.now() })
@@ -174,7 +198,9 @@ export class NodeInfoCheckService {
         },
       })
     } catch (error) {
-      this.logger.error(`Failed to cache NodeInfo for ${domain}: ${error.message}`)
+      this.logger.error(
+        `Failed to cache NodeInfo for ${domain}: ${error.message}`,
+      )
     }
 
     return isOpenIllustboard

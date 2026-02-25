@@ -1,6 +1,6 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import { PrismaService } from '../prisma/prisma.service';
+import { Injectable, Logger } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
+import { PrismaService } from '../prisma/prisma.service'
 import {
   HeadlessBotScore,
   UserAgentSignal,
@@ -11,20 +11,20 @@ import {
   DeviceFingerprintSignal,
   HeadlessDetectionConfig,
   HeadlessDetectionAction,
-} from './interfaces/headless-detection.interface';
-import { Request } from 'express';
-import { RateLimitTier } from '@prisma/client';
+} from './interfaces/headless-detection.interface'
+import { Request } from 'express'
+import { RateLimitTier } from '@prisma/client'
 
 @Injectable()
 export class HeadlessDetectionService {
-  private readonly logger = new Logger(HeadlessDetectionService.name);
-  private config: HeadlessDetectionConfig;
+  private readonly logger = new Logger(HeadlessDetectionService.name)
+  private config: HeadlessDetectionConfig
 
   constructor(
     private readonly configService: ConfigService,
     private readonly prisma: PrismaService,
   ) {
-    this.loadConfig();
+    this.loadConfig()
   }
 
   private loadConfig(): void {
@@ -60,20 +60,20 @@ export class HeadlessDetectionService {
       definiteBotAction: HeadlessDetectionAction.BLOCK,
       allowedUserAgents: [],
       allowedIpRanges: [],
-    };
+    }
   }
 
   async analyze(req: Request): Promise<HeadlessBotScore> {
-    const userAgent = req.headers['user-agent'] || '';
-    const ipAddress = this.getIpAddress(req);
+    const userAgent = req.headers['user-agent'] || ''
+    const ipAddress = this.getIpAddress(req)
 
     // 各シグナルを分析
-    const userAgentSignal = this.analyzeUserAgent(userAgent);
-    const clientHintsSignal = this.analyzeClientHints(req);
-    const headerConsistencySignal = this.analyzeHeaderConsistency(req);
-    const rateLimitSignal = this.analyzeRateLimit(req);
-    const userInteractionSignal = this.analyzeUserInteraction(req);
-    const deviceFingerprintSignal = this.analyzeDeviceFingerprint(req);
+    const userAgentSignal = this.analyzeUserAgent(userAgent)
+    const clientHintsSignal = this.analyzeClientHints(req)
+    const headerConsistencySignal = this.analyzeHeaderConsistency(req)
+    const rateLimitSignal = this.analyzeRateLimit(req)
+    const userInteractionSignal = this.analyzeUserInteraction(req)
+    const deviceFingerprintSignal = this.analyzeDeviceFingerprint(req)
 
     // 複合スコア計算
     const totalScore =
@@ -82,11 +82,11 @@ export class HeadlessDetectionService {
       headerConsistencySignal.score * this.config.headerWeight +
       rateLimitSignal.score * this.config.rateLimitWeight +
       userInteractionSignal.score * this.config.userInteractionWeight +
-      deviceFingerprintSignal.score * this.config.deviceFingerprintWeight;
+      deviceFingerprintSignal.score * this.config.deviceFingerprintWeight
 
     // 判定
-    const verdict = this.determineVerdict(totalScore);
-    const confidence = this.calculateConfidence(totalScore, verdict);
+    const verdict = this.determineVerdict(totalScore)
+    const confidence = this.calculateConfidence(totalScore, verdict)
 
     const result: HeadlessBotScore = {
       totalScore: Math.round(totalScore),
@@ -100,29 +100,29 @@ export class HeadlessDetectionService {
       },
       verdict,
       confidence,
-    };
+    }
 
     // ログ記録
-    await this.logDetection(ipAddress, userAgent, req.headers, result);
+    await this.logDetection(ipAddress, userAgent, req.headers, result)
 
-    return result;
+    return result
   }
 
   private analyzeUserAgent(userAgent: string): UserAgentSignal {
-    const details: string[] = [];
-    let score = 0;
+    const details: string[] = []
+    let score = 0
 
     // 空のUA
-    const isEmpty = !userAgent || userAgent.trim().length === 0;
+    const isEmpty = !userAgent || userAgent.trim().length === 0
     if (isEmpty) {
-      score += 30;
-      details.push('Empty User-Agent');
+      score += 30
+      details.push('Empty User-Agent')
     }
 
     // 短すぎるUA
     if (!isEmpty && userAgent.length < 20) {
-      score += 20;
-      details.push('Suspiciously short User-Agent');
+      score += 20
+      details.push('Suspiciously short User-Agent')
     }
 
     // ヘッドレスブラウザパターン
@@ -131,13 +131,13 @@ export class HeadlessDetectionService {
       /Puppeteer/i,
       /PhantomJS/i,
       /playwright/i,
-    ];
+    ]
     const isHeadless = headlessPatterns.some((pattern) =>
       pattern.test(userAgent),
-    );
+    )
     if (isHeadless) {
-      score = Math.min(score + 30, 30);
-      details.push('Headless browser detected in User-Agent');
+      score = Math.min(score + 30, 30)
+      details.push('Headless browser detected in User-Agent')
     }
 
     // 自動化ツールパターン
@@ -146,23 +146,23 @@ export class HeadlessDetectionService {
       /WebDriver/i,
       /chromedriver/i,
       /automation/i,
-    ];
+    ]
     const isSuspicious = automationPatterns.some((pattern) =>
       pattern.test(userAgent),
-    );
+    )
     if (isSuspicious) {
-      score = Math.min(score + 25, 30);
-      details.push('Automation tool detected in User-Agent');
+      score = Math.min(score + 25, 30)
+      details.push('Automation tool detected in User-Agent')
     }
 
     // 既知のbotパターン
-    const botPatterns = [/bot/i, /crawler/i, /spider/i, /scraper/i];
+    const botPatterns = [/bot/i, /crawler/i, /spider/i, /scraper/i]
     const knownBotPattern = botPatterns.some((pattern) =>
       pattern.test(userAgent),
-    );
+    )
     if (knownBotPattern) {
-      score = Math.min(score + 20, 30);
-      details.push('Known bot pattern detected');
+      score = Math.min(score + 20, 30)
+      details.push('Known bot pattern detected')
     }
 
     return {
@@ -172,46 +172,46 @@ export class HeadlessDetectionService {
       knownBotPattern,
       score: Math.min(score, 30),
       details,
-    };
+    }
   }
 
   private analyzeClientHints(req: Request): ClientHintsSignal {
-    const details: string[] = [];
-    let score = 0;
+    const details: string[] = []
+    let score = 0
 
-    const secChUa = req.headers['sec-ch-ua'];
-    const secChUaMobile = req.headers['sec-ch-ua-mobile'];
-    const secChUaPlatform = req.headers['sec-ch-ua-platform'];
-    const userAgent = req.headers['user-agent'] || '';
+    const secChUa = req.headers['sec-ch-ua']
+    const secChUaMobile = req.headers['sec-ch-ua-mobile']
+    const secChUaPlatform = req.headers['sec-ch-ua-platform']
+    const userAgent = req.headers['user-agent'] || ''
 
-    const hasSecChUa = !!secChUa;
-    const hasSecChUaMobile = !!secChUaMobile;
-    const hasSecChUaPlatform = !!secChUaPlatform;
+    const hasSecChUa = !!secChUa
+    const hasSecChUaMobile = !!secChUaMobile
+    const hasSecChUaPlatform = !!secChUaPlatform
 
     // Puppeteer/Playwright特有のパターン検出
     if (hasSecChUa) {
-      const secChUaStr = String(secChUa).toLowerCase();
+      const secChUaStr = String(secChUa).toLowerCase()
       // "HeadlessChrome" パターン（確実な検出）
       if (secChUaStr.includes('headlesschrome')) {
-        score += 25;
-        details.push('HeadlessChrome detected in Client Hints');
+        score += 25
+        details.push('HeadlessChrome detected in Client Hints')
       }
     }
 
     // Chromeを名乗っているがClient Hintsがない
     if (userAgent.includes('Chrome') && !hasSecChUa) {
-      score += 25;
-      details.push('Chrome User-Agent without Client Hints');
+      score += 25
+      details.push('Chrome User-Agent without Client Hints')
     }
 
     // Client Hintsが部分的に欠落
     if (hasSecChUa && (!hasSecChUaMobile || !hasSecChUaPlatform)) {
-      score += 15;
-      details.push('Incomplete Client Hints');
+      score += 15
+      details.push('Incomplete Client Hints')
     }
 
     // 整合性チェック（UAとClient Hintsの整合性）
-    let consistency = true;
+    let consistency = true
     if (hasSecChUa && userAgent) {
       // 簡易的な整合性チェック
       if (
@@ -219,9 +219,9 @@ export class HeadlessDetectionService {
         secChUa &&
         !String(secChUa).includes('Chromium')
       ) {
-        consistency = false;
-        score += 10;
-        details.push('Client Hints inconsistent with User-Agent');
+        consistency = false
+        score += 10
+        details.push('Client Hints inconsistent with User-Agent')
       }
     }
 
@@ -232,54 +232,54 @@ export class HeadlessDetectionService {
       consistency,
       score: Math.min(score, 25),
       details,
-    };
+    }
   }
 
   private analyzeHeaderConsistency(req: Request): HeaderConsistencySignal {
-    const details: string[] = [];
-    let score = 0;
+    const details: string[] = []
+    let score = 0
 
-    const acceptLanguage = req.headers['accept-language'];
-    const acceptEncoding = req.headers['accept-encoding'];
-    const connection = req.headers['connection'];
+    const acceptLanguage = req.headers['accept-language']
+    const acceptEncoding = req.headers['accept-encoding']
+    const connection = req.headers['connection']
 
-    const hasAcceptLanguage = !!acceptLanguage;
-    const hasAcceptEncoding = !!acceptEncoding;
+    const hasAcceptLanguage = !!acceptLanguage
+    const hasAcceptEncoding = !!acceptEncoding
 
     // Accept-Languageが欠落
     if (!hasAcceptLanguage) {
-      score += 15;
-      details.push('Missing Accept-Language header');
+      score += 15
+      details.push('Missing Accept-Language header')
     }
 
     // Accept-Encodingが欠落
     if (!hasAcceptEncoding) {
-      score += 15;
-      details.push('Missing Accept-Encoding header');
+      score += 15
+      details.push('Missing Accept-Encoding header')
     }
 
     // Accept-Encodingの妥当性チェック
-    let acceptEncodingValid = true;
+    let acceptEncodingValid = true
     if (hasAcceptEncoding) {
-      const encoding = String(acceptEncoding).toLowerCase();
-      const hasGzip = encoding.includes('gzip');
-      const hasDeflate = encoding.includes('deflate');
+      const encoding = String(acceptEncoding).toLowerCase()
+      const hasGzip = encoding.includes('gzip')
+      const hasDeflate = encoding.includes('deflate')
 
       if (!hasGzip && !hasDeflate) {
-        acceptEncodingValid = false;
-        score += 10;
-        details.push('Invalid Accept-Encoding header');
+        acceptEncodingValid = false
+        score += 10
+        details.push('Invalid Accept-Encoding header')
       }
     }
 
     // Connectionヘッダーの異常
-    let connectionHeaderNormal = true;
+    let connectionHeaderNormal = true
     if (connection) {
-      const connValue = String(connection).toLowerCase();
+      const connValue = String(connection).toLowerCase()
       if (connValue !== 'keep-alive' && connValue !== 'close') {
-        connectionHeaderNormal = false;
-        score += 5;
-        details.push('Unusual Connection header');
+        connectionHeaderNormal = false
+        score += 5
+        details.push('Unusual Connection header')
       }
     }
 
@@ -290,12 +290,12 @@ export class HeadlessDetectionService {
       connectionHeaderNormal,
       score: Math.min(score, 25),
       details,
-    };
+    }
   }
 
   private analyzeRateLimit(req: Request): RateLimitSignal {
     // リクエストにrate-limit情報が付与されている場合は利用
-    const rateLimitStatus = (req as any).rateLimitStatus;
+    const rateLimitStatus = (req as any).rateLimitStatus
 
     if (!rateLimitStatus) {
       return {
@@ -303,32 +303,32 @@ export class HeadlessDetectionService {
         recentViolations: 0,
         patternScore: 0,
         score: 0,
-      };
+      }
     }
 
-    let score = 0;
-    const tier = rateLimitStatus.tier || 'NORMAL';
+    let score = 0
+    const tier = rateLimitStatus.tier || 'NORMAL'
 
     // ティアに基づくスコア
     switch (tier) {
       case RateLimitTier.HARD_LIMIT:
-        score += 20;
-        break;
+        score += 20
+        break
       case RateLimitTier.SOFT_LIMIT:
-        score += 15;
-        break;
+        score += 15
+        break
       case RateLimitTier.WARNING:
-        score += 10;
-        break;
+        score += 10
+        break
       default:
-        score += 0;
+        score += 0
     }
 
     // リスクスコアがある場合は加味
     if (rateLimitStatus.riskScore) {
-      const riskScore = rateLimitStatus.riskScore.score;
+      const riskScore = rateLimitStatus.riskScore.score
       if (riskScore > 80) {
-        score += 5;
+        score += 5
       }
     }
 
@@ -337,31 +337,31 @@ export class HeadlessDetectionService {
       recentViolations: 0,
       patternScore: rateLimitStatus.riskScore?.score || 0,
       score: Math.min(score, 20),
-    };
+    }
   }
 
   private analyzeUserInteraction(req: Request): UserInteractionSignal {
-    const details: string[] = [];
-    let score = 0;
+    const details: string[] = []
+    let score = 0
 
     const interactionToken = req.headers['x-user-interaction-token'] as
       | string
-      | undefined;
+      | undefined
     const realInteractionHeader = req.headers['x-real-user-interaction'] as
       | string
-      | undefined;
+      | undefined
 
-    const hasToken = !!interactionToken;
-    const hasRealInteraction = realInteractionHeader === 'true';
-    let tokenValid = false;
-    let tokenAge = 0;
-    let tokenExpired = false;
+    const hasToken = !!interactionToken
+    const hasRealInteraction = realInteractionHeader === 'true'
+    let tokenValid = false
+    let tokenAge = 0
+    let tokenExpired = false
 
     if (!hasToken) {
-      score += 30;
-      details.push('No user interaction token');
+      score += 30
+      details.push('No user interaction token')
       if (hasRealInteraction) {
-        details.push('Real interaction detected (anomaly)');
+        details.push('Real interaction detected (anomaly)')
       }
       return {
         hasToken: false,
@@ -371,14 +371,14 @@ export class HeadlessDetectionService {
         hasRealInteraction,
         score: Math.min(score, 30),
         details,
-      };
+      }
     }
 
     try {
-      const [timestampStr, signature] = interactionToken.split(':');
+      const [timestampStr, signature] = interactionToken.split(':')
       if (!timestampStr || !signature) {
-        score += 25;
-        details.push('Invalid token format');
+        score += 25
+        details.push('Invalid token format')
         return {
           hasToken: true,
           tokenValid: false,
@@ -387,55 +387,55 @@ export class HeadlessDetectionService {
           hasRealInteraction,
           score: Math.min(score, 30),
           details,
-        };
+        }
       }
 
-      const timestamp = parseInt(timestampStr, 10);
-      const now = Math.floor(Date.now() / 1000);
-      tokenAge = now - timestamp;
+      const timestamp = parseInt(timestampStr, 10)
+      const now = Math.floor(Date.now() / 1000)
+      tokenAge = now - timestamp
 
       // トークンの有効期限（5分 = 300秒）
-      const maxTokenAge = 300;
+      const maxTokenAge = 300
       if (tokenAge > maxTokenAge) {
-        tokenExpired = true;
-        score += 15;
-        details.push(`Token expired (age: ${tokenAge}s)`);
+        tokenExpired = true
+        score += 15
+        details.push(`Token expired (age: ${tokenAge}s)`)
       } else if (tokenAge < 0) {
-        score += 25;
-        details.push('Token timestamp in future');
+        score += 25
+        details.push('Token timestamp in future')
       } else {
         // シグネチャ検証
-        const crypto = require('crypto');
+        const crypto = require('crypto')
         const secret = this.configService.get<string>(
           'HEADLESS_DETECTION_INTERACTION_SECRET',
           'default-secret-change-me',
-        );
+        )
         const expectedSignature = crypto
           .createHmac('sha256', secret)
           .update(timestampStr)
-          .digest('hex');
+          .digest('hex')
 
         if (signature === expectedSignature) {
-          tokenValid = true;
+          tokenValid = true
 
           // Token is valid, now check real interaction
           if (hasRealInteraction) {
             // Normal user with real interaction
-            score += 0;
-            details.push('Valid token with real user interaction');
+            score += 0
+            details.push('Valid token with real user interaction')
           } else {
             // Token valid but no real interaction (Puppeteer visiting page)
-            score += 15;
-            details.push('Valid token but no real user interaction detected');
+            score += 15
+            details.push('Valid token but no real user interaction detected')
           }
         } else {
-          score += 25;
-          details.push('Invalid token signature');
+          score += 25
+          details.push('Invalid token signature')
         }
       }
     } catch (error) {
-      score += 25;
-      details.push('Token validation error');
+      score += 25
+      details.push('Token validation error')
     }
 
     return {
@@ -446,21 +446,21 @@ export class HeadlessDetectionService {
       hasRealInteraction,
       score: Math.min(score, 30),
       details,
-    };
+    }
   }
 
   private analyzeDeviceFingerprint(req: Request): DeviceFingerprintSignal {
-    const details: string[] = [];
-    let score = 0;
-    let webdriverDetected = false;
-    let suspiciousPlugins = false;
-    let suspiciousWebGL = false;
-    let suspiciousCanvas = false;
+    const details: string[] = []
+    let score = 0
+    let webdriverDetected = false
+    let suspiciousPlugins = false
+    let suspiciousWebGL = false
+    let suspiciousCanvas = false
 
-    const header = req.headers['x-device-fingerprint'] as string | undefined;
+    const header = req.headers['x-device-fingerprint'] as string | undefined
     if (!header) {
-      score += 10;
-      details.push('No device fingerprint');
+      score += 10
+      details.push('No device fingerprint')
       return {
         hasFingerprint: false,
         webdriverDetected,
@@ -469,46 +469,43 @@ export class HeadlessDetectionService {
         suspiciousCanvas,
         score: Math.min(score, 25),
         details,
-      };
+      }
     }
 
     try {
-      const fp = JSON.parse(Buffer.from(header, 'base64').toString('utf-8'));
+      const fp = JSON.parse(Buffer.from(header, 'base64').toString('utf-8'))
 
       if (fp.webdriver === true) {
-        webdriverDetected = true;
-        score += 25;
-        details.push('navigator.webdriver is true');
+        webdriverDetected = true
+        score += 25
+        details.push('navigator.webdriver is true')
       }
 
-      if (
-        fp.pluginsCount === 0 &&
-        fp.maxTouchPoints === 0
-      ) {
-        suspiciousPlugins = true;
-        score += 15;
-        details.push(`No plugins on desktop (plugins: ${fp.pluginsCount})`);
+      if (fp.pluginsCount === 0 && fp.maxTouchPoints === 0) {
+        suspiciousPlugins = true
+        score += 15
+        details.push(`No plugins on desktop (plugins: ${fp.pluginsCount})`)
       }
 
-      const renderer = (fp.webglRenderer || '').toLowerCase();
+      const renderer = (fp.webglRenderer || '').toLowerCase()
       if (
         renderer.includes('swiftshader') ||
         renderer.includes('llvmpipe') ||
         renderer.includes('mesa')
       ) {
-        suspiciousWebGL = true;
-        score += 20;
-        details.push(`Suspicious WebGL renderer: ${fp.webglRenderer}`);
+        suspiciousWebGL = true
+        score += 20
+        details.push(`Suspicious WebGL renderer: ${fp.webglRenderer}`)
       }
 
       if (!fp.canvas || fp.canvas.length === 0) {
-        suspiciousCanvas = true;
-        score += 15;
-        details.push('Empty canvas fingerprint');
+        suspiciousCanvas = true
+        score += 15
+        details.push('Empty canvas fingerprint')
       }
     } catch {
-      score += 5;
-      details.push('Invalid device fingerprint format');
+      score += 5
+      details.push('Invalid device fingerprint format')
     }
 
     return {
@@ -519,22 +516,22 @@ export class HeadlessDetectionService {
       suspiciousCanvas,
       score: Math.min(score, 25),
       details,
-    };
+    }
   }
 
   private determineVerdict(
     score: number,
   ): 'normal' | 'suspicious' | 'likely_bot' | 'definite_bot' {
     if (score >= this.config.definiteBotThreshold) {
-      return 'definite_bot';
+      return 'definite_bot'
     }
     if (score >= this.config.likelyBotThreshold) {
-      return 'likely_bot';
+      return 'likely_bot'
     }
     if (score >= this.config.suspiciousThreshold) {
-      return 'suspicious';
+      return 'suspicious'
     }
-    return 'normal';
+    return 'normal'
   }
 
   private calculateConfidence(
@@ -547,26 +544,25 @@ export class HeadlessDetectionService {
         return Math.min(
           (score - this.config.definiteBotThreshold) / 20 + 0.8,
           1.0,
-        );
+        )
       case 'likely_bot':
         return (
-          (score - this.config.likelyBotThreshold) /
-            (this.config.definiteBotThreshold - this.config.likelyBotThreshold) *
+          ((score - this.config.likelyBotThreshold) /
+            (this.config.definiteBotThreshold -
+              this.config.likelyBotThreshold)) *
             0.3 +
           0.5
-        );
+        )
       case 'suspicious':
         return (
-          (score - this.config.suspiciousThreshold) /
-            (this.config.likelyBotThreshold - this.config.suspiciousThreshold) *
+          ((score - this.config.suspiciousThreshold) /
+            (this.config.likelyBotThreshold -
+              this.config.suspiciousThreshold)) *
             0.3 +
           0.3
-        );
+        )
       default:
-        return Math.max(
-          1.0 - score / this.config.suspiciousThreshold,
-          0.1,
-        );
+        return Math.max(1.0 - score / this.config.suspiciousThreshold, 0.1)
     }
   }
 
@@ -583,11 +579,11 @@ export class HeadlessDetectionService {
         ...result.signals.headerConsistency.details,
         ...result.signals.userInteraction.details,
         ...result.signals.deviceFingerprint.details,
-      ];
+      ]
 
       const action = this.config.measurementMode
         ? 'log_only'
-        : this.getActionForVerdict(result.verdict);
+        : this.getActionForVerdict(result.verdict)
 
       await this.prisma.headlessDetectionLog.create({
         data: {
@@ -607,9 +603,9 @@ export class HeadlessDetectionService {
           detectionReasons,
           actionTaken: action,
         },
-      });
+      })
     } catch (error) {
-      this.logger.error('Failed to log headless detection', error);
+      this.logger.error('Failed to log headless detection', error)
     }
   }
 
@@ -618,30 +614,30 @@ export class HeadlessDetectionService {
   ): string {
     switch (verdict) {
       case 'definite_bot':
-        return this.config.definiteBotAction;
+        return this.config.definiteBotAction
       case 'likely_bot':
-        return this.config.likelyBotAction;
+        return this.config.likelyBotAction
       case 'suspicious':
-        return this.config.suspiciousAction;
+        return this.config.suspiciousAction
       default:
-        return HeadlessDetectionAction.ALLOW;
+        return HeadlessDetectionAction.ALLOW
     }
   }
 
   private getIpAddress(req: Request): string {
-    const forwarded = req.headers['x-forwarded-for'];
+    const forwarded = req.headers['x-forwarded-for']
     if (forwarded) {
-      const ips = String(forwarded).split(',');
-      return ips[0].trim();
+      const ips = String(forwarded).split(',')
+      return ips[0].trim()
     }
-    return req.ip || req.socket.remoteAddress || 'unknown';
+    return req.ip || req.socket.remoteAddress || 'unknown'
   }
 
   getConfig(): HeadlessDetectionConfig {
-    return { ...this.config };
+    return { ...this.config }
   }
 
   isEnabled(): boolean {
-    return this.config.enabled;
+    return this.config.enabled
   }
 }

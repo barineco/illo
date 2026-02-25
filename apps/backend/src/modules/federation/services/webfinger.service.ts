@@ -68,7 +68,9 @@ export class WebFingerService {
     // Fallback to BASE_URL environment variable
     const baseUrl = this.configService.get<string>('BASE_URL')
     if (!baseUrl) {
-      throw new Error('Public URL not configured in database or BASE_URL environment variable')
+      throw new Error(
+        'Public URL not configured in database or BASE_URL environment variable',
+      )
     }
 
     return baseUrl

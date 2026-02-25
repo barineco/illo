@@ -91,7 +91,10 @@ export class MlsController {
   @Public()
   @Get('users/:username/keypackages/:id')
   @Header('Content-Type', 'application/activity+json')
-  async getKeyPackage(@Param('username') username: string, @Param('id') id: string) {
+  async getKeyPackage(
+    @Param('username') username: string,
+    @Param('id') id: string,
+  ) {
     const user = await this.prisma.user.findFirst({
       where: {
         username,
@@ -167,7 +170,10 @@ export class MlsController {
    * Delete a KeyPackage owned by the authenticated user.
    */
   @Delete('api/mls/keypackages/:id')
-  async deleteKeyPackage(@CurrentUser() user: { id: string }, @Param('id') id: string) {
+  async deleteKeyPackage(
+    @CurrentUser() user: { id: string },
+    @Param('id') id: string,
+  ) {
     await this.mlsService.deleteKeyPackage(user.id, id)
 
     return { success: true }

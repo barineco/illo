@@ -268,9 +268,6 @@ model User {
   // Analytics
   viewLogs          ViewLog[]
 
-  // Original Characters
-  ownedCharacters   OriginalCharacter[] @relation("OwnedCharacters")
-
   @@unique([username, domain], name: "username_domain")
   @@index([username])
   @@index([email])
@@ -376,10 +373,6 @@ model Artwork {
   originalCreator              User?    @relation("OriginalCreator", fields: [originalCreatorId], references: [id], onDelete: SetNull)
   originalCreatorAllowDownload Boolean  @default(false) @map("original_creator_allow_download")  // Allow original creator to download
 
-  // Original Character linking (for fan art)
-  characterId                  String?  @map("character_id")
-  character                    OriginalCharacter? @relation("CharacterFanArts", fields: [characterId], references: [id], onDelete: SetNull)
-
   // Link Card (OG image for social sharing)
   ogCardUrl     String?     @db.VarChar(500) @map("og_card_url")
   ogCardBlur    Boolean     @default(false) @map("og_card_blur")
@@ -413,9 +406,6 @@ model Artwork {
   notifications Notification[]
   reports       Report[]
   viewLogs      ViewLog[]
-  characterRepresentative OriginalCharacter[] @relation("CharacterRepresentative")
-  characterReferences     CharacterReferenceArtwork[] @relation("CharacterReferences")
-
   @@index([authorId])
   @@index([type])
   @@index([ageRating])
@@ -426,7 +416,6 @@ model Artwork {
   @@index([likeCount])
   @@index([isDeleted])
   @@index([creationDate])
-  @@index([characterId])
   @@map("artworks")
 }
 
@@ -524,16 +513,6 @@ enum NotificationType {
   FOLLOW
   DIRECT_MESSAGE
   REACTION
-  CHARACTER_FAN_ART
-}
-
-// ============================================
-// Fan Art Permission for Original Characters
-// ============================================
-
-enum FanArtPermission {
-  EVERYONE
-  FOLLOWERS_ONLY
 }
 
 model Notification {
@@ -555,8 +534,6 @@ model Notification {
   message    Message?         @relation(fields: [messageId], references: [id], onDelete: Cascade)
   reactionId  String?          @unique
   reaction    Reaction?        @relation(fields: [reactionId], references: [id], onDelete: Cascade)
-  characterId String?
-  character   OriginalCharacter? @relation(fields: [characterId], references: [id], onDelete: Cascade)
   isRead      Boolean          @default(false)
   readAt    DateTime?
   createdAt DateTime         @default(now())
@@ -564,7 +541,6 @@ model Notification {
   @@index([userId, isRead, createdAt])
   @@index([actorId])
   @@index([type])
-  @@index([characterId])
   @@map("notifications")
 }
 
@@ -1457,76 +1433,3 @@ model HeadlessDetectionLog {
   @@map("headless_detection_logs")
 }
 
-// ============================================
-// Original Characters (OC)
-// ============================================
-
-model OriginalCharacter {
-  id              String    @id @default(cuid())
-  creatorId       String
-  creator         User      @relation("OwnedCharacters", fields: [creatorId], references: [id], onDelete: Cascade)
-
-  name            String    @db.VarChar(100)
-  description     String?   @db.Text
-
-  // Representative artwork (used as avatar/thumbnail)
-  representativeArtworkId  String?   @map("representative_artwork_id")
-  representativeArtwork    Artwork?  @relation("CharacterRepresentative", fields: [representativeArtworkId], references: [id], onDelete: SetNull)
-
-  // Fan art permission settings
-  allowFanArt          Boolean   @default(true) @map("allow_fan_art")
-  fanArtPermission     FanArtPermission @default(EVERYONE) @map("fan_art_permission")
-
-  // Guidelines
-  allowR18             Boolean   @default(false) @map("allow_r18")
-  allowCommercial      Boolean   @default(false) @map("allow_commercial")
-  requireCredit        Boolean   @default(true) @map("require_credit")
-  guidelines           String?   @db.Text
-
-  // Reference materials
-  referenceNotes       String?   @db.Text @map("reference_notes")
-  referenceVisibility  Visibility @default(PUBLIC) @map("reference_visibility")
-
-  // Tags
-  tags                 String[]
-
-  // Statistics
-  fanArtCount          Int       @default(0) @map("fan_art_count")
-
-  // Timestamps
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-
-  // Relations
-  referenceArtworks CharacterReferenceArtwork[]
-  fanArts           Artwork[] @relation("CharacterFanArts")
-  notifications     Notification[]
-
-  @@index([creatorId])
-  @@index([representativeArtworkId])
-  @@index([allowFanArt, fanArtPermission])
-  @@index([createdAt])
-  @@map("original_characters")
-}
-
-// Reference artworks for a character (like CollectionArtwork)
-model CharacterReferenceArtwork {
-  id           String     @id @default(cuid())
-  characterId  String
-  artworkId    String
-  character    OriginalCharacter @relation(fields: [characterId], references: [id], onDelete: Cascade)
-  artwork      Artwork    @relation("CharacterReferences", fields: [artworkId], references: [id], onDelete: Cascade)
-
-  // Order within references
-  order        Int       @default(0)
-  caption      String?   @db.VarChar(200)
-
-  // When added
-  addedAt      DateTime  @default(now())
-
-  @@unique([characterId, artworkId])
-  @@index([characterId])
-  @@index([artworkId])
-  @@index([order])
-  @@map("character_reference_artworks")
-}

@@ -46,7 +46,6 @@ function mockRequest(overrides: Partial<Request> = {}): Request {
     socket: { remoteAddress: '127.0.0.1' },
     ...overrides,
   } as unknown as Request
-
 }
 
 describe('HeadlessDetectionService', () => {

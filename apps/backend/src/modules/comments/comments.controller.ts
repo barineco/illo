@@ -53,7 +53,12 @@ export class CommentsController {
     @Query('limit', new DefaultValuePipe(20), ParseIntPipe) limit: number,
     @Request() req,
   ) {
-    return this.commentsService.getArtworkComments(artworkId, page, limit, req.user?.id)
+    return this.commentsService.getArtworkComments(
+      artworkId,
+      page,
+      limit,
+      req.user?.id,
+    )
   }
 
   /**

@@ -16,7 +16,13 @@ import {
 } from '@nestjs/common'
 import { Request } from 'express'
 import { FilesInterceptor, FileInterceptor } from '@nestjs/platform-express'
-import { ArtworksService, CreateArtworkDto, UpdateArtworkDto, ImageOperation, GenerateOgCardDto } from './artworks.service'
+import {
+  ArtworksService,
+  CreateArtworkDto,
+  UpdateArtworkDto,
+  ImageOperation,
+  GenerateOgCardDto,
+} from './artworks.service'
 import { UploadLinkCardDto } from './dto/upload-link-card.dto'
 import { UsersService } from '../users/users.service'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
@@ -25,7 +31,15 @@ import { Public } from '../auth/decorators/public.decorator'
 import { RateLimit } from '../rate-limit/decorators/rate-limit.decorator'
 import { RateLimitGuard } from '../rate-limit/rate-limit.guard'
 import { RateLimitInterceptor } from '../rate-limit/rate-limit.interceptor'
-import { ArtworkType, AgeRating, Visibility, RateLimitTier, CreationPeriodUnit, ArtworkMedium, CopyrightType } from '@prisma/client'
+import {
+  ArtworkType,
+  AgeRating,
+  Visibility,
+  RateLimitTier,
+  CreationPeriodUnit,
+  ArtworkMedium,
+  CopyrightType,
+} from '@prisma/client'
 @Controller('artworks')
 export class ArtworksController {
   constructor(
@@ -49,16 +63,27 @@ export class ArtworksController {
     let toolsUsed: string[] | undefined
     if (body.toolsUsed) {
       try {
-        toolsUsed = typeof body.toolsUsed === 'string' ? JSON.parse(body.toolsUsed) : body.toolsUsed
+        toolsUsed =
+          typeof body.toolsUsed === 'string'
+            ? JSON.parse(body.toolsUsed)
+            : body.toolsUsed
       } catch {
-        toolsUsed = Array.isArray(body.toolsUsed) ? body.toolsUsed : [body.toolsUsed]
+        toolsUsed = Array.isArray(body.toolsUsed)
+          ? body.toolsUsed
+          : [body.toolsUsed]
       }
     }
 
     // Parse OG card crop coordinates
-    let ogCardCrop: { x: number; y: number; width: number; height: number } | undefined
-    if (body.ogCardCropX !== undefined && body.ogCardCropY !== undefined &&
-        body.ogCardCropWidth !== undefined && body.ogCardCropHeight !== undefined) {
+    let ogCardCrop:
+      | { x: number; y: number; width: number; height: number }
+      | undefined
+    if (
+      body.ogCardCropX !== undefined &&
+      body.ogCardCropY !== undefined &&
+      body.ogCardCropWidth !== undefined &&
+      body.ogCardCropHeight !== undefined
+    ) {
       ogCardCrop = {
         x: parseInt(body.ogCardCropX, 10),
         y: parseInt(body.ogCardCropY, 10),
@@ -77,15 +102,24 @@ export class ArtworksController {
       type: body.type as ArtworkType,
       ageRating: body.ageRating as AgeRating,
       visibility: body.visibility as Visibility | undefined,
-      tags: body.tags ? (Array.isArray(body.tags) ? body.tags : [body.tags]) : [],
-      disableRightClick: body.disableRightClick !== 'false' && body.disableRightClick !== false,
+      tags: body.tags
+        ? Array.isArray(body.tags)
+          ? body.tags
+          : [body.tags]
+        : [],
+      disableRightClick:
+        body.disableRightClick !== 'false' && body.disableRightClick !== false,
       license: body.license,
       customLicenseUrl: body.customLicenseUrl,
       customLicenseText: body.customLicenseText,
       // Creation metadata (portfolio fields)
       creationDate: body.creationDate || undefined,
-      creationPeriodValue: body.creationPeriodValue ? parseInt(body.creationPeriodValue, 10) : undefined,
-      creationPeriodUnit: body.creationPeriodUnit as CreationPeriodUnit | undefined,
+      creationPeriodValue: body.creationPeriodValue
+        ? parseInt(body.creationPeriodValue, 10)
+        : undefined,
+      creationPeriodUnit: body.creationPeriodUnit as
+        | CreationPeriodUnit
+        | undefined,
       isCommission: body.isCommission === 'true' || body.isCommission === true,
       clientName: body.clientName || undefined,
       projectName: body.projectName || undefined,
@@ -101,16 +135,16 @@ export class ArtworksController {
       copyrightNote: body.copyrightNote || undefined,
       // Fan art original creator linking
       originalCreatorId: body.originalCreatorId || undefined,
-      originalCreatorAllowDownload: body.originalCreatorAllowDownload === 'true' || body.originalCreatorAllowDownload === true,
-      // Fan art character linking
-      characterId: body.characterId || undefined,
+      originalCreatorAllowDownload:
+        body.originalCreatorAllowDownload === 'true' ||
+        body.originalCreatorAllowDownload === true,
       // Collection integration
       collectionIds: body.collectionIds
-        ? (typeof body.collectionIds === 'string'
-            ? JSON.parse(body.collectionIds)
-            : Array.isArray(body.collectionIds)
-              ? body.collectionIds
-              : [body.collectionIds])
+        ? typeof body.collectionIds === 'string'
+          ? JSON.parse(body.collectionIds)
+          : Array.isArray(body.collectionIds)
+            ? body.collectionIds
+            : [body.collectionIds]
         : undefined,
     }
 
@@ -164,7 +198,13 @@ export class ArtworksController {
     @Query('type') type?: ArtworkType,
     @Query('ageRating') ageRating?: AgeRating,
     @Query('tags') tags?: string | string[],
-    @Query('sort') sort?: 'latest' | 'popular' | 'views' | 'creationDateDesc' | 'creationDateAsc',
+    @Query('sort')
+    sort?:
+      | 'latest'
+      | 'popular'
+      | 'views'
+      | 'creationDateDesc'
+      | 'creationDateAsc',
     @Query('federation') federation?: 'local' | 'remote' | 'all',
   ) {
     const tagsArray = tags
@@ -211,14 +251,22 @@ export class ArtworksController {
       ? await this.usersService.getContentFilters(user.id)
       : undefined
 
-    const artwork = await this.artworksService.getArtworkById(id, user?.id, contentFilters)
+    const artwork = await this.artworksService.getArtworkById(
+      id,
+      user?.id,
+      contentFilters,
+    )
 
     const rateLimitStatus = request.rateLimitStatus
     const isOwnArtwork = user?.id && artwork.authorId === user.id
 
     if (isOwnArtwork) {
       if (rateLimitStatus) {
-        request.rateLimitStatus = { ...rateLimitStatus, tier: RateLimitTier.NORMAL, degradeQuality: false }
+        request.rateLimitStatus = {
+          ...rateLimitStatus,
+          tier: RateLimitTier.NORMAL,
+          degradeQuality: false,
+        }
       }
     } else if (
       rateLimitStatus &&
@@ -268,13 +316,18 @@ export class ArtworksController {
     // Parse tags
     let tags: string[] | undefined
     if (body.tags) {
-      tags = Array.isArray(body.tags) ? body.tags : typeof body.tags === 'string' ? JSON.parse(body.tags) : undefined
+      tags = Array.isArray(body.tags)
+        ? body.tags
+        : typeof body.tags === 'string'
+          ? JSON.parse(body.tags)
+          : undefined
     }
 
     // Parse disableRightClick
     let disableRightClick: boolean | undefined
     if (body.disableRightClick !== undefined) {
-      disableRightClick = body.disableRightClick !== 'false' && body.disableRightClick !== false
+      disableRightClick =
+        body.disableRightClick !== 'false' && body.disableRightClick !== false
     }
 
     // Parse toolsUsed from JSON string if provided
@@ -284,17 +337,29 @@ export class ArtworksController {
         toolsUsed = null
       } else {
         try {
-          toolsUsed = typeof body.toolsUsed === 'string' ? JSON.parse(body.toolsUsed) : body.toolsUsed
+          toolsUsed =
+            typeof body.toolsUsed === 'string'
+              ? JSON.parse(body.toolsUsed)
+              : body.toolsUsed
         } catch {
-          toolsUsed = Array.isArray(body.toolsUsed) ? body.toolsUsed : [body.toolsUsed]
+          toolsUsed = Array.isArray(body.toolsUsed)
+            ? body.toolsUsed
+            : [body.toolsUsed]
         }
       }
     }
 
     // Parse OG card crop coordinates
-    let ogCardCrop: { x: number; y: number; width: number; height: number } | null | undefined
-    if (body.ogCardCropX !== undefined && body.ogCardCropY !== undefined &&
-        body.ogCardCropWidth !== undefined && body.ogCardCropHeight !== undefined) {
+    let ogCardCrop:
+      | { x: number; y: number; width: number; height: number }
+      | null
+      | undefined
+    if (
+      body.ogCardCropX !== undefined &&
+      body.ogCardCropY !== undefined &&
+      body.ogCardCropWidth !== undefined &&
+      body.ogCardCropHeight !== undefined
+    ) {
       ogCardCrop = {
         x: parseInt(body.ogCardCropX, 10),
         y: parseInt(body.ogCardCropY, 10),
@@ -304,9 +369,10 @@ export class ArtworksController {
     }
 
     // Parse OG card blur
-    const ogCardBlur = body.ogCardBlur !== undefined
-      ? (body.ogCardBlur === 'true' || body.ogCardBlur === true)
-      : undefined
+    const ogCardBlur =
+      body.ogCardBlur !== undefined
+        ? body.ogCardBlur === 'true' || body.ogCardBlur === true
+        : undefined
 
     const updateDto: UpdateArtworkDto = {
       title: body.title,
@@ -321,54 +387,93 @@ export class ArtworksController {
       customLicenseUrl: body.customLicenseUrl,
       customLicenseText: body.customLicenseText,
       // Creation metadata (portfolio fields)
-      creationDate: body.creationDate !== undefined
-        ? (body.creationDate === '' || body.creationDate === null ? null : body.creationDate)
-        : undefined,
-      creationPeriodValue: body.creationPeriodValue !== undefined
-        ? (body.creationPeriodValue === '' || body.creationPeriodValue === null ? null : parseInt(body.creationPeriodValue, 10))
-        : undefined,
-      creationPeriodUnit: body.creationPeriodUnit !== undefined
-        ? (body.creationPeriodUnit === '' || body.creationPeriodUnit === null ? null : body.creationPeriodUnit as CreationPeriodUnit)
-        : undefined,
-      isCommission: body.isCommission !== undefined
-        ? (body.isCommission === 'true' || body.isCommission === true)
-        : undefined,
-      clientName: body.clientName !== undefined
-        ? (body.clientName === '' ? null : body.clientName)
-        : undefined,
-      projectName: body.projectName !== undefined
-        ? (body.projectName === '' ? null : body.projectName)
-        : undefined,
-      medium: body.medium !== undefined
-        ? (body.medium === '' || body.medium === null ? null : body.medium as ArtworkMedium)
-        : undefined,
-      externalUrl: body.externalUrl !== undefined
-        ? (body.externalUrl === '' ? null : body.externalUrl)
-        : undefined,
+      creationDate:
+        body.creationDate !== undefined
+          ? body.creationDate === '' || body.creationDate === null
+            ? null
+            : body.creationDate
+          : undefined,
+      creationPeriodValue:
+        body.creationPeriodValue !== undefined
+          ? body.creationPeriodValue === '' || body.creationPeriodValue === null
+            ? null
+            : parseInt(body.creationPeriodValue, 10)
+          : undefined,
+      creationPeriodUnit:
+        body.creationPeriodUnit !== undefined
+          ? body.creationPeriodUnit === '' || body.creationPeriodUnit === null
+            ? null
+            : (body.creationPeriodUnit as CreationPeriodUnit)
+          : undefined,
+      isCommission:
+        body.isCommission !== undefined
+          ? body.isCommission === 'true' || body.isCommission === true
+          : undefined,
+      clientName:
+        body.clientName !== undefined
+          ? body.clientName === ''
+            ? null
+            : body.clientName
+          : undefined,
+      projectName:
+        body.projectName !== undefined
+          ? body.projectName === ''
+            ? null
+            : body.projectName
+          : undefined,
+      medium:
+        body.medium !== undefined
+          ? body.medium === '' || body.medium === null
+            ? null
+            : (body.medium as ArtworkMedium)
+          : undefined,
+      externalUrl:
+        body.externalUrl !== undefined
+          ? body.externalUrl === ''
+            ? null
+            : body.externalUrl
+          : undefined,
       toolsUsed,
       // OG card crop coordinates and blur
       ogCardCrop,
       ogCardBlur,
       // Copyright/Rights holder information
-      copyrightHolder: body.copyrightHolder !== undefined
-        ? (body.copyrightHolder === '' ? null : body.copyrightHolder)
-        : undefined,
-      copyrightType: body.copyrightType !== undefined
-        ? (body.copyrightType as CopyrightType)
-        : undefined,
-      copyrightNote: body.copyrightNote !== undefined
-        ? (body.copyrightNote === '' ? null : body.copyrightNote)
-        : undefined,
+      copyrightHolder:
+        body.copyrightHolder !== undefined
+          ? body.copyrightHolder === ''
+            ? null
+            : body.copyrightHolder
+          : undefined,
+      copyrightType:
+        body.copyrightType !== undefined
+          ? (body.copyrightType as CopyrightType)
+          : undefined,
+      copyrightNote:
+        body.copyrightNote !== undefined
+          ? body.copyrightNote === ''
+            ? null
+            : body.copyrightNote
+          : undefined,
       // Fan art original creator linking
-      originalCreatorId: body.originalCreatorId !== undefined
-        ? (body.originalCreatorId === '' ? null : body.originalCreatorId)
-        : undefined,
-      originalCreatorAllowDownload: body.originalCreatorAllowDownload !== undefined
-        ? (body.originalCreatorAllowDownload === 'true' || body.originalCreatorAllowDownload === true)
-        : undefined,
+      originalCreatorId:
+        body.originalCreatorId !== undefined
+          ? body.originalCreatorId === ''
+            ? null
+            : body.originalCreatorId
+          : undefined,
+      originalCreatorAllowDownload:
+        body.originalCreatorAllowDownload !== undefined
+          ? body.originalCreatorAllowDownload === 'true' ||
+            body.originalCreatorAllowDownload === true
+          : undefined,
     }
 
-    return this.artworksService.updateArtworkWithImages(id, user.id, updateDto, files)
+    return this.artworksService.updateArtworkWithImages(
+      id,
+      user.id,
+      updateDto,
+      files,
+    )
   }
 
   /**
@@ -392,7 +497,13 @@ export class ArtworksController {
     @CurrentUser() user: any,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
-    @Query('sort') sort?: 'latest' | 'popular' | 'views' | 'creationDateDesc' | 'creationDateAsc',
+    @Query('sort')
+    sort?:
+      | 'latest'
+      | 'popular'
+      | 'views'
+      | 'creationDateDesc'
+      | 'creationDateAsc',
     @Query('tag') tag?: string,
   ) {
     const contentFilters = user?.id
@@ -500,11 +611,11 @@ export class ArtworksController {
    */
   @Get(':id/can-download')
   @UseGuards(JwtAuthGuard)
-  async canDownloadArtwork(
-    @Param('id') id: string,
-    @CurrentUser() user: any,
-  ) {
-    const canDownload = await this.artworksService.canDownloadArtwork(id, user.id)
+  async canDownloadArtwork(@Param('id') id: string, @CurrentUser() user: any) {
+    const canDownload = await this.artworksService.canDownloadArtwork(
+      id,
+      user.id,
+    )
     return { canDownload }
   }
 }

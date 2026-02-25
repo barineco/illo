@@ -170,9 +170,9 @@ const isOwnProfile = computed(() => {
 // Dynamic tabs based on profile ownership
 // Following/Followers are shown via header stat clicks, not tabs
 const tabs = computed(() => {
-  const publicTabs = ['artworks', 'characters', 'collections', 'likes']
+  const publicTabs = ['artworks', 'collections', 'likes']
   if (isOwnProfile.value) {
-    return ['artworks', 'characters', 'collections', 'likes', 'bookmarks']
+    return ['artworks', 'collections', 'likes', 'bookmarks']
   }
   return publicTabs
 })
@@ -182,7 +182,6 @@ const activeStat = ref<'following' | 'followers' | null>(null)
 
 const tabLabels = computed(() => ({
   artworks: t('user.works'),
-  characters: t('user.characters'),
   collections: t('user.collections'),
   likes: t('user.likes'),
   bookmarks: t('user.bookmarks'),

@@ -166,9 +166,6 @@ const form = ref<ArtworkFormData>({
   originalCreatorId: undefined,
   originalCreator: undefined,
   originalCreatorAllowDownload: false,
-  // Fan art character
-  characterId: undefined,
-  character: undefined,
 })
 
 const parsedTags = computed(() => {
@@ -271,10 +268,6 @@ const handleSubmit = async () => {
     if (form.value.originalCreatorAllowDownload) {
       formData.append('originalCreatorAllowDownload', String(form.value.originalCreatorAllowDownload))
     }
-    if (form.value.characterId) {
-      formData.append('characterId', form.value.characterId)
-    }
-
     // コレクションを追加
     if (selectedCollectionIds.value.length > 0) {
       formData.append('collectionIds', JSON.stringify(selectedCollectionIds.value))
@@ -339,61 +332,12 @@ const fetchToolsSettings = async () => {
   }
 }
 
-// Fetch character from query parameter
-const fetchCharacterFromQuery = async () => {
-  const characterId = route.query.characterId as string | undefined
-  if (!characterId) return
-
-  try {
-    interface CharacterResponse {
-      id: string
-      name: string
-      allowFanArt: boolean
-      representativeArtwork?: {
-        id: string
-        images?: { id: string; thumbnailUrl?: string | null }[]
-      } | null
-      creator?: {
-        id: string
-        username: string
-        displayName?: string | null
-      }
-    }
-    const character = await api.get<CharacterResponse>(`/api/ocs/${characterId}`)
-    if (character.allowFanArt) {
-      form.value.characterId = character.id
-      // Get signed URL for avatar from representative artwork
-      let avatarUrl: string | null = null
-      const firstImage = character.representativeArtwork?.images?.[0]
-      if (firstImage) {
-        try {
-          avatarUrl = await getSignedUrl(firstImage.id, true)
-        } catch {
-          avatarUrl = firstImage.thumbnailUrl || null
-        }
-      }
-      form.value.character = {
-        id: character.id,
-        name: character.name,
-        avatarUrl,
-        creator: character.creator,
-      }
-    }
-  } catch (e) {
-    console.error('Failed to fetch character from query:', e)
-  }
-}
-
 // 認証チェック
 onMounted(async () => {
   if (!isAuthenticated.value) {
     navigateTo('/login')
   } else {
-    // Fetch default tools and character from query in parallel
-    await Promise.all([
-      fetchToolsSettings(),
-      fetchCharacterFromQuery(),
-    ])
+    await fetchToolsSettings()
   }
 })
 </script>

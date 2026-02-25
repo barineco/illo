@@ -1,4 +1,9 @@
-import { Module, NestModule, MiddlewareConsumer, forwardRef } from '@nestjs/common'
+import {
+  Module,
+  NestModule,
+  MiddlewareConsumer,
+  forwardRef,
+} from '@nestjs/common'
 import { ConfigModule } from '@nestjs/config'
 import { SetupController } from './setup.controller'
 import { SetupService } from './setup.service'

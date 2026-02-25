@@ -1,4 +1,9 @@
-import { Injectable, Logger, UnauthorizedException, InternalServerErrorException } from '@nestjs/common'
+import {
+  Injectable,
+  Logger,
+  UnauthorizedException,
+  InternalServerErrorException,
+} from '@nestjs/common'
 import { PrismaService } from '../prisma/prisma.service'
 import { EncryptionService } from '../auth/services/encryption.service'
 import { SupporterTier } from '@prisma/client'
@@ -85,7 +90,9 @@ export class PatreonService {
       return data as PatreonTokens
     } catch (error) {
       this.logger.error(`Failed to exchange code for tokens: ${error.message}`)
-      throw new InternalServerErrorException('Failed to authenticate with Patreon')
+      throw new InternalServerErrorException(
+        'Failed to authenticate with Patreon',
+      )
     }
   }
 
@@ -126,7 +133,7 @@ export class PatreonService {
     try {
       // Build query parameters for the identity endpoint
       const params = new URLSearchParams({
-        'include': 'memberships',
+        include: 'memberships',
         'fields[user]': 'full_name,email,image_url',
         'fields[member]': 'currently_entitled_amount_cents,patron_status',
       })
@@ -135,10 +142,10 @@ export class PatreonService {
         `https://www.patreon.com/api/oauth2/v2/identity?${params.toString()}`,
         {
           headers: {
-            'Authorization': `Bearer ${accessToken}`,
+            Authorization: `Bearer ${accessToken}`,
             'Content-Type': 'application/json',
           },
-        }
+        },
       )
 
       if (!response.ok) {
@@ -148,7 +155,9 @@ export class PatreonService {
       return await response.json()
     } catch (error) {
       this.logger.error(`Failed to fetch Patreon identity: ${error.message}`)
-      throw new InternalServerErrorException('Failed to fetch Patreon user data')
+      throw new InternalServerErrorException(
+        'Failed to fetch Patreon user data',
+      )
     }
   }
 
@@ -237,7 +246,9 @@ export class PatreonService {
         data: {
           patreonAccessToken: this.encryptToken(tokens.access_token),
           patreonRefreshToken: this.encryptToken(tokens.refresh_token),
-          patreonTokenExpiresAt: new Date(Date.now() + tokens.expires_in * 1000),
+          patreonTokenExpiresAt: new Date(
+            Date.now() + tokens.expires_in * 1000,
+          ),
         },
       })
     }
@@ -251,7 +262,12 @@ export class PatreonService {
       where: { id: userId },
       data: {
         supporterTier: tier,
-        supporterSince: tier !== 'NONE' ? (user.patreonAccessToken ? undefined : new Date()) : null,
+        supporterSince:
+          tier !== 'NONE'
+            ? user.patreonAccessToken
+              ? undefined
+              : new Date()
+            : null,
         patreonLastSyncAt: new Date(),
       },
     })
@@ -265,7 +281,8 @@ export class PatreonService {
    */
   private determineTierFromMembership(identity: any): SupporterTier {
     // Check if user has active memberships
-    const memberships = identity.included?.filter((inc: any) => inc.type === 'member') || []
+    const memberships =
+      identity.included?.filter((inc: any) => inc.type === 'member') || []
 
     if (memberships.length === 0) {
       return 'NONE'
@@ -273,12 +290,15 @@ export class PatreonService {
 
     // Get the highest entitled amount across all memberships
     const maxAmount = Math.max(
-      ...memberships.map((m: PatreonMember) => m.attributes?.currently_entitled_amount_cents || 0)
+      ...memberships.map(
+        (m: PatreonMember) =>
+          m.attributes?.currently_entitled_amount_cents || 0,
+      ),
     )
 
     // Check patron status - must be active
     const hasActiveMembership = memberships.some(
-      (m: PatreonMember) => m.attributes?.patron_status === 'active_patron'
+      (m: PatreonMember) => m.attributes?.patron_status === 'active_patron',
     )
 
     if (!hasActiveMembership || maxAmount === 0) {

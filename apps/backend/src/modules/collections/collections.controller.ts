@@ -61,7 +61,11 @@ export class CollectionsController {
       username = usernameWithDomain
     }
 
-    return this.collectionsService.getUserCollections(username, domain, currentUser?.id)
+    return this.collectionsService.getUserCollections(
+      username,
+      domain,
+      currentUser?.id,
+    )
   }
 
   /**
@@ -94,10 +98,7 @@ export class CollectionsController {
    */
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
-  async deleteCollection(
-    @Param('id') id: string,
-    @CurrentUser() user: any,
-  ) {
+  async deleteCollection(@Param('id') id: string, @CurrentUser() user: any) {
     return this.collectionsService.deleteCollection(id, user.id)
   }
 
@@ -111,7 +112,11 @@ export class CollectionsController {
     @Body('artworkId') artworkId: string,
     @CurrentUser() user: any,
   ) {
-    return this.collectionsService.addArtworkToCollection(id, artworkId, user.id)
+    return this.collectionsService.addArtworkToCollection(
+      id,
+      artworkId,
+      user.id,
+    )
   }
 
   /**
@@ -124,7 +129,11 @@ export class CollectionsController {
     @Param('artworkId') artworkId: string,
     @CurrentUser() user: any,
   ) {
-    return this.collectionsService.removeArtworkFromCollection(id, artworkId, user.id)
+    return this.collectionsService.removeArtworkFromCollection(
+      id,
+      artworkId,
+      user.id,
+    )
   }
 
   /**
@@ -137,6 +146,10 @@ export class CollectionsController {
     @Body('artworkIds') artworkIds: string[],
     @CurrentUser() user: any,
   ) {
-    return this.collectionsService.reorderCollectionArtworks(id, artworkIds, user.id)
+    return this.collectionsService.reorderCollectionArtworks(
+      id,
+      artworkIds,
+      user.id,
+    )
   }
 }

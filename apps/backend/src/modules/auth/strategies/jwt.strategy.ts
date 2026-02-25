@@ -25,7 +25,8 @@ function extractJwtFromHeaderOrCookie(req: Request): string | null {
 
   // Fall back to cookie for image requests
   // Get instance ID for cookie namespacing (matches frontend useAuth.ts naming: ${instanceId}_accessToken)
-  const instanceId = process.env.INSTANCE_ID || `port${process.env.FRONTEND_PORT || '11103'}`
+  const instanceId =
+    process.env.INSTANCE_ID || `port${process.env.FRONTEND_PORT || '11103'}`
   const cookieName = `${instanceId}_accessToken`
 
   if (req.cookies && req.cookies[cookieName]) {

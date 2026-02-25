@@ -51,11 +51,17 @@ export class MlsService {
     const keyPair = crypto.generateKeyPairSync('x25519')
 
     // Export public key as raw bytes
-    const publicKeyRaw = keyPair.publicKey.export({ type: 'spki', format: 'der' })
+    const publicKeyRaw = keyPair.publicKey.export({
+      type: 'spki',
+      format: 'der',
+    })
     const publicKeyBase64 = publicKeyRaw.toString('base64')
 
     // Export private key (encrypted with master key if available)
-    const privateKeyRaw = keyPair.privateKey.export({ type: 'pkcs8', format: 'der' })
+    const privateKeyRaw = keyPair.privateKey.export({
+      type: 'pkcs8',
+      format: 'der',
+    })
 
     // Create a simplified KeyPackage structure
     // In full MLS, this would be a proper TLS-serialized KeyPackage
@@ -203,7 +209,9 @@ export class MlsService {
         },
       })
 
-      this.logger.log(`Rotated ${toDelete.length} old KeyPackages for user ${userId}`)
+      this.logger.log(
+        `Rotated ${toDelete.length} old KeyPackages for user ${userId}`,
+      )
     }
   }
 
@@ -220,10 +228,14 @@ export class MlsService {
    * This is a known limitation for Phase 2.
    */
   private async storePrivateKey(keyPackageId: string, privateKey: Buffer) {
-    const encryptionKey = this.configService.get<string>('MESSAGE_ENCRYPTION_KEY')
+    const encryptionKey = this.configService.get<string>(
+      'MESSAGE_ENCRYPTION_KEY',
+    )
 
     if (!encryptionKey) {
-      this.logger.warn('MESSAGE_ENCRYPTION_KEY not set, private keys stored unencrypted')
+      this.logger.warn(
+        'MESSAGE_ENCRYPTION_KEY not set, private keys stored unencrypted',
+      )
       // In a real implementation, we would refuse to store without encryption
       return
     }

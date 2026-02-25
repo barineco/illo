@@ -31,10 +31,16 @@ export class MessageEncryptionService {
       this.masterKey = Buffer.from(keyHex, 'hex')
       this.logger.log('Message encryption enabled')
     } else if (process.env.NODE_ENV === 'production') {
-      this.logger.error('MESSAGE_ENCRYPTION_KEY must be a 64-character hex string (32 bytes) in production')
-      throw new Error('MESSAGE_ENCRYPTION_KEY must be a 64-character hex string (32 bytes)')
+      this.logger.error(
+        'MESSAGE_ENCRYPTION_KEY must be a 64-character hex string (32 bytes) in production',
+      )
+      throw new Error(
+        'MESSAGE_ENCRYPTION_KEY must be a 64-character hex string (32 bytes)',
+      )
     } else {
-      this.logger.warn('MESSAGE_ENCRYPTION_KEY not set - message encryption disabled (development mode)')
+      this.logger.warn(
+        'MESSAGE_ENCRYPTION_KEY not set - message encryption disabled (development mode)',
+      )
     }
   }
 
@@ -51,7 +57,11 @@ export class MessageEncryptionService {
    * @param content - The plaintext message content
    * @returns Object containing encrypted content (base64), IV (base64), and encryption version
    */
-  encrypt(content: string): { encryptedContent: string; iv: string; version: number } {
+  encrypt(content: string): {
+    encryptedContent: string
+    iv: string
+    version: number
+  } {
     if (!this.masterKey) {
       // Return plaintext if encryption is disabled
       return {
@@ -94,14 +104,20 @@ export class MessageEncryptionService {
    * @param version - The encryption version (0 = plaintext)
    * @returns Decrypted message content
    */
-  decrypt(encryptedContent: string, ivBase64: string | null, version: number): string {
+  decrypt(
+    encryptedContent: string,
+    ivBase64: string | null,
+    version: number,
+  ): string {
     // Version 0 = plaintext
     if (version === 0 || !ivBase64) {
       return encryptedContent
     }
 
     if (!this.masterKey) {
-      this.logger.error('Cannot decrypt message: MESSAGE_ENCRYPTION_KEY not set')
+      this.logger.error(
+        'Cannot decrypt message: MESSAGE_ENCRYPTION_KEY not set',
+      )
       return '[Message encrypted - decryption key not available]'
     }
 
@@ -114,7 +130,11 @@ export class MessageEncryptionService {
       const encrypted = combined.slice(0, -16)
 
       // Create decipher
-      const decipher = crypto.createDecipheriv('aes-256-gcm', this.masterKey, iv)
+      const decipher = crypto.createDecipheriv(
+        'aes-256-gcm',
+        this.masterKey,
+        iv,
+      )
       decipher.setAuthTag(authTag)
 
       // Decrypt data
@@ -174,9 +194,13 @@ export class MessageEncryptionService {
    * @param messages - Array of message objects
    * @returns Messages with decrypted content
    */
-  decryptMessages<T extends { content: string; contentIv?: string | null; encryptionVersion?: number }>(
-    messages: T[],
-  ): (T & { content: string })[] {
+  decryptMessages<
+    T extends {
+      content: string
+      contentIv?: string | null
+      encryptionVersion?: number
+    },
+  >(messages: T[]): (T & { content: string })[] {
     return messages.map((message) => ({
       ...message,
       content: this.decryptMessage(message),

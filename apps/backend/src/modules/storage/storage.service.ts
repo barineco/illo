@@ -1,4 +1,10 @@
-import { Injectable, Logger, OnModuleInit, Inject, forwardRef } from '@nestjs/common'
+import {
+  Injectable,
+  Logger,
+  OnModuleInit,
+  Inject,
+  forwardRef,
+} from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import * as Minio from 'minio'
 import * as sharp from 'sharp'
@@ -21,7 +27,7 @@ export interface UploadResult {
   bucket: string
   size: number
   contentType: string
-  encryptionIv?: string  // Base64 encoded IV if encrypted
+  encryptionIv?: string // Base64 encoded IV if encrypted
 }
 
 export interface ArtworkImageUploadResult {
@@ -49,11 +55,24 @@ export class StorageService implements OnModuleInit {
     private configService: ConfigService,
     private encryptionService: EncryptionService,
   ) {
-    const endpoint = this.configService.get<string>('MINIO_ENDPOINT', 'localhost')
-    const port = parseInt(this.configService.get<string>('MINIO_PORT', '9000'), 10)
-    const useSSL = this.configService.get<string>('MINIO_USE_SSL', 'false') === 'true'
-    const accessKey = this.configService.get<string>('MINIO_ACCESS_KEY', 'minioadmin')
-    const secretKey = this.configService.get<string>('MINIO_SECRET_KEY', 'minioadmin')
+    const endpoint = this.configService.get<string>(
+      'MINIO_ENDPOINT',
+      'localhost',
+    )
+    const port = parseInt(
+      this.configService.get<string>('MINIO_PORT', '9000'),
+      10,
+    )
+    const useSSL =
+      this.configService.get<string>('MINIO_USE_SSL', 'false') === 'true'
+    const accessKey = this.configService.get<string>(
+      'MINIO_ACCESS_KEY',
+      'minioadmin',
+    )
+    const secretKey = this.configService.get<string>(
+      'MINIO_SECRET_KEY',
+      'minioadmin',
+    )
 
     this.bucket = this.configService.get<string>('MINIO_BUCKET', 'illustboard')
     this.publicUrl = this.configService.get<string>(
@@ -70,11 +89,16 @@ export class StorageService implements OnModuleInit {
     })
 
     // Base URL for image proxy API (used when encryption is enabled)
-    this.baseUrl = this.configService.get<string>('BASE_URL', 'http://localhost:11104')
+    this.baseUrl = this.configService.get<string>(
+      'BASE_URL',
+      'http://localhost:11104',
+    )
 
     this.logger.log(`MinIO configured: ${endpoint}:${port}/${this.bucket}`)
     if (this.encryptionService.isEnabled()) {
-      this.logger.log('Image encryption is enabled - images will be served via proxy API')
+      this.logger.log(
+        'Image encryption is enabled - images will be served via proxy API',
+      )
     }
   }
 
@@ -144,9 +168,13 @@ export class StorageService implements OnModuleInit {
             this.bucket,
             JSON.stringify(hybridPolicy),
           )
-          this.logger.log(`Bucket policy set to HYBRID for: ${this.bucket} (users/* public, artworks/* private)`)
+          this.logger.log(
+            `Bucket policy set to HYBRID for: ${this.bucket} (users/* public, artworks/* private)`,
+          )
         } catch (policyError) {
-          this.logger.warn(`Could not set hybrid policy: ${policyError.message}`)
+          this.logger.warn(
+            `Could not set hybrid policy: ${policyError.message}`,
+          )
         }
       } else {
         // Public read access (development mode without encryption)
@@ -165,10 +193,15 @@ export class StorageService implements OnModuleInit {
           this.bucket,
           JSON.stringify(publicPolicy),
         )
-        this.logger.log(`Bucket policy set to PUBLIC READ for: ${this.bucket} (no encryption)`)
+        this.logger.log(
+          `Bucket policy set to PUBLIC READ for: ${this.bucket} (no encryption)`,
+        )
       }
     } catch (error) {
-      this.logger.error(`Failed to ensure bucket exists: ${error.message}`, error.stack)
+      this.logger.error(
+        `Failed to ensure bucket exists: ${error.message}`,
+        error.stack,
+      )
     }
   }
 
@@ -272,7 +305,9 @@ export class StorageService implements OnModuleInit {
 
     const url = `${this.publicUrl}/${this.bucket}/${key}`
 
-    this.logger.log(`Profile image uploaded: ${key} (${info.width}x${info.height}, NOT encrypted)`)
+    this.logger.log(
+      `Profile image uploaded: ${key} (${info.width}x${info.height}, NOT encrypted)`,
+    )
 
     return {
       url,
@@ -346,8 +381,10 @@ export class StorageService implements OnModuleInit {
     artworkId: string,
   ): Promise<{ url: string; key: string; width: number; height: number }> {
     // 1. Resize to 320x180 with center crop (automatically handles any aspect ratio)
-    let pipeline = sharp(file.buffer)
-      .resize(320, 180, { fit: 'cover', position: 'center' })
+    let pipeline = sharp(file.buffer).resize(320, 180, {
+      fit: 'cover',
+      position: 'center',
+    })
 
     // 2. Apply blur if requested (before encoding)
     if (blur) {
@@ -398,7 +435,9 @@ export class StorageService implements OnModuleInit {
     // Process original image
     // - .rotate() applies EXIF orientation and removes the orientation tag
     // - No .withMetadata() call = all EXIF/IPTC/XMP data is stripped
-    const { data: originalBuffer, info: originalInfo } = await sharp(file.buffer)
+    const { data: originalBuffer, info: originalInfo } = await sharp(
+      file.buffer,
+    )
       .rotate() // Apply EXIF orientation, then strip all metadata
       .resize(maxWidth, null, {
         withoutEnlargement: true,
@@ -412,7 +451,8 @@ export class StorageService implements OnModuleInit {
     // Encrypt and upload original
     let originalEncryptionIv: string | undefined
     if (encryptionEnabled) {
-      const { encrypted, iv } = await this.encryptionService.encrypt(originalBuffer)
+      const { encrypted, iv } =
+        await this.encryptionService.encrypt(originalBuffer)
       originalEncryptionIv = iv
       await this.minioClient.putObject(
         this.bucket,
@@ -436,7 +476,9 @@ export class StorageService implements OnModuleInit {
     }
 
     // Generate thumbnail (also strip metadata)
-    const { data: thumbnailBuffer, info: thumbnailInfo } = await sharp(file.buffer)
+    const { data: thumbnailBuffer, info: thumbnailInfo } = await sharp(
+      file.buffer,
+    )
       .rotate() // Apply EXIF orientation, then strip all metadata
       .resize(thumbnailWidth, null, {
         withoutEnlargement: true,
@@ -450,7 +492,8 @@ export class StorageService implements OnModuleInit {
     // Encrypt and upload thumbnail
     let thumbnailEncryptionIv: string | undefined
     if (encryptionEnabled) {
-      const { encrypted, iv } = await this.encryptionService.encrypt(thumbnailBuffer)
+      const { encrypted, iv } =
+        await this.encryptionService.encrypt(thumbnailBuffer)
       thumbnailEncryptionIv = iv
       await this.minioClient.putObject(
         this.bucket,
@@ -474,7 +517,9 @@ export class StorageService implements OnModuleInit {
     }
 
     const encryptedSuffix = encryptionEnabled ? ', encrypted' : ''
-    this.logger.log(`Image uploaded: ${originalKey} (${originalInfo.width}x${originalInfo.height}, with thumbnail, metadata stripped${encryptedSuffix})`)
+    this.logger.log(
+      `Image uploaded: ${originalKey} (${originalInfo.width}x${originalInfo.height}, with thumbnail, metadata stripped${encryptedSuffix})`,
+    )
 
     // Note: URLs are NOT returned here - they will be set by artworks.service.ts
     // based on the imageId after the database record is created
@@ -517,7 +562,9 @@ export class StorageService implements OnModuleInit {
       // For unencrypted mode, we need the storage key
       // This method should only be called for encrypted mode
       // For unencrypted mode, use getFileUrl with the storage key
-      throw new Error('getImageUrl should only be called when encryption is enabled')
+      throw new Error(
+        'getImageUrl should only be called when encryption is enabled',
+      )
     }
   }
 
@@ -547,7 +594,11 @@ export class StorageService implements OnModuleInit {
   ): Promise<ArtworkImageUploadResult> {
     const encryptionEnabled = this.encryptionService.isEnabled()
     const timestamp = Date.now()
-    const hash = crypto.createHash('sha256').update(file.buffer).digest('hex').substring(0, 8)
+    const hash = crypto
+      .createHash('sha256')
+      .update(file.buffer)
+      .digest('hex')
+      .substring(0, 8)
     const uniqueId = `${timestamp}-${hash}`
 
     // Configuration from environment variables
@@ -557,8 +608,10 @@ export class StorageService implements OnModuleInit {
       10,
     )
     const thumbnailWidth = 320
-    const preserveFormat = this.configService.get<string>('IMAGE_PRESERVE_FORMAT', 'true') === 'true'
-    const embedMetadata = this.configService.get<string>('IMAGE_EMBED_METADATA', 'true') === 'true'
+    const preserveFormat =
+      this.configService.get<string>('IMAGE_PRESERVE_FORMAT', 'true') === 'true'
+    const embedMetadata =
+      this.configService.get<string>('IMAGE_EMBED_METADATA', 'true') === 'true'
 
     // Detect image format
     const detectedFormat = detectImageFormat(file.mimetype)
@@ -569,15 +622,15 @@ export class StorageService implements OnModuleInit {
     const format = preserveFormat ? detectedFormat : 'jpeg'
     const fileSizeInMB = file.size / (1024 * 1024)
 
-    this.logger.log(
-      `Processing ${format} image: ${fileSizeInMB.toFixed(2)}MB`,
-    )
+    this.logger.log(`Processing ${format} image: ${fileSizeInMB.toFixed(2)}MB`)
 
     // Generate metadata for embedding
-    const metadata = embedMetadata ? generateImageMetadata(metadataInput) : undefined
+    const metadata = embedMetadata
+      ? generateImageMetadata(metadataInput)
+      : undefined
 
     // === ORIGINAL VERSION (for viewer - always save) ===
-    let originalResult: (UploadResult & { width: number; height: number })
+    let originalResult: UploadResult & { width: number; height: number }
 
     if (format === 'svg') {
       // SVG: Embed metadata in <metadata> tag
@@ -593,7 +646,9 @@ export class StorageService implements OnModuleInit {
     } else if (format === 'gif') {
       // GIF: Save as-is to preserve animation (sharp would lose frames)
       // Use sharp only to get dimensions, with animated: true to read all frames
-      const gifMetadata = await sharp(file.buffer, { animated: true }).metadata()
+      const gifMetadata = await sharp(file.buffer, {
+        animated: true,
+      }).metadata()
       const extension = getExtensionFromFormat(format)
       const fullSizeKey = `${folder}/${uniqueId}-full.${extension}`
 
@@ -618,7 +673,11 @@ export class StorageService implements OnModuleInit {
       let processedBuffer: Buffer
       if (embedMetadata && supportsSharpMetadata(format)) {
         const sharpInstance = sharp(data)
-        processedBuffer = await this.encodeWithMetadata(sharpInstance, format, metadata!)
+        processedBuffer = await this.encodeWithMetadata(
+          sharpInstance,
+          format,
+          metadata!,
+        )
       } else {
         processedBuffer = data
       }
@@ -658,7 +717,10 @@ export class StorageService implements OnModuleInit {
       )
 
       // Check if resized
-      if (standardResult.width < originalResult.width || standardResult.height < originalResult.height) {
+      if (
+        standardResult.width < originalResult.width ||
+        standardResult.height < originalResult.height
+      ) {
         wasResized = true
       }
     }
@@ -760,11 +822,21 @@ export class StorageService implements OnModuleInit {
     let info: sharp.OutputInfo
 
     if (embedMetadata && supportsSharpMetadata(format)) {
-      processedBuffer = await this.encodeWithMetadata(sharpInstance, format, metadata)
+      processedBuffer = await this.encodeWithMetadata(
+        sharpInstance,
+        format,
+        metadata,
+      )
       const tempInfo = await sharp(processedBuffer).metadata()
-      info = { width: tempInfo.width!, height: tempInfo.height!, format: tempInfo.format! } as sharp.OutputInfo
+      info = {
+        width: tempInfo.width!,
+        height: tempInfo.height!,
+        format: tempInfo.format!,
+      } as sharp.OutputInfo
     } else {
-      const result = await this.encodeImage(sharpInstance, format).toBuffer({ resolveWithObject: true })
+      const result = await this.encodeImage(sharpInstance, format).toBuffer({
+        resolveWithObject: true,
+      })
       processedBuffer = result.data
       info = result.info
     }
@@ -817,7 +889,14 @@ export class StorageService implements OnModuleInit {
 
     const key = `${folder}/${uniqueId}-thumb.jpg`
 
-    return this.uploadBuffer(data, key, 'image/jpeg', info.width, info.height, encryptionEnabled)
+    return this.uploadBuffer(
+      data,
+      key,
+      'image/jpeg',
+      info.width,
+      info.height,
+      encryptionEnabled,
+    )
   }
 
   /**
@@ -854,7 +933,9 @@ export class StorageService implements OnModuleInit {
         break
       case 'png':
         // Use compressionLevel 6 for balance between speed and size
-        encoded = sharpInstance.png({ compressionLevel: 6 }).withMetadata(metadata)
+        encoded = sharpInstance
+          .png({ compressionLevel: 6 })
+          .withMetadata(metadata)
         break
       case 'webp':
         encoded = sharpInstance.webp({ quality: 90 }).withMetadata(metadata)
@@ -889,11 +970,19 @@ export class StorageService implements OnModuleInit {
       contentType = 'application/octet-stream' // Encrypted data in MinIO
     }
 
-    await this.minioClient.putObject(this.bucket, key, uploadBuffer, uploadBuffer.length, {
-      'Content-Type': contentType,
-    })
+    await this.minioClient.putObject(
+      this.bucket,
+      key,
+      uploadBuffer,
+      uploadBuffer.length,
+      {
+        'Content-Type': contentType,
+      },
+    )
 
-    this.logger.log(`Uploaded: ${key} (${width}x${height}, ${(buffer.length / 1024).toFixed(2)}KB)`)
+    this.logger.log(
+      `Uploaded: ${key} (${width}x${height}, ${(buffer.length / 1024).toFixed(2)}KB)`,
+    )
 
     return {
       url: '', // URL will be set after database record creation

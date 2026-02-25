@@ -1,4 +1,11 @@
-import { IsString, IsNotEmpty, MinLength, MaxLength, IsBoolean, IsOptional } from 'class-validator'
+import {
+  IsString,
+  IsNotEmpty,
+  MinLength,
+  MaxLength,
+  IsBoolean,
+  IsOptional,
+} from 'class-validator'
 
 export class ChangePasswordDto {
   @IsString()

@@ -25,7 +25,7 @@ export class RateLimitController {
 
   @Get('config')
   async getConfig() {
-    return this.rateLimitService.getConfig();
+    return this.rateLimitService.getConfig()
   }
 
   @Put('config')
@@ -33,27 +33,27 @@ export class RateLimitController {
     @Body() dto: UpdateRateLimitConfigDto,
     @CurrentUser() user: { id: string },
   ) {
-    return this.rateLimitService.updateConfig(dto, user.id);
+    return this.rateLimitService.updateConfig(dto, user.id)
   }
 
   @Get('logs')
   async getLogs(@Query() query: RateLimitLogQueryDto) {
-    return this.rateLimitService.getLogs(query);
+    return this.rateLimitService.getLogs(query)
   }
 
   @Get('penalties')
   async getPenalties(@Query() query: RateLimitPenaltyQueryDto) {
-    return this.rateLimitService.getPenalties(query);
+    return this.rateLimitService.getPenalties(query)
   }
 
   @Delete('penalties/:id')
   async deletePenalty(@Param('id') id: string) {
-    await this.rateLimitService.deletePenalty(id);
-    return { success: true };
+    await this.rateLimitService.deletePenalty(id)
+    return { success: true }
   }
 
   @Get('stats')
   async getStats() {
-    return this.rateLimitService.getStats();
+    return this.rateLimitService.getStats()
   }
 }

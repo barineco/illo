@@ -134,7 +134,11 @@ export class RemoteAvatarCacheService {
           where: { id: userId },
           data: { avatarCacheStatus: RemoteImageCacheStatus.CACHE_FAILED },
         })
-        return { success: false, userId, error: 'Failed to fetch remote avatar' }
+        return {
+          success: false,
+          userId,
+          error: 'Failed to fetch remote avatar',
+        }
       }
 
       const { buffer } = fetchResult
@@ -194,7 +198,9 @@ export class RemoteAvatarCacheService {
         cachedAvatarUrl,
       }
     } catch (error) {
-      this.logger.error(`Failed to cache avatar for ${userId}: ${error.message}`)
+      this.logger.error(
+        `Failed to cache avatar for ${userId}: ${error.message}`,
+      )
       await this.prisma.user.update({
         where: { id: userId },
         data: { avatarCacheStatus: RemoteImageCacheStatus.CACHE_FAILED },
@@ -240,7 +246,9 @@ export class RemoteAvatarCacheService {
 
       this.logger.log(`Invalidated avatar cache for user: ${userId}`)
     } catch (error) {
-      this.logger.error(`Failed to invalidate avatar cache for ${userId}: ${error.message}`)
+      this.logger.error(
+        `Failed to invalidate avatar cache for ${userId}: ${error.message}`,
+      )
     }
   }
 

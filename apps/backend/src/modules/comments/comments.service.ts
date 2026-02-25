@@ -1,4 +1,12 @@
-import { Injectable, NotFoundException, ForbiddenException, BadRequestException, Logger, Inject, forwardRef } from '@nestjs/common'
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+  BadRequestException,
+  Logger,
+  Inject,
+  forwardRef,
+} from '@nestjs/common'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { PrismaService } from '../prisma/prisma.service'
 import { CreateCommentDto } from './dto/create-comment.dto'
@@ -152,14 +160,24 @@ export class CommentsService {
             .sendCreateComment(commenter, commentWithArtwork)
             .then((sent) => {
               if (sent) {
-                this.logger.log(`Sent federated comment to ${artwork.author.username}@${artwork.author.domain}`)
-                this.prisma.comment.update({
-                  where: { id: comment.id },
-                  data: { federated: true },
-                }).catch((err) => this.logger.error(`Failed to mark comment as federated: ${err}`))
+                this.logger.log(
+                  `Sent federated comment to ${artwork.author.username}@${artwork.author.domain}`,
+                )
+                this.prisma.comment
+                  .update({
+                    where: { id: comment.id },
+                    data: { federated: true },
+                  })
+                  .catch((err) =>
+                    this.logger.error(
+                      `Failed to mark comment as federated: ${err}`,
+                    ),
+                  )
               }
             })
-            .catch((err) => this.logger.error(`Failed to send federated comment: ${err}`))
+            .catch((err) =>
+              this.logger.error(`Failed to send federated comment: ${err}`),
+            )
         }
       }
     }
@@ -167,14 +185,24 @@ export class CommentsService {
     return comment
   }
 
-  async getArtworkComments(artworkId: string, page = 1, limit = 20, currentUserId?: string) {
+  async getArtworkComments(
+    artworkId: string,
+    page = 1,
+    limit = 20,
+    currentUserId?: string,
+  ) {
     const skip = (page - 1) * limit
 
     let mutedUserIds: string[] = []
-    let wordMutes: { keyword: string; regex: boolean; wholeWord: boolean; caseSensitive: boolean }[] = []
+    let wordMutes: {
+      keyword: string
+      regex: boolean
+      wholeWord: boolean
+      caseSensitive: boolean
+    }[] = []
 
     if (currentUserId) {
-      [mutedUserIds, wordMutes] = await Promise.all([
+      ;[mutedUserIds, wordMutes] = await Promise.all([
         this.mutesService.getMutedUserIds(currentUserId),
         this.mutesService.getWordMutes(currentUserId),
       ])
@@ -202,7 +230,10 @@ export class CommentsService {
             },
           },
           replies: {
-            where: mutedUserIds.length > 0 ? { userId: { notIn: mutedUserIds } } : undefined,
+            where:
+              mutedUserIds.length > 0
+                ? { userId: { notIn: mutedUserIds } }
+                : undefined,
             include: {
               user: {
                 select: {
@@ -229,17 +260,19 @@ export class CommentsService {
 
     let filteredComments = comments
     if (wordMutes.length > 0) {
-      filteredComments = comments.filter((comment) => {
-        if (this.matchesAnyWordMute(comment.content, wordMutes)) {
-          return false
-        }
-        return true
-      }).map((comment) => ({
-        ...comment,
-        replies: comment.replies.filter((reply) => {
-          return !this.matchesAnyWordMute(reply.content, wordMutes)
-        }),
-      }))
+      filteredComments = comments
+        .filter((comment) => {
+          if (this.matchesAnyWordMute(comment.content, wordMutes)) {
+            return false
+          }
+          return true
+        })
+        .map((comment) => ({
+          ...comment,
+          replies: comment.replies.filter((reply) => {
+            return !this.matchesAnyWordMute(reply.content, wordMutes)
+          }),
+        }))
     }
 
     return {
@@ -253,7 +286,12 @@ export class CommentsService {
 
   private matchesAnyWordMute(
     text: string,
-    wordMutes: { keyword: string; regex: boolean; wholeWord: boolean; caseSensitive: boolean }[],
+    wordMutes: {
+      keyword: string
+      regex: boolean
+      wholeWord: boolean
+      caseSensitive: boolean
+    }[],
   ): boolean {
     for (const mute of wordMutes) {
       if (this.textMatchesWordMute(text, mute)) {
@@ -265,10 +303,17 @@ export class CommentsService {
 
   private textMatchesWordMute(
     text: string,
-    mute: { keyword: string; regex: boolean; wholeWord: boolean; caseSensitive: boolean },
+    mute: {
+      keyword: string
+      regex: boolean
+      wholeWord: boolean
+      caseSensitive: boolean
+    },
   ): boolean {
     const searchText = mute.caseSensitive ? text : text.toLowerCase()
-    const keyword = mute.caseSensitive ? mute.keyword : mute.keyword.toLowerCase()
+    const keyword = mute.caseSensitive
+      ? mute.keyword
+      : mute.keyword.toLowerCase()
 
     if (mute.regex) {
       try {
@@ -282,7 +327,10 @@ export class CommentsService {
 
     if (mute.wholeWord) {
       const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-      const regex = new RegExp(`\\b${escapedKeyword}\\b`, mute.caseSensitive ? '' : 'i')
+      const regex = new RegExp(
+        `\\b${escapedKeyword}\\b`,
+        mute.caseSensitive ? '' : 'i',
+      )
       return regex.test(text)
     }
 

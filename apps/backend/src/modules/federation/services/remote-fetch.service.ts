@@ -111,14 +111,20 @@ export class RemoteFetchService {
 
       try {
         // For development environments (.orb.local), disable SSL verification
-        const isDevelopment = urlObj.hostname.endsWith('.orb.local') || urlObj.hostname === 'localhost'
+        const isDevelopment =
+          urlObj.hostname.endsWith('.orb.local') ||
+          urlObj.hostname === 'localhost'
 
         const response = await fetch(url, {
           method: 'GET',
           headers,
           signal: controller.signal,
           // @ts-ignore - Node.js fetch agent option
-          ...(isDevelopment && { agent: new (await import('https')).Agent({ rejectUnauthorized: false }) })
+          ...(isDevelopment && {
+            agent: new (await import('https')).Agent({
+              rejectUnauthorized: false,
+            }),
+          }),
         })
 
         clearTimeout(timeoutId)
@@ -177,7 +183,13 @@ export class RemoteFetchService {
     }
 
     // Actorタイプを検証
-    const validActorTypes = ['Person', 'Service', 'Application', 'Group', 'Organization']
+    const validActorTypes = [
+      'Person',
+      'Service',
+      'Application',
+      'Group',
+      'Organization',
+    ]
     if (!validActorTypes.includes(actor.type)) {
       this.logger.warn(
         `Invalid actor type: ${actor.type} (expected Person, Service, etc.)`,
@@ -187,7 +199,9 @@ export class RemoteFetchService {
 
     // 必須フィールドを検証
     if (!actor.inbox || !actor.preferredUsername) {
-      this.logger.warn('Actor missing required fields (inbox, preferredUsername)')
+      this.logger.warn(
+        'Actor missing required fields (inbox, preferredUsername)',
+      )
       return null
     }
 
@@ -216,17 +230,15 @@ export class RemoteFetchService {
       const [, username, domain] = match
       const webfingerUrl = `https://${domain}/.well-known/webfinger?resource=acct:${username}@${domain}`
 
-      const {
-        timeout = 10000,
-        userAgent = this.defaultUserAgent,
-      } = options
+      const { timeout = 10000, userAgent = this.defaultUserAgent } = options
 
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), timeout)
 
       try {
         // For development environments (.orb.local), disable SSL verification
-        const isDevelopment = domain.endsWith('.orb.local') || domain === 'localhost'
+        const isDevelopment =
+          domain.endsWith('.orb.local') || domain === 'localhost'
 
         const response = await fetch(webfingerUrl, {
           method: 'GET',
@@ -236,7 +248,11 @@ export class RemoteFetchService {
           },
           signal: controller.signal,
           // @ts-ignore - Node.js fetch agent option
-          ...(isDevelopment && { agent: new (await import('https')).Agent({ rejectUnauthorized: false }) })
+          ...(isDevelopment && {
+            agent: new (await import('https')).Agent({
+              rejectUnauthorized: false,
+            }),
+          }),
         })
 
         clearTimeout(timeoutId)
@@ -387,11 +403,18 @@ export class RemoteFetchService {
     if (buffer.length >= 12) {
       const ftypIndex = buffer.indexOf(Buffer.from([0x66, 0x74, 0x79, 0x70]))
       if (ftypIndex >= 4 && ftypIndex <= 8) {
-        const brand = buffer.subarray(ftypIndex + 4, ftypIndex + 8).toString('ascii')
+        const brand = buffer
+          .subarray(ftypIndex + 4, ftypIndex + 8)
+          .toString('ascii')
         if (brand === 'avif' || brand === 'avis') {
           return 'image/avif'
         }
-        if (brand === 'heic' || brand === 'heix' || brand === 'hevc' || brand === 'hevx') {
+        if (
+          brand === 'heic' ||
+          brand === 'heix' ||
+          brand === 'hevc' ||
+          brand === 'hevx'
+        ) {
           return 'image/heic'
         }
       }
@@ -445,14 +468,20 @@ export class RemoteFetchService {
 
       try {
         // For development environments (.orb.local), disable SSL verification
-        const isDevelopment = urlObj.hostname.endsWith('.orb.local') || urlObj.hostname === 'localhost'
+        const isDevelopment =
+          urlObj.hostname.endsWith('.orb.local') ||
+          urlObj.hostname === 'localhost'
 
         const response = await fetch(url, {
           method: 'GET',
           headers,
           signal: controller.signal,
           // @ts-ignore - Node.js fetch agent option
-          ...(isDevelopment && { agent: new (await import('https')).Agent({ rejectUnauthorized: false }) })
+          ...(isDevelopment && {
+            agent: new (await import('https')).Agent({
+              rejectUnauthorized: false,
+            }),
+          }),
         })
 
         clearTimeout(timeoutId)
@@ -470,7 +499,9 @@ export class RemoteFetchService {
         // サイズ制限チェック (50MB)
         const maxSize = 50 * 1024 * 1024
         if (buffer.length > maxSize) {
-          this.logger.warn(`Image too large: ${buffer.length} bytes (max: ${maxSize})`)
+          this.logger.warn(
+            `Image too large: ${buffer.length} bytes (max: ${maxSize})`,
+          )
           return null
         }
 
@@ -482,7 +513,9 @@ export class RemoteFetchService {
         if (!mimeType.startsWith('image/')) {
           const detectedMime = this.detectImageMimeType(buffer)
           if (detectedMime) {
-            this.logger.debug(`Detected image type from magic bytes: ${detectedMime}`)
+            this.logger.debug(
+              `Detected image type from magic bytes: ${detectedMime}`,
+            )
             mimeType = detectedMime
           } else {
             this.logger.warn(

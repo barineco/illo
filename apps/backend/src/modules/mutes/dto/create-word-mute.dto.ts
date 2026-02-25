@@ -1,4 +1,11 @@
-import { IsString, IsOptional, IsBoolean, IsNumber, Min, MaxLength } from 'class-validator'
+import {
+  IsString,
+  IsOptional,
+  IsBoolean,
+  IsNumber,
+  Min,
+  MaxLength,
+} from 'class-validator'
 
 export class CreateWordMuteDto {
   @IsString()

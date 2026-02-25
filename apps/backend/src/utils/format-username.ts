@@ -4,7 +4,10 @@
  * @param domain - The domain (null for local users)
  * @returns Formatted username (@username for local, @username@domain for remote)
  */
-export function formatUsername(username: string, domain: string | null): string {
+export function formatUsername(
+  username: string,
+  domain: string | null,
+): string {
   if (domain === null || domain === undefined) {
     return `@${username}`
   }
@@ -16,6 +19,9 @@ export function formatUsername(username: string, domain: string | null): string 
  * @param user - User object with username and domain fields
  * @returns Formatted username string
  */
-export function formatUserHandle(user: { username: string; domain?: string | null }): string {
+export function formatUserHandle(user: {
+  username: string
+  domain?: string | null
+}): string {
   return formatUsername(user.username, user.domain ?? null)
 }

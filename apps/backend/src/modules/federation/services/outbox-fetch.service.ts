@@ -3,7 +3,11 @@ import { ConfigService } from '@nestjs/config'
 import { PrismaService } from '../../prisma/prisma.service'
 import { User } from '@prisma/client'
 import { RemoteFetchService, FetchOptions } from './remote-fetch.service'
-import { RemoteArtworkData, RemoteImageData, OutboxFetchResult } from '../dto/remote-artwork.dto'
+import {
+  RemoteArtworkData,
+  RemoteImageData,
+  OutboxFetchResult,
+} from '../dto/remote-artwork.dto'
 
 /**
  * Outbox Fetch Service
@@ -24,7 +28,10 @@ export class OutboxFetchService {
    * Get signing credentials for outbox fetch requests
    * Uses the instance admin user's keys
    */
-  private async getSigningCredentials(): Promise<{ keyId: string; privateKey: string } | null> {
+  private async getSigningCredentials(): Promise<{
+    keyId: string
+    privateKey: string
+  } | null> {
     // Get instance settings to find admin user
     const settings = await this.prisma.instanceSettings.findFirst()
     if (!settings?.adminUserId) {
@@ -42,7 +49,8 @@ export class OutboxFetchService {
       return null
     }
 
-    const publicUrl = settings.publicUrl || this.configService.get<string>('BASE_URL')
+    const publicUrl =
+      settings.publicUrl || this.configService.get<string>('BASE_URL')
     if (!publicUrl) {
       this.logger.warn('No public URL configured')
       return null
@@ -66,7 +74,9 @@ export class OutboxFetchService {
       return { artworks: [], totalItems: 0 }
     }
 
-    this.logger.log(`Fetching outbox for ${user.username}@${user.domain}: ${user.outbox}`)
+    this.logger.log(
+      `Fetching outbox for ${user.username}@${user.domain}: ${user.outbox}`,
+    )
 
     // Get signing credentials
     const credentials = await this.getSigningCredentials()
@@ -80,7 +90,10 @@ export class OutboxFetchService {
 
     try {
       // Fetch the outbox OrderedCollection
-      const collection = await this.remoteFetch.fetchObject(user.outbox, options)
+      const collection = await this.remoteFetch.fetchObject(
+        user.outbox,
+        options,
+      )
 
       if (!collection) {
         this.logger.warn(`Failed to fetch outbox: ${user.outbox}`)
@@ -102,7 +115,8 @@ export class OutboxFetchService {
         // Otherwise, fetch the first page
         const firstPageUrl = collection.first
         if (firstPageUrl) {
-          const pageUrl = typeof firstPageUrl === 'string' ? firstPageUrl : firstPageUrl.id
+          const pageUrl =
+            typeof firstPageUrl === 'string' ? firstPageUrl : firstPageUrl.id
           return this.fetchOutboxPage(pageUrl, totalItems, options)
         }
 
@@ -124,7 +138,10 @@ export class OutboxFetchService {
       this.logger.warn(`Unexpected collection type: ${collection.type}`)
       return { artworks: [], totalItems: 0 }
     } catch (error) {
-      this.logger.error(`Error fetching outbox for ${user.username}@${user.domain}`, error)
+      this.logger.error(
+        `Error fetching outbox for ${user.username}@${user.domain}`,
+        error,
+      )
       return { artworks: [], totalItems: 0 }
     }
   }
@@ -177,14 +194,19 @@ export class OutboxFetchService {
       }
     }
 
-    this.logger.debug(`Parsed ${artworks.length} artworks from ${activities.length} activities`)
+    this.logger.debug(
+      `Parsed ${artworks.length} artworks from ${activities.length} activities`,
+    )
     return artworks
   }
 
   /**
    * Parse an ActivityPub object (Note/Article/Image) into artwork data
    */
-  private parseActivityObject(obj: any, actorUrl: string | any): RemoteArtworkData | null {
+  private parseActivityObject(
+    obj: any,
+    actorUrl: string | any,
+  ): RemoteArtworkData | null {
     if (!obj || typeof obj !== 'object') {
       return null
     }
@@ -212,7 +234,8 @@ export class OutboxFetchService {
     }
 
     // Extract actor URL
-    const authorUrl = typeof actorUrl === 'string' ? actorUrl : actorUrl?.id || obj.attributedTo
+    const authorUrl =
+      typeof actorUrl === 'string' ? actorUrl : actorUrl?.id || obj.attributedTo
 
     // Extract tags
     const tags = this.extractTags(obj)

@@ -4,7 +4,11 @@ import { ConfigService } from '@nestjs/config'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { PrismaService } from '../prisma/prisma.service'
 import { ActivityDeliveryService } from '../federation/services/activity-delivery.service'
-import { ReactionSummary, ReactionResponse, UserReactionsResponse } from './dto/reaction-response.dto'
+import {
+  ReactionSummary,
+  ReactionResponse,
+  UserReactionsResponse,
+} from './dto/reaction-response.dto'
 
 @Injectable()
 export class ReactionsService {
@@ -18,7 +22,9 @@ export class ReactionsService {
     private activityDelivery: ActivityDeliveryService,
     private eventEmitter: EventEmitter2,
   ) {
-    this.ipSalt = this.configService.get<string>('REACTION_IP_SALT') || 'default-reaction-salt'
+    this.ipSalt =
+      this.configService.get<string>('REACTION_IP_SALT') ||
+      'default-reaction-salt'
   }
 
   async addReaction(
@@ -40,7 +46,12 @@ export class ReactionsService {
       throw new NotFoundException('Artwork not found')
     }
 
-    const existingReaction = await this.findExistingReaction(artworkId, emoji, userId, ipHash)
+    const existingReaction = await this.findExistingReaction(
+      artworkId,
+      emoji,
+      userId,
+      ipHash,
+    )
 
     if (existingReaction) {
       return { reacted: true, emoji, message: 'Already reacted' }
@@ -77,10 +88,18 @@ export class ReactionsService {
       await this.updateAnonymousRateLimit(ipHash)
     }
 
-    if (userId && isFederatedArtwork && artwork.author.inbox && artwork.apObjectId && user) {
-      this.activityDelivery.sendEmojiReact(user, artwork.apObjectId, emoji, artwork.author.inbox).catch((err) => {
-        this.logger.error(`Failed to send EmojiReact activity: ${err}`)
-      })
+    if (
+      userId &&
+      isFederatedArtwork &&
+      artwork.author.inbox &&
+      artwork.apObjectId &&
+      user
+    ) {
+      this.activityDelivery
+        .sendEmojiReact(user, artwork.apObjectId, emoji, artwork.author.inbox)
+        .catch((err) => {
+          this.logger.error(`Failed to send EmojiReact activity: ${err}`)
+        })
     }
 
     if (userId && userId !== artwork.authorId) {
@@ -110,7 +129,12 @@ export class ReactionsService {
       throw new Error('Either userId or ipHash is required')
     }
 
-    const existingReaction = await this.findExistingReaction(artworkId, emoji, userId, ipHash)
+    const existingReaction = await this.findExistingReaction(
+      artworkId,
+      emoji,
+      userId,
+      ipHash,
+    )
 
     if (!existingReaction) {
       return { reacted: false, emoji, message: 'Reaction removed' }
@@ -141,9 +165,16 @@ export class ReactionsService {
     ])
 
     if (userId && artwork?.apObjectId && artwork.author.inbox && user) {
-      this.activityDelivery.sendUndoEmojiReact(user, artwork.apObjectId, emoji, artwork.author.inbox).catch((err) => {
-        this.logger.error(`Failed to send Undo EmojiReact activity: ${err}`)
-      })
+      this.activityDelivery
+        .sendUndoEmojiReact(
+          user,
+          artwork.apObjectId,
+          emoji,
+          artwork.author.inbox,
+        )
+        .catch((err) => {
+          this.logger.error(`Failed to send Undo EmojiReact activity: ${err}`)
+        })
     }
 
     return { reacted: false, emoji, message: 'Reaction removed' }
@@ -155,7 +186,12 @@ export class ReactionsService {
     userId?: string,
     ipHash?: string,
   ) {
-    const existingReaction = await this.findExistingReaction(artworkId, emoji, userId, ipHash)
+    const existingReaction = await this.findExistingReaction(
+      artworkId,
+      emoji,
+      userId,
+      ipHash,
+    )
 
     if (existingReaction) {
       return this.removeReaction(artworkId, emoji, userId, ipHash)
@@ -286,7 +322,9 @@ export class ReactionsService {
         expiresAt: { lt: now },
       },
     })
-    this.logger.log(`Cleaned up ${result.count} expired anonymous reaction rate limits`)
+    this.logger.log(
+      `Cleaned up ${result.count} expired anonymous reaction rate limits`,
+    )
     return result.count
   }
 }

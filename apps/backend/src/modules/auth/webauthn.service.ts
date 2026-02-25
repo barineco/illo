@@ -71,7 +71,9 @@ export class WebAuthnService {
     }
 
     const excludeCredentials = user.authenticators.map((auth) => ({
-      id: Buffer.from(auth.credentialId).toString('base64url') as Base64URLString,
+      id: Buffer.from(auth.credentialId).toString(
+        'base64url',
+      ) as Base64URLString,
       type: 'public-key' as const,
       transports: auth.transports as AuthenticatorTransportFuture[],
     }))
@@ -145,7 +147,10 @@ export class WebAuthnService {
 
     const { registrationInfo } = verification
 
-    const credentialIdBuffer = Buffer.from(registrationInfo.credential.id, 'base64url')
+    const credentialIdBuffer = Buffer.from(
+      registrationInfo.credential.id,
+      'base64url',
+    )
     const existingAuth = await this.prisma.authenticator.findUnique({
       where: { credentialId: credentialIdBuffer },
     })
@@ -198,7 +203,9 @@ export class WebAuthnService {
 
       if (user?.authenticators.length) {
         allowCredentials = user.authenticators.map((auth) => ({
-          id: Buffer.from(auth.credentialId).toString('base64url') as Base64URLString,
+          id: Buffer.from(auth.credentialId).toString(
+            'base64url',
+          ) as Base64URLString,
           type: 'public-key' as const,
           transports: auth.transports as AuthenticatorTransportFuture[],
         }))
@@ -262,7 +269,9 @@ export class WebAuthnService {
     let verification
     try {
       const credential: WebAuthnCredential = {
-        id: Buffer.from(authenticator.credentialId).toString('base64url') as Base64URLString,
+        id: Buffer.from(authenticator.credentialId).toString(
+          'base64url',
+        ) as Base64URLString,
         publicKey: new Uint8Array(authenticator.credentialPublicKey),
         counter: Number(authenticator.counter),
         transports: authenticator.transports as AuthenticatorTransportFuture[],

@@ -110,7 +110,10 @@ export class UsersService {
    * Parse username handle to extract username and domain
    * Supports formats: "username" or "username@domain"
    */
-  private parseUserHandle(handle: string): { username: string; domain: string } {
+  private parseUserHandle(handle: string): {
+    username: string
+    domain: string
+  } {
     const parts = handle.split('@')
     if (parts.length === 1) {
       // Local user: "username"
@@ -155,7 +158,9 @@ export class UsersService {
     if (!user && domain !== '') {
       this.logger.log(`User @${handle} not in DB, attempting ActivityPub fetch`)
       try {
-        const remoteUser = await this.federationSearchService.searchByHandle(`@${username}@${domain}`)
+        const remoteUser = await this.federationSearchService.searchByHandle(
+          `@${username}@${domain}`,
+        )
         if (remoteUser && remoteUser.id) {
           // Re-fetch from DB with full relations after federation search saved it
           user = await this.prisma.user.findUnique({
@@ -170,10 +175,14 @@ export class UsersService {
               },
             },
           })
-          this.logger.log(`Successfully fetched remote user @${handle} via ActivityPub`)
+          this.logger.log(
+            `Successfully fetched remote user @${handle} via ActivityPub`,
+          )
         }
       } catch (error) {
-        this.logger.warn(`Failed to fetch remote user @${handle}: ${error.message}`)
+        this.logger.warn(
+          `Failed to fetch remote user @${handle}: ${error.message}`,
+        )
       }
     }
 
@@ -291,11 +300,19 @@ export class UsersService {
 
     // Prepare update data with proper type casting for Prisma
     const prismaUpdateData: any = {
-      ...(updateData.displayName !== undefined && { displayName: updateData.displayName }),
+      ...(updateData.displayName !== undefined && {
+        displayName: updateData.displayName,
+      }),
       ...(updateData.bio !== undefined && { bio: updateData.bio }),
-      ...(updateData.avatarUrl !== undefined && { avatarUrl: updateData.avatarUrl }),
-      ...(updateData.coverImageUrl !== undefined && { coverImageUrl: updateData.coverImageUrl }),
-      ...(updateData.socialLinks !== undefined && { socialLinks: updateData.socialLinks }),
+      ...(updateData.avatarUrl !== undefined && {
+        avatarUrl: updateData.avatarUrl,
+      }),
+      ...(updateData.coverImageUrl !== undefined && {
+        coverImageUrl: updateData.coverImageUrl,
+      }),
+      ...(updateData.socialLinks !== undefined && {
+        socialLinks: updateData.socialLinks,
+      }),
     }
 
     const updatedUser = await this.prisma.user.update({
@@ -316,7 +333,9 @@ export class UsersService {
     if (!updatedUser.domain) {
       this.activityDeliveryService
         .sendUpdateProfile(updatedUser)
-        .catch((err) => this.logger.error(`Failed to send profile Update: ${err.message}`))
+        .catch((err) =>
+          this.logger.error(`Failed to send profile Update: ${err.message}`),
+        )
     }
 
     return {
@@ -460,7 +479,7 @@ export class UsersService {
       file,
       `users/${userId}/avatar`,
       400, // maxWidth for avatar
-      85,  // quality
+      85, // quality
       cropRegion,
     )
 
@@ -476,7 +495,9 @@ export class UsersService {
     if (!updatedUser.domain) {
       this.activityDeliveryService
         .sendUpdateProfile(updatedUser)
-        .catch((err) => this.logger.error(`Failed to send avatar Update: ${err.message}`))
+        .catch((err) =>
+          this.logger.error(`Failed to send avatar Update: ${err.message}`),
+        )
     }
 
     return { avatarUrl: result.url }
@@ -504,7 +525,7 @@ export class UsersService {
       file,
       `users/${userId}/cover`,
       1920, // maxWidth for cover
-      90,   // quality
+      90, // quality
       cropRegion,
     )
 
@@ -520,7 +541,9 @@ export class UsersService {
     if (!updatedUser.domain) {
       this.activityDeliveryService
         .sendUpdateProfile(updatedUser)
-        .catch((err) => this.logger.error(`Failed to send cover Update: ${err.message}`))
+        .catch((err) =>
+          this.logger.error(`Failed to send cover Update: ${err.message}`),
+        )
     }
 
     return { coverImageUrl: result.url }
@@ -530,36 +553,32 @@ export class UsersService {
    * Get dashboard statistics for current user
    */
   async getDashboardStats(userId: string) {
-    const [
-      artworkStats,
-      followerCount,
-      followingCount,
-      bookmarkCount,
-    ] = await Promise.all([
-      // Artwork stats aggregation
-      this.prisma.artwork.aggregate({
-        where: { authorId: userId, isDeleted: false },
-        _sum: {
-          viewCount: true,
-          likeCount: true,
-          bookmarkCount: true,
-          commentCount: true,
-        },
-        _count: true,
-      }),
-      // Follower count
-      this.prisma.follow.count({
-        where: { followingId: userId, status: 'ACCEPTED' },
-      }),
-      // Following count
-      this.prisma.follow.count({
-        where: { followerId: userId, status: 'ACCEPTED' },
-      }),
-      // User's bookmarks
-      this.prisma.bookmark.count({
-        where: { userId },
-      }),
-    ])
+    const [artworkStats, followerCount, followingCount, bookmarkCount] =
+      await Promise.all([
+        // Artwork stats aggregation
+        this.prisma.artwork.aggregate({
+          where: { authorId: userId, isDeleted: false },
+          _sum: {
+            viewCount: true,
+            likeCount: true,
+            bookmarkCount: true,
+            commentCount: true,
+          },
+          _count: true,
+        }),
+        // Follower count
+        this.prisma.follow.count({
+          where: { followingId: userId, status: 'ACCEPTED' },
+        }),
+        // Following count
+        this.prisma.follow.count({
+          where: { followerId: userId, status: 'ACCEPTED' },
+        }),
+        // User's bookmarks
+        this.prisma.bookmark.count({
+          where: { userId },
+        }),
+      ])
 
     return {
       artworks: {
@@ -612,7 +631,9 @@ export class UsersService {
    * Get user by Bluesky handle
    * Used for /at/:handle URL redirect
    */
-  async getUserByBlueskyHandle(handle: string): Promise<UserProfileResponse | null> {
+  async getUserByBlueskyHandle(
+    handle: string,
+  ): Promise<UserProfileResponse | null> {
     // Normalize handle (remove @ if present, ensure .bsky.social suffix if not present)
     let normalizedHandle = handle.replace(/^@/, '')
     if (!normalizedHandle.includes('.')) {
@@ -691,7 +712,10 @@ export class UsersService {
     let age = today.getFullYear() - birthDate.getFullYear()
     const monthDiff = today.getMonth() - birthDate.getMonth()
 
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
       age--
     }
 
@@ -720,7 +744,11 @@ export class UsersService {
   async updateBirthday(
     userId: string,
     dto: UpdateBirthdayDto,
-  ): Promise<{ birthday: Date | null; birthdayDisplay: BirthdayDisplay; isAdult: boolean }> {
+  ): Promise<{
+    birthday: Date | null
+    birthdayDisplay: BirthdayDisplay
+    isAdult: boolean
+  }> {
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
     })
@@ -762,7 +790,9 @@ export class UsersService {
       throw new NotFoundException('User not found')
     }
 
-    const isAdult = user.birthday ? this.calculateAge(user.birthday) >= 18 : false
+    const isAdult = user.birthday
+      ? this.calculateAge(user.birthday) >= 18
+      : false
     const stored = user.contentFilters as Partial<ContentFilters> | null
 
     // Merge with defaults
@@ -797,15 +827,21 @@ export class UsersService {
       throw new NotFoundException('User not found')
     }
 
-    const isAdult = user.birthday ? this.calculateAge(user.birthday) >= 18 : false
+    const isAdult = user.birthday
+      ? this.calculateAge(user.birthday) >= 18
+      : false
 
     // Don't allow non-adults to enable R-18 content
     if (!isAdult) {
       if (dto.r18 && dto.r18 !== 'hide') {
-        throw new ForbiddenException('Age verification required to view R-18 content')
+        throw new ForbiddenException(
+          'Age verification required to view R-18 content',
+        )
       }
       if (dto.r18g && dto.r18g !== 'hide') {
-        throw new ForbiddenException('Age verification required to view R-18G content')
+        throw new ForbiddenException(
+          'Age verification required to view R-18G content',
+        )
       }
     }
 
@@ -854,7 +890,9 @@ export class UsersService {
       throw new NotFoundException('User not found')
     }
 
-    const isAdult = user.birthday ? this.calculateAge(user.birthday) >= 18 : false
+    const isAdult = user.birthday
+      ? this.calculateAge(user.birthday) >= 18
+      : false
     const stored = user.contentFilters as Partial<ContentFilters> | null
 
     // Build content filters with defaults
@@ -871,7 +909,9 @@ export class UsersService {
     }
 
     return {
-      birthday: user.birthday ? user.birthday.toISOString().split('T')[0] : null,
+      birthday: user.birthday
+        ? user.birthday.toISOString().split('T')[0]
+        : null,
       birthdayDisplay: user.birthdayDisplay,
       isAdult,
       contentFilters,
@@ -944,7 +984,7 @@ export class UsersService {
     }
 
     // Remove duplicates and empty strings
-    const uniqueTools = [...new Set(tools.filter(t => t.trim()))]
+    const uniqueTools = [...new Set(tools.filter((t) => t.trim()))]
 
     await this.prisma.user.update({
       where: { id: userId },
@@ -968,7 +1008,9 @@ export class UsersService {
     }
 
     // Check if tool already exists (case-insensitive)
-    const exists = currentTools.some(t => t.toLowerCase() === trimmedTool.toLowerCase())
+    const exists = currentTools.some(
+      (t) => t.toLowerCase() === trimmedTool.toLowerCase(),
+    )
     if (exists) {
       return currentTools
     }
@@ -1038,7 +1080,7 @@ export class UsersService {
 
     if (dto.tools !== undefined) {
       // Remove duplicates and empty strings
-      const uniqueTools = [...new Set(dto.tools.filter(t => t.trim()))]
+      const uniqueTools = [...new Set(dto.tools.filter((t) => t.trim()))]
       updateData.toolsUsed = JSON.stringify(uniqueTools)
     }
 

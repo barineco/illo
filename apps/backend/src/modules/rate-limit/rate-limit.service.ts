@@ -1,8 +1,8 @@
-import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import Redis from 'ioredis';
-import { PrismaService } from '../prisma/prisma.service';
-import { RateLimitTier } from '@prisma/client';
+import { Injectable, OnModuleInit, Logger } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
+import Redis from 'ioredis'
+import { PrismaService } from '../prisma/prisma.service'
+import { RateLimitTier } from '@prisma/client'
 import {
   RateLimitIdentifier,
   RateLimitStatus,
@@ -10,26 +10,26 @@ import {
   RateLimitConfig,
   RateLimitStats,
   CompositeRiskScore,
-} from './interfaces/rate-limit.interface';
-import { UpdateRateLimitConfigDto } from './dto/rate-limit-config.dto';
+} from './interfaces/rate-limit.interface'
+import { UpdateRateLimitConfigDto } from './dto/rate-limit-config.dto'
 import {
   RateLimitLogQueryDto,
   RateLimitPenaltyQueryDto,
-} from './dto/rate-limit-log-query.dto';
+} from './dto/rate-limit-log-query.dto'
 
-const CONFIG_CACHE_TTL = 300; // 5 minutes
-const CONFIG_CACHE_KEY = 'ratelimit:config';
-const PATTERN_SAMPLE_SIZE = 100;
-const NO_INTERACTION_KEY_PREFIX = 'ratelimit:no_interaction:';
-const NO_INTERACTION_TTL = 86400; // 24 hours - cleared only by real interaction
-const NO_INTERACTION_GRACE_SECONDS = 5; // grace period for concurrent requests on page load
+const CONFIG_CACHE_TTL = 300 // 5 minutes
+const CONFIG_CACHE_KEY = 'ratelimit:config'
+const PATTERN_SAMPLE_SIZE = 100
+const NO_INTERACTION_KEY_PREFIX = 'ratelimit:no_interaction:'
+const NO_INTERACTION_TTL = 86400 // 24 hours - cleared only by real interaction
+const NO_INTERACTION_GRACE_SECONDS = 5 // grace period for concurrent requests on page load
 
 @Injectable()
 export class RateLimitService implements OnModuleInit {
-  private readonly logger = new Logger(RateLimitService.name);
-  private redis: Redis;
-  private configCache: RateLimitConfig | null = null;
-  private configCacheExpiry: number = 0;
+  private readonly logger = new Logger(RateLimitService.name)
+  private redis: Redis
+  private configCache: RateLimitConfig | null = null
+  private configCacheExpiry: number = 0
 
   constructor(
     private readonly prisma: PrismaService,
@@ -40,15 +40,15 @@ export class RateLimitService implements OnModuleInit {
       port: this.configService.get('REDIS_PORT', 6379),
       maxRetriesPerRequest: 3,
       lazyConnect: true,
-    });
+    })
   }
 
   async onModuleInit() {
     try {
-      await this.redis.connect();
-      this.logger.log('Redis connected for rate limiting');
+      await this.redis.connect()
+      this.logger.log('Redis connected for rate limiting')
     } catch (error) {
-      this.logger.error('Failed to connect to Redis for rate limiting', error);
+      this.logger.error('Failed to connect to Redis for rate limiting', error)
     }
   }
 
@@ -61,28 +61,29 @@ export class RateLimitService implements OnModuleInit {
     artworkId?: string,
     hasRealInteraction?: boolean,
   ): Promise<RateLimitStatus> {
-    const config = await this.getConfig();
+    const config = await this.getConfig()
 
     // Even if rate limiting is disabled, apply interaction-based degradation if enabled
     if (!config.enabled) {
       if (config.noInteractionEnabled && hasRealInteraction === false) {
-        const isConsecutive = await this.checkConsecutiveNoInteraction(identifier);
+        const isConsecutive =
+          await this.checkConsecutiveNoInteraction(identifier)
         if (isConsecutive) {
-          this.logInteractionOnlyDetection(identifier, action);
+          this.logInteractionOnlyDetection(identifier, action)
           return {
             tier: RateLimitTier.SOFT_LIMIT,
             degradeQuality: true,
             reason: 'no_real_interaction',
-          };
+          }
         }
       } else if (hasRealInteraction === true) {
-        await this.clearNoInteractionFlag(identifier);
+        await this.clearNoInteractionFlag(identifier)
       }
-      return { tier: RateLimitTier.NORMAL, degradeQuality: false };
+      return { tier: RateLimitTier.NORMAL, degradeQuality: false }
     }
 
     // Check for active penalty first (fast path)
-    const penalty = await this.getActivePenalty(identifier);
+    const penalty = await this.getActivePenalty(identifier)
     if (penalty) {
       return {
         tier: penalty.tier,
@@ -91,27 +92,27 @@ export class RateLimitService implements OnModuleInit {
           penalty.tier === RateLimitTier.HARD_LIMIT,
         penaltyExpiresAt: penalty.expiresAt,
         reason: penalty.reason,
-      };
+      }
     }
 
-    const key = this.buildKey(identifier, action);
-    const now = Date.now();
+    const key = this.buildKey(identifier, action)
+    const now = Date.now()
 
     if (artworkId) {
-      await this.recordRequest(key, now, artworkId, config.windowSeconds);
+      await this.recordRequest(key, now, artworkId, config.windowSeconds)
     }
 
     const [countPerWindow, countPerHour] = await Promise.all([
       this.getRequestCount(key, config.windowSeconds),
       this.getRequestCount(key, 3600),
-    ]);
+    ])
 
-    const patternAnalysis = await this.analyzeRequestPattern(identifier, action);
-    const isAnonymous = !identifier.userId;
+    const patternAnalysis = await this.analyzeRequestPattern(identifier, action)
+    const isAnonymous = !identifier.userId
 
-    let tier: RateLimitTier;
-    let riskScore: CompositeRiskScore | undefined;
-    let detectionReason: string | undefined;
+    let tier: RateLimitTier
+    let riskScore: CompositeRiskScore | undefined
+    let detectionReason: string | undefined
 
     if (config.useCompositeScore) {
       const result = await this.determineTierV2(
@@ -122,10 +123,10 @@ export class RateLimitService implements OnModuleInit {
         isAnonymous,
         hasRealInteraction,
         identifier,
-      );
-      tier = result.tier;
-      riskScore = result.riskScore;
-      detectionReason = result.reason;
+      )
+      tier = result.tier
+      riskScore = result.riskScore
+      detectionReason = result.reason
     } else {
       tier = this.determineTier(
         countPerWindow,
@@ -133,7 +134,7 @@ export class RateLimitService implements OnModuleInit {
         patternAnalysis,
         config,
         isAnonymous,
-      );
+      )
     }
 
     // No-interaction consecutive detection (independent of scoring algorithm)
@@ -142,13 +143,13 @@ export class RateLimitService implements OnModuleInit {
       config.noInteractionEnabled &&
       hasRealInteraction === false
     ) {
-      const isConsecutive = await this.checkConsecutiveNoInteraction(identifier);
+      const isConsecutive = await this.checkConsecutiveNoInteraction(identifier)
       if (isConsecutive) {
-        tier = RateLimitTier.SOFT_LIMIT;
-        detectionReason = 'no_real_interaction';
+        tier = RateLimitTier.SOFT_LIMIT
+        detectionReason = 'no_real_interaction'
       }
     } else if (hasRealInteraction === true) {
-      await this.clearNoInteractionFlag(identifier);
+      await this.clearNoInteractionFlag(identifier)
     }
 
     // Measurement mode: log everything but don't apply penalties
@@ -165,7 +166,7 @@ export class RateLimitService implements OnModuleInit {
         `measurement:${detectionReason || 'legacy'}`,
         isAnonymous,
         hasRealInteraction,
-      );
+      )
       return {
         tier: RateLimitTier.NORMAL, // Always return NORMAL in measurement mode
         degradeQuality: false,
@@ -173,12 +174,15 @@ export class RateLimitService implements OnModuleInit {
         requestsInHour: countPerHour,
         riskScore,
         detectionReason: `measurement:${detectionReason || 'legacy'}`,
-      };
+      }
     }
 
     // Apply penalty if needed
-    if (tier === RateLimitTier.SOFT_LIMIT || tier === RateLimitTier.HARD_LIMIT) {
-      await this.applyPenalty(identifier, tier, action, config);
+    if (
+      tier === RateLimitTier.SOFT_LIMIT ||
+      tier === RateLimitTier.HARD_LIMIT
+    ) {
+      await this.applyPenalty(identifier, tier, action, config)
     }
 
     // Log if not NORMAL
@@ -194,7 +198,7 @@ export class RateLimitService implements OnModuleInit {
         detectionReason,
         isAnonymous,
         hasRealInteraction,
-      );
+      )
     }
 
     return {
@@ -205,39 +209,51 @@ export class RateLimitService implements OnModuleInit {
       requestsInHour: countPerHour,
       riskScore,
       detectionReason,
-    };
+    }
   }
 
   /**
    * Get cached config or fetch from database
    */
   async getConfig(): Promise<RateLimitConfig> {
-    const now = Date.now();
+    const now = Date.now()
     if (this.configCache && this.configCacheExpiry > now) {
-      return this.configCache;
+      return this.configCache
     }
 
     // Try Redis cache first
-    const cachedConfig = await this.redis.hgetall(CONFIG_CACHE_KEY);
+    const cachedConfig = await this.redis.hgetall(CONFIG_CACHE_KEY)
     if (cachedConfig && Object.keys(cachedConfig).length > 0) {
-      this.configCache = this.parseConfigFromRedis(cachedConfig);
-      this.configCacheExpiry = now + CONFIG_CACHE_TTL * 1000;
-      return this.configCache;
+      this.configCache = this.parseConfigFromRedis(cachedConfig)
+      this.configCacheExpiry = now + CONFIG_CACHE_TTL * 1000
+      return this.configCache
     }
 
     // Fetch from database
-    let dbConfig = await this.prisma.rateLimitConfig.findFirst();
+    let dbConfig = await this.prisma.rateLimitConfig.findFirst()
     if (!dbConfig) {
       // Create default config with environment variable overrides
       dbConfig = await this.prisma.rateLimitConfig.create({
         data: {
-          measurementMode: this.configService.get('RATE_LIMIT_MEASUREMENT_MODE', 'false') === 'true',
-          useCompositeScore: this.configService.get('RATE_LIMIT_USE_COMPOSITE_SCORE', 'false') === 'true',
-          hardLimitScore: parseFloat(this.configService.get('RATE_LIMIT_HARD_SCORE', '90')),
-          softLimitScore: parseFloat(this.configService.get('RATE_LIMIT_SOFT_SCORE', '50')),
-          warningScore: parseFloat(this.configService.get('RATE_LIMIT_WARNING_SCORE', '35')),
+          measurementMode:
+            this.configService.get('RATE_LIMIT_MEASUREMENT_MODE', 'false') ===
+            'true',
+          useCompositeScore:
+            this.configService.get(
+              'RATE_LIMIT_USE_COMPOSITE_SCORE',
+              'false',
+            ) === 'true',
+          hardLimitScore: parseFloat(
+            this.configService.get('RATE_LIMIT_HARD_SCORE', '90'),
+          ),
+          softLimitScore: parseFloat(
+            this.configService.get('RATE_LIMIT_SOFT_SCORE', '50'),
+          ),
+          warningScore: parseFloat(
+            this.configService.get('RATE_LIMIT_WARNING_SCORE', '35'),
+          ),
         },
-      });
+      })
     }
 
     const config: RateLimitConfig = {
@@ -262,15 +278,16 @@ export class RateLimitService implements OnModuleInit {
       measurementMode: dbConfig.measurementMode,
       useCompositeScore: dbConfig.useCompositeScore,
       noInteractionEnabled: dbConfig.noInteractionEnabled,
-      noInteractionThresholdMultiplier: dbConfig.noInteractionThresholdMultiplier,
-    };
+      noInteractionThresholdMultiplier:
+        dbConfig.noInteractionThresholdMultiplier,
+    }
 
     // Cache in Redis
-    await this.cacheConfig(config);
-    this.configCache = config;
-    this.configCacheExpiry = now + CONFIG_CACHE_TTL * 1000;
+    await this.cacheConfig(config)
+    this.configCache = config
+    this.configCacheExpiry = now + CONFIG_CACHE_TTL * 1000
 
-    return config;
+    return config
   }
 
   /**
@@ -280,24 +297,24 @@ export class RateLimitService implements OnModuleInit {
     dto: UpdateRateLimitConfigDto,
     updatedBy: string,
   ): Promise<RateLimitConfig> {
-    let dbConfig = await this.prisma.rateLimitConfig.findFirst();
+    let dbConfig = await this.prisma.rateLimitConfig.findFirst()
     if (!dbConfig) {
       dbConfig = await this.prisma.rateLimitConfig.create({
         data: { ...dto, updatedBy },
-      });
+      })
     } else {
       dbConfig = await this.prisma.rateLimitConfig.update({
         where: { id: dbConfig.id },
         data: { ...dto, updatedBy },
-      });
+      })
     }
 
     // Invalidate caches
-    await this.redis.del(CONFIG_CACHE_KEY);
-    this.configCache = null;
-    this.configCacheExpiry = 0;
+    await this.redis.del(CONFIG_CACHE_KEY)
+    this.configCache = null
+    this.configCacheExpiry = 0
 
-    return this.getConfig();
+    return this.getConfig()
   }
 
   /**
@@ -309,18 +326,18 @@ export class RateLimitService implements OnModuleInit {
     artworkId: string,
     windowSeconds: number,
   ): Promise<void> {
-    const pipeline = this.redis.pipeline();
+    const pipeline = this.redis.pipeline()
     // Use artworkId as member for deduplication within the same artwork
     // Score is the timestamp for time-based expiry
-    pipeline.zadd(key, timestamp, `${artworkId}:${timestamp}`);
+    pipeline.zadd(key, timestamp, `${artworkId}:${timestamp}`)
     // Set TTL
-    pipeline.expire(key, windowSeconds + 3700); // Keep for window + 1 hour buffer
+    pipeline.expire(key, windowSeconds + 3700) // Keep for window + 1 hour buffer
     // Also record timestamp for pattern analysis
-    const intervalKey = `ratelimit:intervals:${key}`;
-    pipeline.lpush(intervalKey, timestamp.toString());
-    pipeline.ltrim(intervalKey, 0, PATTERN_SAMPLE_SIZE - 1);
-    pipeline.expire(intervalKey, 3600);
-    await pipeline.exec();
+    const intervalKey = `ratelimit:intervals:${key}`
+    pipeline.lpush(intervalKey, timestamp.toString())
+    pipeline.ltrim(intervalKey, 0, PATTERN_SAMPLE_SIZE - 1)
+    pipeline.expire(intervalKey, 3600)
+    await pipeline.exec()
   }
 
   /**
@@ -330,13 +347,13 @@ export class RateLimitService implements OnModuleInit {
     key: string,
     windowSeconds: number,
   ): Promise<number> {
-    const now = Date.now();
-    const windowStart = now - windowSeconds * 1000;
+    const now = Date.now()
+    const windowStart = now - windowSeconds * 1000
 
     // Clean old entries and count
-    await this.redis.zremrangebyscore(key, 0, windowStart);
-    const count = await this.redis.zcount(key, windowStart, now);
-    return count;
+    await this.redis.zremrangebyscore(key, 0, windowStart)
+    const count = await this.redis.zcount(key, windowStart, now)
+    return count
   }
 
   /**
@@ -346,37 +363,45 @@ export class RateLimitService implements OnModuleInit {
     identifier: RateLimitIdentifier,
     action: string,
   ): Promise<PatternAnalysis> {
-    const key = `ratelimit:intervals:${this.buildKey(identifier, action)}`;
-    const timestamps = await this.redis.lrange(key, 0, PATTERN_SAMPLE_SIZE - 1);
+    const key = `ratelimit:intervals:${this.buildKey(identifier, action)}`
+    const timestamps = await this.redis.lrange(key, 0, PATTERN_SAMPLE_SIZE - 1)
 
     if (timestamps.length < 10) {
-      return { intervalCV: 1.0, avgInterval: null, sampleSize: timestamps.length };
+      return {
+        intervalCV: 1.0,
+        avgInterval: null,
+        sampleSize: timestamps.length,
+      }
     }
 
-    const intervals: number[] = [];
+    const intervals: number[] = []
     for (let i = 1; i < timestamps.length; i++) {
-      const interval = parseInt(timestamps[i - 1]) - parseInt(timestamps[i]);
+      const interval = parseInt(timestamps[i - 1]) - parseInt(timestamps[i])
       if (interval > 0) {
-        intervals.push(interval);
+        intervals.push(interval)
       }
     }
 
     if (intervals.length < 5) {
-      return { intervalCV: 1.0, avgInterval: null, sampleSize: intervals.length };
+      return {
+        intervalCV: 1.0,
+        avgInterval: null,
+        sampleSize: intervals.length,
+      }
     }
 
-    const mean = intervals.reduce((a, b) => a + b, 0) / intervals.length;
+    const mean = intervals.reduce((a, b) => a + b, 0) / intervals.length
     const variance =
       intervals.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) /
-      intervals.length;
-    const stdDev = Math.sqrt(variance);
-    const cv = mean > 0 ? stdDev / mean : 1.0;
+      intervals.length
+    const stdDev = Math.sqrt(variance)
+    const cv = mean > 0 ? stdDev / mean : 1.0
 
     return {
       intervalCV: cv,
       avgInterval: mean,
       sampleSize: intervals.length,
-    };
+    }
   }
 
   // ============================================
@@ -387,28 +412,28 @@ export class RateLimitService implements OnModuleInit {
    * Calculate interval score (0-50 points)
    */
   private calculateIntervalScore(avgIntervalMs: number): number {
-    const avgSeconds = avgIntervalMs / 1000;
-    if (avgSeconds < 1) return 50;
-    if (avgSeconds < 2) return 45;
-    if (avgSeconds < 3) return 35;
-    if (avgSeconds < 5) return 25;
-    if (avgSeconds < 8) return 15;
-    if (avgSeconds < 15) return 5;
-    return 0;
+    const avgSeconds = avgIntervalMs / 1000
+    if (avgSeconds < 1) return 50
+    if (avgSeconds < 2) return 45
+    if (avgSeconds < 3) return 35
+    if (avgSeconds < 5) return 25
+    if (avgSeconds < 8) return 15
+    if (avgSeconds < 15) return 5
+    return 0
   }
 
   /**
    * Calculate regularity score from CV (0-50 points)
    */
   private calculateRegularityScore(cv: number): number {
-    if (cv < 0.05) return 50;
-    if (cv < 0.10) return 45;
-    if (cv < 0.15) return 40;
-    if (cv < 0.25) return 30;
-    if (cv < 0.40) return 20;
-    if (cv < 0.60) return 10;
-    if (cv < 0.80) return 5;
-    return 0;
+    if (cv < 0.05) return 50
+    if (cv < 0.1) return 45
+    if (cv < 0.15) return 40
+    if (cv < 0.25) return 30
+    if (cv < 0.4) return 20
+    if (cv < 0.6) return 10
+    if (cv < 0.8) return 5
+    return 0
   }
 
   /**
@@ -419,8 +444,8 @@ export class RateLimitService implements OnModuleInit {
     cv: number,
     sampleSize: number,
   ): CompositeRiskScore {
-    const intervalScore = this.calculateIntervalScore(avgIntervalMs);
-    const regularityScore = this.calculateRegularityScore(cv);
+    const intervalScore = this.calculateIntervalScore(avgIntervalMs)
+    const regularityScore = this.calculateRegularityScore(cv)
 
     return {
       score: intervalScore + regularityScore,
@@ -428,7 +453,7 @@ export class RateLimitService implements OnModuleInit {
       avgIntervalMs,
       cv,
       sampleSize,
-    };
+    }
   }
 
   /**
@@ -442,29 +467,33 @@ export class RateLimitService implements OnModuleInit {
     isAnonymous: boolean,
     hasRealInteraction?: boolean,
     identifier?: RateLimitIdentifier,
-  ): Promise<{ tier: RateLimitTier; riskScore?: CompositeRiskScore; reason?: string }> {
+  ): Promise<{
+    tier: RateLimitTier
+    riskScore?: CompositeRiskScore
+    reason?: string
+  }> {
     // Anonymous users have 50% stricter volume limits
-    const anonymousMultiplier = isAnonymous ? 0.5 : 1.0;
+    const anonymousMultiplier = isAnonymous ? 0.5 : 1.0
 
     const effectiveHardLimitPerWindow = Math.floor(
       config.hardLimitPerWindow * anonymousMultiplier,
-    );
+    )
     const effectiveHardLimitPerHour = Math.floor(
       config.hardLimitPerHour * anonymousMultiplier,
-    );
+    )
     const effectiveSoftLimitPerWindow = Math.floor(
       config.softLimitPerWindow * anonymousMultiplier,
-    );
+    )
     const effectiveSoftLimitPerHour = Math.floor(
       config.softLimitPerHour * anonymousMultiplier,
-    );
+    )
 
     // 1. Volume-based hard limit check
     if (
       countPerWindow > effectiveHardLimitPerWindow ||
       countPerHour > effectiveHardLimitPerHour
     ) {
-      return { tier: RateLimitTier.HARD_LIMIT, reason: 'volume_hard_limit' };
+      return { tier: RateLimitTier.HARD_LIMIT, reason: 'volume_hard_limit' }
     }
 
     // 2. Volume-based soft limit check
@@ -472,7 +501,7 @@ export class RateLimitService implements OnModuleInit {
       countPerWindow > effectiveSoftLimitPerWindow ||
       countPerHour > effectiveSoftLimitPerHour
     ) {
-      return { tier: RateLimitTier.SOFT_LIMIT, reason: 'volume_soft_limit' };
+      return { tier: RateLimitTier.SOFT_LIMIT, reason: 'volume_soft_limit' }
     }
 
     // 3. No real interaction detection
@@ -483,15 +512,15 @@ export class RateLimitService implements OnModuleInit {
       hasRealInteraction === false &&
       identifier
     ) {
-      const isConsecutive = await this.checkConsecutiveNoInteraction(identifier);
+      const isConsecutive = await this.checkConsecutiveNoInteraction(identifier)
       if (isConsecutive) {
         return {
           tier: RateLimitTier.SOFT_LIMIT,
           reason: 'no_real_interaction',
-        };
+        }
       }
     } else if (hasRealInteraction === true && identifier) {
-      await this.clearNoInteractionFlag(identifier);
+      await this.clearNoInteractionFlag(identifier)
     }
 
     // 4. Instant detection (obvious automation, sample size not required)
@@ -504,20 +533,20 @@ export class RateLimitService implements OnModuleInit {
         pattern.avgInterval,
         pattern.intervalCV,
         pattern.sampleSize,
-      );
+      )
       return {
         tier: RateLimitTier.HARD_LIMIT,
         reason: 'instant_automation_detected',
         riskScore,
-      };
+      }
     }
 
     // 5. Check minimum sample size for pattern analysis
     const minSamples = isAnonymous
       ? config.minSamplesAnonymous
-      : config.minSamplesUser;
+      : config.minSamplesUser
     if (pattern.sampleSize < minSamples || !pattern.avgInterval) {
-      return { tier: RateLimitTier.NORMAL, reason: 'insufficient_samples' };
+      return { tier: RateLimitTier.NORMAL, reason: 'insufficient_samples' }
     }
 
     // 6. Calculate composite risk score
@@ -525,23 +554,35 @@ export class RateLimitService implements OnModuleInit {
       pattern.avgInterval,
       pattern.intervalCV,
       pattern.sampleSize,
-    );
+    )
 
     // Anonymous users have 10% stricter thresholds
-    const thresholdMultiplier = isAnonymous ? 0.9 : 1.0;
+    const thresholdMultiplier = isAnonymous ? 0.9 : 1.0
 
     // 7. Pattern-based tier determination
     if (riskScore.score >= config.hardLimitScore * thresholdMultiplier) {
-      return { tier: RateLimitTier.HARD_LIMIT, riskScore, reason: 'pattern_hard_limit' };
+      return {
+        tier: RateLimitTier.HARD_LIMIT,
+        riskScore,
+        reason: 'pattern_hard_limit',
+      }
     }
     if (riskScore.score >= config.softLimitScore * thresholdMultiplier) {
-      return { tier: RateLimitTier.SOFT_LIMIT, riskScore, reason: 'pattern_soft_limit' };
+      return {
+        tier: RateLimitTier.SOFT_LIMIT,
+        riskScore,
+        reason: 'pattern_soft_limit',
+      }
     }
     if (riskScore.score >= config.warningScore * thresholdMultiplier) {
-      return { tier: RateLimitTier.WARNING, riskScore, reason: 'pattern_warning' };
+      return {
+        tier: RateLimitTier.WARNING,
+        riskScore,
+        reason: 'pattern_warning',
+      }
     }
 
-    return { tier: RateLimitTier.NORMAL, riskScore, reason: 'normal' };
+    return { tier: RateLimitTier.NORMAL, riskScore, reason: 'normal' }
   }
 
   /**
@@ -556,19 +597,27 @@ export class RateLimitService implements OnModuleInit {
     isAnonymous: boolean = false,
   ): RateLimitTier {
     // Anonymous users have 50% stricter limits
-    const anonymousMultiplier = isAnonymous ? 0.5 : 1.0;
+    const anonymousMultiplier = isAnonymous ? 0.5 : 1.0
 
-    const effectiveSoftLimitPerWindow = Math.floor(config.softLimitPerWindow * anonymousMultiplier);
-    const effectiveHardLimitPerWindow = Math.floor(config.hardLimitPerWindow * anonymousMultiplier);
-    const effectiveSoftLimitPerHour = Math.floor(config.softLimitPerHour * anonymousMultiplier);
-    const effectiveHardLimitPerHour = Math.floor(config.hardLimitPerHour * anonymousMultiplier);
+    const effectiveSoftLimitPerWindow = Math.floor(
+      config.softLimitPerWindow * anonymousMultiplier,
+    )
+    const effectiveHardLimitPerWindow = Math.floor(
+      config.hardLimitPerWindow * anonymousMultiplier,
+    )
+    const effectiveSoftLimitPerHour = Math.floor(
+      config.softLimitPerHour * anonymousMultiplier,
+    )
+    const effectiveHardLimitPerHour = Math.floor(
+      config.hardLimitPerHour * anonymousMultiplier,
+    )
 
     // Hard limit checks (any one triggers)
     if (
       countPerWindow > effectiveHardLimitPerWindow ||
       countPerHour > effectiveHardLimitPerHour
     ) {
-      return RateLimitTier.HARD_LIMIT;
+      return RateLimitTier.HARD_LIMIT
     }
 
     // Soft limit checks
@@ -576,22 +625,25 @@ export class RateLimitService implements OnModuleInit {
       countPerWindow > effectiveSoftLimitPerWindow ||
       countPerHour > effectiveSoftLimitPerHour
     ) {
-      return RateLimitTier.SOFT_LIMIT;
+      return RateLimitTier.SOFT_LIMIT
     }
 
     // Warning level (volume)
     const warningWindowThreshold = Math.floor(
       (effectiveSoftLimitPerWindow + effectiveHardLimitPerWindow) / 3,
-    );
+    )
     const warningHourThreshold = Math.floor(
       (effectiveSoftLimitPerHour + effectiveHardLimitPerHour) / 3,
-    );
+    )
 
-    if (countPerWindow > warningWindowThreshold || countPerHour > warningHourThreshold) {
-      return RateLimitTier.WARNING;
+    if (
+      countPerWindow > warningWindowThreshold ||
+      countPerHour > warningHourThreshold
+    ) {
+      return RateLimitTier.WARNING
     }
 
-    return RateLimitTier.NORMAL;
+    return RateLimitTier.NORMAL
   }
 
   /**
@@ -600,28 +652,28 @@ export class RateLimitService implements OnModuleInit {
   private async getActivePenalty(
     identifier: RateLimitIdentifier,
   ): Promise<{ tier: RateLimitTier; expiresAt: Date; reason: string } | null> {
-    const now = Date.now();
+    const now = Date.now()
 
     // Check Redis cache for both user and IP
-    const keys = [];
+    const keys = []
     if (identifier.userId) {
-      keys.push(`ratelimit:penalty:user:${identifier.userId}`);
+      keys.push(`ratelimit:penalty:user:${identifier.userId}`)
     }
-    keys.push(`ratelimit:penalty:ip:${identifier.ipAddress}`);
+    keys.push(`ratelimit:penalty:ip:${identifier.ipAddress}`)
 
     for (const key of keys) {
-      const cached = await this.redis.hgetall(key);
+      const cached = await this.redis.hgetall(key)
       if (cached && cached.tier && cached.expiresAt) {
-        const expiresAt = parseInt(cached.expiresAt);
+        const expiresAt = parseInt(cached.expiresAt)
         if (expiresAt > now) {
           return {
             tier: cached.tier as RateLimitTier,
             expiresAt: new Date(expiresAt),
             reason: cached.reason || 'Rate limit exceeded',
-          };
+          }
         } else {
           // Expired, clean up
-          await this.redis.del(key);
+          await this.redis.del(key)
         }
       }
     }
@@ -636,19 +688,24 @@ export class RateLimitService implements OnModuleInit {
         expiresAt: { gt: new Date() },
       },
       orderBy: { expiresAt: 'desc' },
-    });
+    })
 
     if (penalty) {
       // Cache it
-      await this.cachePenalty(identifier, penalty.tier, penalty.expiresAt, penalty.reason);
+      await this.cachePenalty(
+        identifier,
+        penalty.tier,
+        penalty.expiresAt,
+        penalty.reason,
+      )
       return {
         tier: penalty.tier,
         expiresAt: penalty.expiresAt,
         reason: penalty.reason,
-      };
+      }
     }
 
-    return null;
+    return null
   }
 
   /**
@@ -670,26 +727,26 @@ export class RateLimitService implements OnModuleInit {
         startedAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
       },
       orderBy: { startedAt: 'desc' },
-    });
+    })
 
     // Calculate duration with escalation
     let baseDuration =
       tier === RateLimitTier.SOFT_LIMIT
         ? config.softPenaltyMinutes
-        : config.hardPenaltyMinutes;
-    let violationCount = 1;
+        : config.hardPenaltyMinutes
+    let violationCount = 1
 
     if (recentPenalty) {
-      violationCount = recentPenalty.violationCount + 1;
+      violationCount = recentPenalty.violationCount + 1
       // Exponential backoff: base * 3^(violations-1), capped at max
       baseDuration = Math.min(
         baseDuration * Math.pow(3, violationCount - 1),
         config.maxPenaltyMinutes,
-      );
+      )
     }
 
-    const expiresAt = new Date(Date.now() + baseDuration * 60 * 1000);
-    const reason = `Rate limit exceeded: ${action} (violation #${violationCount})`;
+    const expiresAt = new Date(Date.now() + baseDuration * 60 * 1000)
+    const reason = `Rate limit exceeded: ${action} (violation #${violationCount})`
 
     // Upsert penalty in database
     await this.prisma.rateLimitPenalty.upsert({
@@ -715,14 +772,14 @@ export class RateLimitService implements OnModuleInit {
         violationCount,
         startedAt: new Date(),
       },
-    });
+    })
 
     // Cache in Redis
-    await this.cachePenalty(identifier, tier, expiresAt, reason);
+    await this.cachePenalty(identifier, tier, expiresAt, reason)
 
     this.logger.warn(
       `Rate limit penalty applied: ${tier} for ${identifier.userId || identifier.ipAddress}, duration: ${baseDuration} minutes`,
-    );
+    )
   }
 
   /**
@@ -734,30 +791,30 @@ export class RateLimitService implements OnModuleInit {
     expiresAt: Date,
     reason: string,
   ): Promise<void> {
-    const ttl = Math.ceil((expiresAt.getTime() - Date.now()) / 1000);
-    if (ttl <= 0) return;
+    const ttl = Math.ceil((expiresAt.getTime() - Date.now()) / 1000)
+    if (ttl <= 0) return
 
-    const pipeline = this.redis.pipeline();
+    const pipeline = this.redis.pipeline()
 
     if (identifier.userId) {
-      const userKey = `ratelimit:penalty:user:${identifier.userId}`;
+      const userKey = `ratelimit:penalty:user:${identifier.userId}`
       pipeline.hset(userKey, {
         tier,
         expiresAt: expiresAt.getTime().toString(),
         reason,
-      });
-      pipeline.expire(userKey, ttl);
+      })
+      pipeline.expire(userKey, ttl)
     }
 
-    const ipKey = `ratelimit:penalty:ip:${identifier.ipAddress}`;
+    const ipKey = `ratelimit:penalty:ip:${identifier.ipAddress}`
     pipeline.hset(ipKey, {
       tier,
       expiresAt: expiresAt.getTime().toString(),
       reason,
-    });
-    pipeline.expire(ipKey, ttl);
+    })
+    pipeline.expire(ipKey, ttl)
 
-    await pipeline.exec();
+    await pipeline.exec()
   }
 
   /**
@@ -785,9 +842,9 @@ export class RateLimitService implements OnModuleInit {
           avgInterval: pattern.avgInterval,
           windowStart: new Date(Date.now() - windowSize * 1000),
         },
-      });
+      })
     } catch (error) {
-      this.logger.error('Failed to log rate limit event', error);
+      this.logger.error('Failed to log rate limit event', error)
     }
   }
 
@@ -826,9 +883,9 @@ export class RateLimitService implements OnModuleInit {
           isAnonymous: isAnonymous ?? !identifier.userId,
           hasRealInteraction: hasRealInteraction ?? null,
         },
-      });
+      })
     } catch (error) {
-      this.logger.error('Failed to log rate limit event', error);
+      this.logger.error('Failed to log rate limit event', error)
     }
   }
 
@@ -859,15 +916,15 @@ export class RateLimitService implements OnModuleInit {
           isAnonymous: !identifier.userId,
           hasRealInteraction: false,
         },
-      });
+      })
     } catch (error) {
-      this.logger.error('Failed to log interaction-only detection', error);
+      this.logger.error('Failed to log interaction-only detection', error)
     }
   }
 
   private getNoInteractionKey(identifier: RateLimitIdentifier): string {
-    const id = identifier.userId || identifier.ipAddress;
-    return `${NO_INTERACTION_KEY_PREFIX}${id}`;
+    const id = identifier.userId || identifier.ipAddress
+    return `${NO_INTERACTION_KEY_PREFIX}${id}`
   }
 
   /**
@@ -879,29 +936,29 @@ export class RateLimitService implements OnModuleInit {
   private async checkConsecutiveNoInteraction(
     identifier: RateLimitIdentifier,
   ): Promise<boolean> {
-    const key = this.getNoInteractionKey(identifier);
-    const stored = await this.redis.get(key);
+    const key = this.getNoInteractionKey(identifier)
+    const stored = await this.redis.get(key)
 
     if (!stored) {
-      await this.redis.setex(key, NO_INTERACTION_TTL, Date.now().toString());
-      return false;
+      await this.redis.setex(key, NO_INTERACTION_TTL, Date.now().toString())
+      return false
     }
 
-    const firstSeen = parseInt(stored, 10);
-    const elapsed = (Date.now() - firstSeen) / 1000;
+    const firstSeen = parseInt(stored, 10)
+    const elapsed = (Date.now() - firstSeen) / 1000
 
     if (elapsed < NO_INTERACTION_GRACE_SECONDS) {
-      return false;
+      return false
     }
 
-    return true;
+    return true
   }
 
   private async clearNoInteractionFlag(
     identifier: RateLimitIdentifier,
   ): Promise<void> {
-    const key = this.getNoInteractionKey(identifier);
-    await this.redis.del(key);
+    const key = this.getNoInteractionKey(identifier)
+    await this.redis.del(key)
   }
 
   /**
@@ -909,9 +966,9 @@ export class RateLimitService implements OnModuleInit {
    */
   private buildKey(identifier: RateLimitIdentifier, action: string): string {
     if (identifier.userId) {
-      return `user:${identifier.userId}:${action}`;
+      return `user:${identifier.userId}:${action}`
     }
-    return `ip:${identifier.ipAddress}:${action}`;
+    return `ip:${identifier.ipAddress}:${action}`
   }
 
   /**
@@ -940,9 +997,10 @@ export class RateLimitService implements OnModuleInit {
       measurementMode: config.measurementMode.toString(),
       useCompositeScore: config.useCompositeScore.toString(),
       noInteractionEnabled: config.noInteractionEnabled.toString(),
-      noInteractionThresholdMultiplier: config.noInteractionThresholdMultiplier.toString(),
-    });
-    await this.redis.expire(CONFIG_CACHE_KEY, CONFIG_CACHE_TTL);
+      noInteractionThresholdMultiplier:
+        config.noInteractionThresholdMultiplier.toString(),
+    })
+    await this.redis.expire(CONFIG_CACHE_KEY, CONFIG_CACHE_TTL)
   }
 
   /**
@@ -966,13 +1024,15 @@ export class RateLimitService implements OnModuleInit {
       warningScore: parseFloat(hash.warningScore) || 35,
       minSamplesAnonymous: parseInt(hash.minSamplesAnonymous) || 15,
       minSamplesUser: parseInt(hash.minSamplesUser) || 20,
-      instantDetectionIntervalMs: parseInt(hash.instantDetectionIntervalMs) || 3000,
+      instantDetectionIntervalMs:
+        parseInt(hash.instantDetectionIntervalMs) || 3000,
       instantDetectionCV: parseFloat(hash.instantDetectionCV) || 1.0,
       measurementMode: hash.measurementMode === 'true',
       useCompositeScore: hash.useCompositeScore === 'true',
       noInteractionEnabled: hash.noInteractionEnabled === 'true',
-      noInteractionThresholdMultiplier: parseFloat(hash.noInteractionThresholdMultiplier) || 1.0,
-    };
+      noInteractionThresholdMultiplier:
+        parseFloat(hash.noInteractionThresholdMultiplier) || 1.0,
+    }
   }
 
   // ============================================
@@ -980,14 +1040,23 @@ export class RateLimitService implements OnModuleInit {
   // ============================================
 
   async getLogs(query: RateLimitLogQueryDto) {
-    const { page = 1, limit = 20, tier, ipAddress, userId, action, sortBy, sortOrder } = query;
-    const skip = (page - 1) * limit;
+    const {
+      page = 1,
+      limit = 20,
+      tier,
+      ipAddress,
+      userId,
+      action,
+      sortBy,
+      sortOrder,
+    } = query
+    const skip = (page - 1) * limit
 
-    const where: any = {};
-    if (tier) where.tier = tier;
-    if (ipAddress) where.ipAddress = { contains: ipAddress };
-    if (userId) where.userId = userId;
-    if (action) where.action = action;
+    const where: any = {}
+    if (tier) where.tier = tier
+    if (ipAddress) where.ipAddress = { contains: ipAddress }
+    if (userId) where.userId = userId
+    if (action) where.action = action
 
     const [data, total] = await Promise.all([
       this.prisma.rateLimitLog.findMany({
@@ -998,7 +1067,7 @@ export class RateLimitService implements OnModuleInit {
         take: limit,
       }),
       this.prisma.rateLimitLog.count({ where }),
-    ]);
+    ])
 
     return {
       data: data.map((log) => ({
@@ -1010,19 +1079,19 @@ export class RateLimitService implements OnModuleInit {
       page,
       limit,
       totalPages: Math.ceil(total / limit),
-    };
+    }
   }
 
   async getPenalties(query: RateLimitPenaltyQueryDto) {
-    const { page = 1, limit = 20, tier, ipAddress, userId, activeOnly } = query;
-    const skip = (page - 1) * limit;
+    const { page = 1, limit = 20, tier, ipAddress, userId, activeOnly } = query
+    const skip = (page - 1) * limit
 
-    const where: any = {};
-    if (tier) where.tier = tier;
-    if (ipAddress) where.ipAddress = { contains: ipAddress };
-    if (userId) where.userId = userId;
+    const where: any = {}
+    if (tier) where.tier = tier
+    if (ipAddress) where.ipAddress = { contains: ipAddress }
+    if (userId) where.userId = userId
     if (activeOnly === 'true') {
-      where.expiresAt = { gt: new Date() };
+      where.expiresAt = { gt: new Date() }
     }
 
     const [data, total] = await Promise.all([
@@ -1034,9 +1103,9 @@ export class RateLimitService implements OnModuleInit {
         take: limit,
       }),
       this.prisma.rateLimitPenalty.count({ where }),
-    ]);
+    ])
 
-    const now = new Date();
+    const now = new Date()
     return {
       data: data.map((penalty) => ({
         ...penalty,
@@ -1048,29 +1117,29 @@ export class RateLimitService implements OnModuleInit {
       page,
       limit,
       totalPages: Math.ceil(total / limit),
-    };
+    }
   }
 
   async deletePenalty(id: string): Promise<void> {
     const penalty = await this.prisma.rateLimitPenalty.findUnique({
       where: { id },
-    });
+    })
 
     if (penalty) {
       // Remove from Redis cache
       if (penalty.userId) {
-        await this.redis.del(`ratelimit:penalty:user:${penalty.userId}`);
+        await this.redis.del(`ratelimit:penalty:user:${penalty.userId}`)
       }
-      await this.redis.del(`ratelimit:penalty:ip:${penalty.ipAddress}`);
+      await this.redis.del(`ratelimit:penalty:ip:${penalty.ipAddress}`)
 
       // Delete from database
-      await this.prisma.rateLimitPenalty.delete({ where: { id } });
+      await this.prisma.rateLimitPenalty.delete({ where: { id } })
     }
   }
 
   async getStats(): Promise<RateLimitStats> {
-    const now = new Date();
-    const last24Hours = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const now = new Date()
+    const last24Hours = new Date(now.getTime() - 24 * 60 * 60 * 1000)
 
     const [
       totalLogs,
@@ -1104,17 +1173,17 @@ export class RateLimitService implements OnModuleInit {
       this.prisma.rateLimitPenalty.count({
         where: { startedAt: { gte: last24Hours } },
       }),
-    ]);
+    ])
 
     const tierCounts = {
       NORMAL: 0,
       WARNING: 0,
       SOFT_LIMIT: 0,
       HARD_LIMIT: 0,
-    };
+    }
     logsByTier.forEach((item) => {
-      tierCounts[item.tier] = item._count.id;
-    });
+      tierCounts[item.tier] = item._count.id
+    })
 
     return {
       totalLogs,
@@ -1126,6 +1195,6 @@ export class RateLimitService implements OnModuleInit {
         logs: logsLast24h,
         penalties: penaltiesLast24h,
       },
-    };
+    }
   }
 }

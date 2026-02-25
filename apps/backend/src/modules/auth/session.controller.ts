@@ -44,7 +44,10 @@ export class SessionController {
    */
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
-  async revokeSession(@Param('id') sessionId: string, @CurrentUser() user: any) {
+  async revokeSession(
+    @Param('id') sessionId: string,
+    @CurrentUser() user: any,
+  ) {
     await this.sessionService.revokeSession(sessionId, user.id)
 
     return { message: 'Session revoked successfully' }
@@ -77,8 +80,9 @@ export class SessionController {
   @Post('revoke-all-including-current')
   @HttpCode(HttpStatus.OK)
   async revokeAllSessionsIncludingCurrent(@CurrentUser() user: any) {
-    const count =
-      await this.sessionService.revokeAllSessionsIncludingCurrent(user.id)
+    const count = await this.sessionService.revokeAllSessionsIncludingCurrent(
+      user.id,
+    )
 
     return {
       message: `All ${count} session(s) revoked successfully. Please login again.`,

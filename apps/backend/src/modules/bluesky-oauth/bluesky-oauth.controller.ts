@@ -109,12 +109,12 @@ export class BlueskyOAuthController {
 
       // Check for existing JWT token in authorization header for link mode
       const authHeader = req.headers.authorization
-      this.logger.log(`Authorization header present: ${!!authHeader}, mode=${mode}`)
+      this.logger.log(
+        `Authorization header present: ${!!authHeader}, mode=${mode}`,
+      )
       if (mode === 'link' && authHeader?.startsWith('Bearer ')) {
         try {
-          const user = await this.authService.validateToken(
-            authHeader.slice(7),
-          )
+          const user = await this.authService.validateToken(authHeader.slice(7))
           linkToUserId = user?.id
           this.logger.log(`Link mode: validated user ID=${linkToUserId}`)
         } catch (e) {
@@ -131,7 +131,9 @@ export class BlueskyOAuthController {
       )
 
       if (mode === 'link' && !linkToUserId) {
-        this.logger.warn(`Link mode but no linkToUserId - authorization header missing or invalid`)
+        this.logger.warn(
+          `Link mode but no linkToUserId - authorization header missing or invalid`,
+        )
       }
 
       return res.json({ url, state })
@@ -163,9 +165,12 @@ export class BlueskyOAuthController {
       const callbackUrl = new URL(`${protocol}://${host}${req.url}`)
 
       // Process the OAuth callback - mode and linkToUserId come from state parameter
-      const { did, handle, mode, linkToUserId } = await this.blueskyOAuthService.callback(callbackUrl)
+      const { did, handle, mode, linkToUserId } =
+        await this.blueskyOAuthService.callback(callbackUrl)
 
-      this.logger.log(`Callback: mode=${mode}, linkToUserId=${linkToUserId}, did=${did}, handle=${handle}`)
+      this.logger.log(
+        `Callback: mode=${mode}, linkToUserId=${linkToUserId}, did=${did}, handle=${handle}`,
+      )
 
       // Handle based on mode (from state parameter)
       if (mode === 'link' && linkToUserId) {
@@ -189,13 +194,20 @@ export class BlueskyOAuthController {
             `${frontendUrl}/auth/pending-approval?via=bluesky`,
           )
         }
-        const tokens = await this.authService.loginUser(user, undefined, undefined, true)
+        const tokens = await this.authService.loginUser(
+          user,
+          undefined,
+          undefined,
+          true,
+        )
         return this.redirectWithTokens(res, frontendUrl, tokens, 'login')
       }
 
       // New user - redirect to username selection page
       // Generate a registration token that contains the DID and handle
-      this.logger.log(`New user from Bluesky OAuth: ${handle}, redirecting to username selection`)
+      this.logger.log(
+        `New user from Bluesky OAuth: ${handle}, redirecting to username selection`,
+      )
       const registrationToken =
         this.blueskyOAuthService.generateRegistrationToken(did, handle)
 
@@ -245,8 +257,9 @@ export class BlueskyOAuthController {
     @Res() res: Response,
   ) {
     // Validate registration token
-    const { did, handle } =
-      this.blueskyOAuthService.validateRegistrationToken(body.token)
+    const { did, handle } = this.blueskyOAuthService.validateRegistrationToken(
+      body.token,
+    )
 
     // Validate username
     const username = body.username.trim().toLowerCase()
@@ -293,7 +306,12 @@ export class BlueskyOAuthController {
     }
 
     // User is active, generate tokens
-    const tokens = await this.authService.loginUser(user, undefined, undefined, true)
+    const tokens = await this.authService.loginUser(
+      user,
+      undefined,
+      undefined,
+      true,
+    )
     return res.json({
       pendingApproval: false,
       accessToken: tokens.accessToken,
@@ -321,7 +339,8 @@ export class BlueskyOAuthController {
     action: 'login' | 'register',
   ) {
     // Set refresh token as HTTP-only cookie
-    const instanceId = this.configService.get<string>('INSTANCE_ID') || 'default'
+    const instanceId =
+      this.configService.get<string>('INSTANCE_ID') || 'default'
     res.cookie(`refresh_token_${instanceId}`, tokens.refreshToken, {
       httpOnly: true,
       secure: this.configService.get('NODE_ENV') === 'production',

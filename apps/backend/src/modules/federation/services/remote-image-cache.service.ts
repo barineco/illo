@@ -74,7 +74,9 @@ export class RemoteImageCacheService {
     try {
       const urlObj = new URL(url)
       // /api/images/:id パターンを検出
-      const imageProxyMatch = urlObj.pathname.match(/^\/api\/images\/([a-zA-Z0-9_-]+)$/)
+      const imageProxyMatch = urlObj.pathname.match(
+        /^\/api\/images\/([a-zA-Z0-9_-]+)$/,
+      )
       if (imageProxyMatch) {
         const imageId = imageProxyMatch[1]
         // federation URL に変換
@@ -86,12 +88,16 @@ export class RemoteImageCacheService {
         } else {
           urlObj.pathname = `/api/federation/images/${imageId}/${variant}`
         }
-        this.logger.debug(`Converted to federation URL (${variant}): ${url} -> ${urlObj.toString()}`)
+        this.logger.debug(
+          `Converted to federation URL (${variant}): ${url} -> ${urlObj.toString()}`,
+        )
         return urlObj.toString()
       }
 
       // /api/federation/images/:id パターンも処理（既にfederation URLの場合）
-      const federationMatch = urlObj.pathname.match(/^\/api\/federation\/images\/([a-zA-Z0-9_-]+)(\/.*)?$/)
+      const federationMatch = urlObj.pathname.match(
+        /^\/api\/federation\/images\/([a-zA-Z0-9_-]+)(\/.*)?$/,
+      )
       if (federationMatch) {
         const imageId = federationMatch[1]
         if (variant === 'thumbnail') {
@@ -183,23 +189,37 @@ export class RemoteImageCacheService {
     })
 
     if (!image) {
-      return { success: false, imageId: artworkImageId, error: 'Image not found' }
+      return {
+        success: false,
+        imageId: artworkImageId,
+        error: 'Image not found',
+      }
     }
 
     // リモート画像のみ対象
     if (!image.storageKey.startsWith('remote:')) {
-      return { success: false, imageId: artworkImageId, error: 'Not a remote image' }
+      return {
+        success: false,
+        imageId: artworkImageId,
+        error: 'Not a remote image',
+      }
     }
 
     // キャッシュ元URLを取得
     const originalRemoteUrl = image.remoteUrl || image.url
     if (!originalRemoteUrl || originalRemoteUrl.startsWith('/api/')) {
-      return { success: false, imageId: artworkImageId, error: 'No valid remote URL' }
+      return {
+        success: false,
+        imageId: artworkImageId,
+        error: 'No valid remote URL',
+      }
     }
 
     // illoインスタンス間の場合、federation URLに変換（standard版を取得）
     const remoteUrl = this.convertToFederationUrl(originalRemoteUrl, 'standard')
-    this.logger.debug(`Fetching remote image: original=${originalRemoteUrl}, converted=${remoteUrl}`)
+    this.logger.debug(
+      `Fetching remote image: original=${originalRemoteUrl}, converted=${remoteUrl}`,
+    )
 
     // キャッシュ中に設定
     await this.prisma.artworkImage.update({
@@ -212,13 +232,20 @@ export class RemoteImageCacheService {
       const credentials = await this.getSignatureCredentials()
 
       // リモート画像をフェッチ（standard版）
-      const fetchResult = await this.remoteFetchService.fetchImageBinary(remoteUrl, credentials || {})
+      const fetchResult = await this.remoteFetchService.fetchImageBinary(
+        remoteUrl,
+        credentials || {},
+      )
       if (!fetchResult) {
         await this.prisma.artworkImage.update({
           where: { id: artworkImageId },
           data: { cacheStatus: RemoteImageCacheStatus.CACHE_FAILED },
         })
-        return { success: false, imageId: artworkImageId, error: 'Failed to fetch remote image' }
+        return {
+          success: false,
+          imageId: artworkImageId,
+          error: 'Failed to fetch remote image',
+        }
       }
 
       const { buffer, mimeType } = fetchResult
@@ -249,7 +276,9 @@ export class RemoteImageCacheService {
       )
 
       // キャッシュ有効期限を計算
-      const cacheExpiresAt = await this.calculateCacheExpiry(image.artwork?.likeCount || 0)
+      const cacheExpiresAt = await this.calculateCacheExpiry(
+        image.artwork?.likeCount || 0,
+      )
       const cachedAt = new Date()
 
       // データベース更新
@@ -274,7 +303,9 @@ export class RemoteImageCacheService {
         },
       })
 
-      this.logger.log(`Cached remote image: ${artworkImageId} (${standardResult.size} bytes)`)
+      this.logger.log(
+        `Cached remote image: ${artworkImageId} (${standardResult.size} bytes)`,
+      )
 
       return {
         success: true,
@@ -283,7 +314,9 @@ export class RemoteImageCacheService {
         cacheExpiresAt,
       }
     } catch (error) {
-      this.logger.error(`Failed to cache remote image ${artworkImageId}: ${error.message}`)
+      this.logger.error(
+        `Failed to cache remote image ${artworkImageId}: ${error.message}`,
+      )
       await this.prisma.artworkImage.update({
         where: { id: artworkImageId },
         data: { cacheStatus: RemoteImageCacheStatus.CACHE_FAILED },
@@ -306,17 +339,28 @@ export class RemoteImageCacheService {
     })
 
     if (!image) {
-      return { success: false, imageId: artworkImageId, error: 'Image not found' }
+      return {
+        success: false,
+        imageId: artworkImageId,
+        error: 'Image not found',
+      }
     }
 
     // 既にオリジナルがキャッシュされている場合
-    if (image.originalStorageKey && !image.originalStorageKey.startsWith('remote:')) {
+    if (
+      image.originalStorageKey &&
+      !image.originalStorageKey.startsWith('remote:')
+    ) {
       return { success: true, imageId: artworkImageId }
     }
 
     const originalRemoteUrl = image.remoteUrl || image.url
     if (!originalRemoteUrl || originalRemoteUrl.startsWith('/api/')) {
-      return { success: false, imageId: artworkImageId, error: 'No valid remote URL' }
+      return {
+        success: false,
+        imageId: artworkImageId,
+        error: 'No valid remote URL',
+      }
     }
 
     // illoインスタンス間の場合、federation URLに変換（original版を取得）
@@ -324,10 +368,17 @@ export class RemoteImageCacheService {
 
     try {
       const credentials = await this.getSignatureCredentials()
-      const fetchResult = await this.remoteFetchService.fetchImageBinary(remoteUrl, credentials || {})
+      const fetchResult = await this.remoteFetchService.fetchImageBinary(
+        remoteUrl,
+        credentials || {},
+      )
 
       if (!fetchResult) {
-        return { success: false, imageId: artworkImageId, error: 'Failed to fetch original image' }
+        return {
+          success: false,
+          imageId: artworkImageId,
+          error: 'Failed to fetch original image',
+        }
       }
 
       const { buffer } = fetchResult
@@ -352,7 +403,9 @@ export class RemoteImageCacheService {
         },
       })
 
-      this.logger.log(`Cached original image: ${artworkImageId} (${originalResult.size} bytes)`)
+      this.logger.log(
+        `Cached original image: ${artworkImageId} (${originalResult.size} bytes)`,
+      )
 
       return {
         success: true,
@@ -360,7 +413,9 @@ export class RemoteImageCacheService {
         cachedAt: new Date(),
       }
     } catch (error) {
-      this.logger.error(`Failed to cache original image ${artworkImageId}: ${error.message}`)
+      this.logger.error(
+        `Failed to cache original image ${artworkImageId}: ${error.message}`,
+      )
       return { success: false, imageId: artworkImageId, error: error.message }
     }
   }
@@ -474,8 +529,13 @@ export class RemoteImageCacheService {
       if (image.storageKey && image.storageKey.startsWith('cache/')) {
         await minioClient.removeObject(bucket, image.storageKey).catch(() => {})
       }
-      if (image.originalStorageKey && image.originalStorageKey.startsWith('cache/')) {
-        await minioClient.removeObject(bucket, image.originalStorageKey).catch(() => {})
+      if (
+        image.originalStorageKey &&
+        image.originalStorageKey.startsWith('cache/')
+      ) {
+        await minioClient
+          .removeObject(bucket, image.originalStorageKey)
+          .catch(() => {})
       }
 
       // データベース更新（リモートURLに戻す）
@@ -499,7 +559,9 @@ export class RemoteImageCacheService {
 
       this.logger.log(`Invalidated cache for image: ${artworkImageId}`)
     } catch (error) {
-      this.logger.error(`Failed to invalidate cache for ${artworkImageId}: ${error.message}`)
+      this.logger.error(
+        `Failed to invalidate cache for ${artworkImageId}: ${error.message}`,
+      )
     }
   }
 
@@ -530,15 +592,20 @@ export class RemoteImageCacheService {
     for (const image of expiredImages) {
       // 優先度チェック（有効な場合）
       if (settings?.cachePriorityEnabled && image.artwork) {
-        const priorityScore = (image.artwork.likeCount * 10) + image.artwork.viewCount
+        const priorityScore =
+          image.artwork.likeCount * 10 + image.artwork.viewCount
         if (priorityScore >= settings.cachePriorityThreshold) {
           // TTLを延長
-          const newExpiresAt = await this.calculateCacheExpiry(image.artwork.likeCount)
+          const newExpiresAt = await this.calculateCacheExpiry(
+            image.artwork.likeCount,
+          )
           await this.prisma.artworkImage.update({
             where: { id: image.id },
             data: { cacheExpiresAt: newExpiresAt },
           })
-          this.logger.log(`Extended cache TTL for popular image: ${image.id} (score: ${priorityScore})`)
+          this.logger.log(
+            `Extended cache TTL for popular image: ${image.id} (score: ${priorityScore})`,
+          )
           continue
         }
       }
@@ -562,7 +629,9 @@ export class RemoteImageCacheService {
       deletedAvatars++
     }
 
-    this.logger.log(`Cleanup completed: ${deletedImages} images, ${deletedAvatars} avatars, ${freedBytes} bytes freed`)
+    this.logger.log(
+      `Cleanup completed: ${deletedImages} images, ${deletedAvatars} avatars, ${freedBytes} bytes freed`,
+    )
 
     return { deletedImages, deletedAvatars, freedBytes }
   }
@@ -604,7 +673,9 @@ export class RemoteImageCacheService {
 
       this.logger.log(`Invalidated avatar cache for user: ${userId}`)
     } catch (error) {
-      this.logger.error(`Failed to invalidate avatar cache for ${userId}: ${error.message}`)
+      this.logger.error(
+        `Failed to invalidate avatar cache for ${userId}: ${error.message}`,
+      )
     }
   }
 
@@ -650,11 +721,18 @@ export class RemoteImageCacheService {
     })
 
     // インスタンス別統計を集計
-    const instanceMap = new Map<string, { imageCount: number; avatarCount: number; totalSize: number }>()
+    const instanceMap = new Map<
+      string,
+      { imageCount: number; avatarCount: number; totalSize: number }
+    >()
 
     for (const image of cachedImages) {
       const domain = image.artwork?.author?.domain || 'unknown'
-      const stats = instanceMap.get(domain) || { imageCount: 0, avatarCount: 0, totalSize: 0 }
+      const stats = instanceMap.get(domain) || {
+        imageCount: 0,
+        avatarCount: 0,
+        totalSize: 0,
+      }
       stats.imageCount++
       stats.totalSize += image.fileSize + (image.originalFileSize || 0)
       instanceMap.set(domain, stats)
@@ -662,7 +740,11 @@ export class RemoteImageCacheService {
 
     for (const user of cachedAvatars) {
       const domain = user.domain || 'unknown'
-      const stats = instanceMap.get(domain) || { imageCount: 0, avatarCount: 0, totalSize: 0 }
+      const stats = instanceMap.get(domain) || {
+        imageCount: 0,
+        avatarCount: 0,
+        totalSize: 0,
+      }
       stats.avatarCount++
       instanceMap.set(domain, stats)
     }
@@ -722,7 +804,9 @@ export class RemoteImageCacheService {
       deletedAvatars++
     }
 
-    this.logger.log(`Cleared cache for instance ${domain}: ${deletedImages} images, ${deletedAvatars} avatars`)
+    this.logger.log(
+      `Cleared cache for instance ${domain}: ${deletedImages} images, ${deletedAvatars} avatars`,
+    )
 
     return { deletedImages, deletedAvatars, freedBytes }
   }
@@ -749,7 +833,8 @@ export class RemoteImageCacheService {
     }
 
     // リモート画像のみ対象（キャッシュ済みでもremoteUrlがあればプロキシ可能）
-    const isRemoteImage = image.storageKey.startsWith('remote:') || !!image.remoteUrl
+    const isRemoteImage =
+      image.storageKey.startsWith('remote:') || !!image.remoteUrl
     if (!isRemoteImage) {
       this.logger.warn(`Not a remote image: ${imageId}`)
       return null
@@ -758,7 +843,9 @@ export class RemoteImageCacheService {
     // リモートURLを取得
     const originalRemoteUrl = image.remoteUrl || image.url
     if (!originalRemoteUrl || originalRemoteUrl.startsWith('/api/images/')) {
-      this.logger.warn(`No valid remote URL for image ${imageId}: ${originalRemoteUrl}`)
+      this.logger.warn(
+        `No valid remote URL for image ${imageId}: ${originalRemoteUrl}`,
+      )
       return null
     }
 
@@ -768,15 +855,23 @@ export class RemoteImageCacheService {
     // - standard:  /api/federation/images/:id/standard (HTTP署名必須)
     // - original:  /api/federation/images/:id/original (HTTP署名必須)
     const remoteUrl = this.convertToFederationUrl(originalRemoteUrl, variant)
-    this.logger.debug(`Proxying remote image (${variant}): ${imageId}, url: ${remoteUrl}`)
+    this.logger.debug(
+      `Proxying remote image (${variant}): ${imageId}, url: ${remoteUrl}`,
+    )
 
     try {
       // HTTP署名認証情報を取得
       // thumbnail は認証不要だが、standard/original は認証が必要
-      const credentials = variant === 'thumbnail' ? {} : (await this.getSignatureCredentials() || {})
+      const credentials =
+        variant === 'thumbnail'
+          ? {}
+          : (await this.getSignatureCredentials()) || {}
 
       // リモート画像をフェッチ
-      const fetchResult = await this.remoteFetchService.fetchImageBinary(remoteUrl, credentials)
+      const fetchResult = await this.remoteFetchService.fetchImageBinary(
+        remoteUrl,
+        credentials,
+      )
       if (!fetchResult) {
         this.logger.warn(`Failed to fetch remote image: ${remoteUrl}`)
         return null
@@ -784,7 +879,9 @@ export class RemoteImageCacheService {
 
       return fetchResult
     } catch (error) {
-      this.logger.error(`Failed to proxy remote image ${imageId}: ${error.message}`)
+      this.logger.error(
+        `Failed to proxy remote image ${imageId}: ${error.message}`,
+      )
       return null
     }
   }
@@ -812,7 +909,10 @@ export class RemoteImageCacheService {
     }
 
     // 既にキャッシュ中または完了している場合はスキップ
-    if (image.cacheStatus === RemoteImageCacheStatus.CACHING || image.cacheStatus === RemoteImageCacheStatus.CACHED) {
+    if (
+      image.cacheStatus === RemoteImageCacheStatus.CACHING ||
+      image.cacheStatus === RemoteImageCacheStatus.CACHED
+    ) {
       return
     }
 
@@ -820,7 +920,9 @@ export class RemoteImageCacheService {
     // Note: BullMQ が設定されている場合はキューを使用するが、
     // 簡易的にここでは直接実行する
     this.cacheRemoteImage(imageId).catch((err) => {
-      this.logger.error(`Background cache job failed for ${imageId}: ${err.message}`)
+      this.logger.error(
+        `Background cache job failed for ${imageId}: ${err.message}`,
+      )
     })
   }
 }

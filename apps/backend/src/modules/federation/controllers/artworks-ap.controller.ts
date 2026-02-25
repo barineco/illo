@@ -87,7 +87,8 @@ export class ArtworksActivityPubController {
 
     // Build actor URL
     const publicUrl = this.configService.get<string>('BASE_URL', '')
-    const actorUrl = artwork.author.actorUrl || `${publicUrl}/users/${artwork.author.username}`
+    const actorUrl =
+      artwork.author.actorUrl || `${publicUrl}/users/${artwork.author.username}`
 
     // Convert to ActivityPub Note
     const note = this.outboxService.artworkToNote(artwork, actorUrl, publicUrl)

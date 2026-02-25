@@ -29,16 +29,12 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { CurrentUser } from '../auth/decorators/current-user.decorator'
 import { Public } from '../auth/decorators/public.decorator'
 import { ActorService } from '../federation/services/actor.service'
-import { OCsService } from '../ocs/ocs.service'
-import { OCQueryDto } from '../ocs/dto/oc-query.dto'
-
 @Controller('users')
 export class UsersController {
   constructor(
     private usersService: UsersService,
     @Inject(forwardRef(() => ActorService))
     private actorService: ActorService,
-    private ocsService: OCsService,
   ) {}
 
   /**
@@ -58,7 +54,9 @@ export class UsersController {
     @Res() res: Response,
   ) {
     // Debug: Log the Accept header
-    console.log(`[UsersController] GET /users/${username} - Accept: ${acceptHeader}`)
+    console.log(
+      `[UsersController] GET /users/${username} - Accept: ${acceptHeader}`,
+    )
 
     // 1. Check for ActivityPub request
     const wantsActivityPub =
@@ -73,7 +71,9 @@ export class UsersController {
 
       if (!isLocalUser) {
         // Remote users don't have Actor objects on this instance
-        return res.status(404).json({ error: 'Remote user Actor not available on this instance' })
+        return res
+          .status(404)
+          .json({ error: 'Remote user Actor not available on this instance' })
       }
 
       const actor = await this.actorService.getLocalActorByUsername(username)
@@ -97,7 +97,7 @@ export class UsersController {
     // If it reaches here, return 404 to avoid redirect loops
     return res.status(404).json({
       error: 'Not Found',
-      message: 'HTML requests should be routed to frontend via nginx'
+      message: 'HTML requests should be routed to frontend via nginx',
     })
   }
 
@@ -132,7 +132,9 @@ export class UsersController {
   ) {
     // Check if user is requesting their own profile
     if (currentUser.username !== username) {
-      throw new ForbiddenException('You can only access your own detailed profile')
+      throw new ForbiddenException(
+        'You can only access your own detailed profile',
+      )
     }
 
     return this.usersService.getUserById(currentUser.id, true)
@@ -161,9 +163,15 @@ export class UsersController {
     }
 
     // Parse crop coordinates if provided
-    let cropRegion: { x: number; y: number; width: number; height: number } | undefined
-    if (body.cropX !== undefined && body.cropY !== undefined &&
-        body.cropWidth !== undefined && body.cropHeight !== undefined) {
+    let cropRegion:
+      | { x: number; y: number; width: number; height: number }
+      | undefined
+    if (
+      body.cropX !== undefined &&
+      body.cropY !== undefined &&
+      body.cropWidth !== undefined &&
+      body.cropHeight !== undefined
+    ) {
       cropRegion = {
         x: parseInt(body.cropX, 10),
         y: parseInt(body.cropY, 10),
@@ -198,9 +206,15 @@ export class UsersController {
     }
 
     // Parse crop coordinates if provided
-    let cropRegion: { x: number; y: number; width: number; height: number } | undefined
-    if (body.cropX !== undefined && body.cropY !== undefined &&
-        body.cropWidth !== undefined && body.cropHeight !== undefined) {
+    let cropRegion:
+      | { x: number; y: number; width: number; height: number }
+      | undefined
+    if (
+      body.cropX !== undefined &&
+      body.cropY !== undefined &&
+      body.cropWidth !== undefined &&
+      body.cropHeight !== undefined
+    ) {
       cropRegion = {
         x: parseInt(body.cropX, 10),
         y: parseInt(body.cropY, 10),
@@ -218,14 +232,15 @@ export class UsersController {
    */
   @Get('search')
   @UseGuards(JwtAuthGuard)
-  async searchUsers(
-    @Query('q') q: string,
-    @Query('limit') limit?: string,
-  ) {
+  async searchUsers(@Query('q') q: string, @Query('limit') limit?: string) {
     if (!q || q.length < 2) {
       return { users: [] }
     }
-    return this.usersService.searchUsers(q, limit ? parseInt(limit, 10) : 10, false)
+    return this.usersService.searchUsers(
+      q,
+      limit ? parseInt(limit, 10) : 10,
+      false,
+    )
   }
 
   /**
@@ -237,7 +252,9 @@ export class UsersController {
   async getUserByBlueskyHandle(@Param('handle') handle: string) {
     const user = await this.usersService.getUserByBlueskyHandle(handle)
     if (!user) {
-      throw new NotFoundException(`No user found with Bluesky handle: ${handle}`)
+      throw new NotFoundException(
+        `No user found with Bluesky handle: ${handle}`,
+      )
     }
     return user
   }
@@ -340,10 +357,18 @@ export class UsersController {
     if (dto.tools !== undefined && !Array.isArray(dto.tools)) {
       throw new BadRequestException('tools must be an array')
     }
-    if (dto.useProfileToolsAsDefault !== undefined && typeof dto.useProfileToolsAsDefault !== 'boolean') {
-      throw new BadRequestException('useProfileToolsAsDefault must be a boolean')
+    if (
+      dto.useProfileToolsAsDefault !== undefined &&
+      typeof dto.useProfileToolsAsDefault !== 'boolean'
+    ) {
+      throw new BadRequestException(
+        'useProfileToolsAsDefault must be a boolean',
+      )
     }
-    const settings = await this.usersService.updateToolsSettings(currentUser.id, dto)
+    const settings = await this.usersService.updateToolsSettings(
+      currentUser.id,
+      dto,
+    )
     return settings
   }
 
@@ -390,19 +415,5 @@ export class UsersController {
       limit ? parseInt(limit, 10) : 10,
     )
     return { tags }
-  }
-
-  /**
-   * Get user's original characters
-   * GET /api/users/:username/characters
-   */
-  @Public()
-  @Get(':username/characters')
-  async getUserCharacters(
-    @Param('username') username: string,
-    @Query() query: OCQueryDto,
-    @CurrentUser('id') currentUserId?: string,
-  ) {
-    return this.ocsService.findByUser(username, query, currentUserId)
   }
 }

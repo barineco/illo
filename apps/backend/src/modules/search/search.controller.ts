@@ -1,6 +1,9 @@
 import { Controller, Get, Query, Post, Body } from '@nestjs/common'
 import { Public } from '../auth/decorators/public.decorator'
-import { SearchPatternService, SearchPatternType } from './services/search-pattern.service'
+import {
+  SearchPatternService,
+  SearchPatternType,
+} from './services/search-pattern.service'
 import { UsersService } from '../users/users.service'
 import { ArtworksService } from '../artworks/artworks.service'
 import { ConfigService } from '@nestjs/config'
@@ -60,7 +63,8 @@ export class SearchController {
     if (type === 'all' || type === 'users') {
       // @記号を除去してユーザー検索（@adminの場合はadminで検索）
       const searchQuery =
-        pattern.type === SearchPatternType.WEBFINGER && pattern.metadata?.username
+        pattern.type === SearchPatternType.WEBFINGER &&
+        pattern.metadata?.username
           ? pattern.metadata.username
           : query.replace(/^@/, '')
 
@@ -175,9 +179,7 @@ export class SearchController {
    */
   @Public()
   @Post('resolve-user')
-  async resolveRemoteUser(
-    @Body('handle') handle: string,
-  ): Promise<{
+  async resolveRemoteUser(@Body('handle') handle: string): Promise<{
     success: boolean
     user?: any
     error?: string
@@ -200,7 +202,8 @@ export class SearchController {
       }
 
       // リモートユーザーを解決
-      const remoteUser = await this.federationSearchService.searchByHandle(handle)
+      const remoteUser =
+        await this.federationSearchService.searchByHandle(handle)
 
       if (!remoteUser) {
         return {
@@ -247,9 +250,7 @@ export class SearchController {
    */
   @Public()
   @Post('resolve-artwork')
-  async resolveRemoteArtwork(
-    @Body('url') url: string,
-  ): Promise<{
+  async resolveRemoteArtwork(@Body('url') url: string): Promise<{
     success: boolean
     artwork?: any
     error?: string
@@ -272,7 +273,8 @@ export class SearchController {
       }
 
       // 作品を解決
-      const artwork = await this.federationSearchService.resolveArtworkByUrl(url)
+      const artwork =
+        await this.federationSearchService.resolveArtworkByUrl(url)
 
       if (!artwork) {
         return {

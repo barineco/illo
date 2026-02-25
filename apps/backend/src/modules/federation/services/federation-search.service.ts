@@ -82,7 +82,10 @@ export class FederationSearchService {
       }
 
       // 2. Redisキャッシュを検索
-      const cachedUser = await this.cache.getRemoteUserByHandle(username, domain)
+      const cachedUser = await this.cache.getRemoteUserByHandle(
+        username,
+        domain,
+      )
       if (cachedUser) {
         this.logger.debug(`Cache hit for: @${username}@${domain}`)
         return {
@@ -213,7 +216,9 @@ export class FederationSearchService {
    *
    * @private
    */
-  private async searchLocalUser(username: string): Promise<RemoteUserResult | null> {
+  private async searchLocalUser(
+    username: string,
+  ): Promise<RemoteUserResult | null> {
     const user = await this.prisma.user.findFirst({
       where: {
         username,
@@ -285,13 +290,15 @@ export class FederationSearchService {
 
     return {
       id: user.id,
-      actorUrl: user.actorUrl || `https://${localDomain}/users/${user.username}`,
+      actorUrl:
+        user.actorUrl || `https://${localDomain}/users/${user.username}`,
       username: user.username,
       domain: isLocal ? localDomain : user.domain,
       displayName: user.displayName || user.username,
       avatarUrl: user.avatarUrl,
       summary: user.summary || user.bio,
-      inbox: user.inbox || `https://${localDomain}/users/${user.username}/inbox`,
+      inbox:
+        user.inbox || `https://${localDomain}/users/${user.username}/inbox`,
       outbox: user.outbox,
       publicKey: user.publicKey || '',
       followersUrl: user.followersUrl,
@@ -322,7 +329,10 @@ export class FederationSearchService {
    * @private
    */
   private getLocalDomain(): string {
-    const baseUrl = this.configService.get<string>('BASE_URL', 'http://localhost:11104')
+    const baseUrl = this.configService.get<string>(
+      'BASE_URL',
+      'http://localhost:11104',
+    )
     try {
       return new URL(baseUrl).hostname
     } catch {
@@ -375,7 +385,9 @@ export class FederationSearchService {
 
         return {
           id: artwork.id,
-          apObjectId: artwork.apObjectId || `https://${localDomain}/artworks/${artwork.id}`,
+          apObjectId:
+            artwork.apObjectId ||
+            `https://${localDomain}/artworks/${artwork.id}`,
           title: artwork.title,
           description: artwork.description,
           authorUsername: artwork.author.username,
@@ -458,7 +470,8 @@ export class FederationSearchService {
         return null
       }
 
-      const authorUsername = author.preferredUsername || author.name || 'unknown'
+      const authorUsername =
+        author.preferredUsername || author.name || 'unknown'
       const authorDomain = new URL(author.id).hostname
 
       // 画像を抽出
@@ -502,7 +515,10 @@ export class FederationSearchService {
         isLocal: false,
       }
     } catch (error) {
-      this.logger.error(`Failed to resolve artwork by URL: ${artworkUrl}`, error)
+      this.logger.error(
+        `Failed to resolve artwork by URL: ${artworkUrl}`,
+        error,
+      )
       return null
     }
   }

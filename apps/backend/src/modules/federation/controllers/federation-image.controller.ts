@@ -77,16 +77,23 @@ export class FederationImageController {
 
     // Check if this is a remote image (not stored locally)
     if (image.storageKey.startsWith('remote:')) {
-      throw new NotFoundException('Remote images cannot be served through this endpoint')
+      throw new NotFoundException(
+        'Remote images cannot be served through this endpoint',
+      )
     }
 
     // PUBLIC/UNLISTED artworks: serve thumbnail without authentication
-    if (image.artwork.visibility === 'PUBLIC' || image.artwork.visibility === 'UNLISTED') {
+    if (
+      image.artwork.visibility === 'PUBLIC' ||
+      image.artwork.visibility === 'UNLISTED'
+    ) {
       return this.serveThumbnail(image, res)
     }
 
     // FOLLOWERS_ONLY/PRIVATE: not available for federation
-    throw new ForbiddenException('This artwork is not available for public federation')
+    throw new ForbiddenException(
+      'This artwork is not available for public federation',
+    )
   }
 
   /**
@@ -107,14 +114,19 @@ export class FederationImageController {
 
     // Check if this is a remote image (not stored locally)
     if (image.storageKey.startsWith('remote:')) {
-      throw new NotFoundException('Remote images cannot be served through this endpoint')
+      throw new NotFoundException(
+        'Remote images cannot be served through this endpoint',
+      )
     }
 
     // Verify HTTP Signature and illo instance
     await this.verifyOpenIllustboardRequest(req)
 
     // PUBLIC/UNLISTED: serve standard version
-    if (image.artwork.visibility === 'PUBLIC' || image.artwork.visibility === 'UNLISTED') {
+    if (
+      image.artwork.visibility === 'PUBLIC' ||
+      image.artwork.visibility === 'UNLISTED'
+    ) {
       return this.serveStandard(image, res)
     }
 
@@ -140,14 +152,19 @@ export class FederationImageController {
 
     // Check if this is a remote image (not stored locally)
     if (image.storageKey.startsWith('remote:')) {
-      throw new NotFoundException('Remote images cannot be served through this endpoint')
+      throw new NotFoundException(
+        'Remote images cannot be served through this endpoint',
+      )
     }
 
     // Verify HTTP Signature and illo instance
     await this.verifyOpenIllustboardRequest(req)
 
     // PUBLIC/UNLISTED: serve original version
-    if (image.artwork.visibility === 'PUBLIC' || image.artwork.visibility === 'UNLISTED') {
+    if (
+      image.artwork.visibility === 'PUBLIC' ||
+      image.artwork.visibility === 'UNLISTED'
+    ) {
       return this.serveOriginal(image, res)
     }
 
@@ -189,7 +206,9 @@ export class FederationImageController {
   private async verifyOpenIllustboardRequest(req: Request): Promise<any> {
     const signatureHeader = req.headers['signature'] as string
     if (!signatureHeader) {
-      throw new UnauthorizedException('HTTP Signature required for high-resolution images')
+      throw new UnauthorizedException(
+        'HTTP Signature required for high-resolution images',
+      )
     }
 
     try {
@@ -198,12 +217,17 @@ export class FederationImageController {
       // Verify the actor is from an illo instance
       if (!this.remoteFetchService.isOpenIllustboardActor(actor)) {
         this.logger.warn(`Rejected non-illo actor: ${actor.id}`)
-        throw new ForbiddenException('Only illo instances can access high-resolution images')
+        throw new ForbiddenException(
+          'Only illo instances can access high-resolution images',
+        )
       }
 
       return actor
     } catch (error) {
-      if (error instanceof ForbiddenException || error instanceof UnauthorizedException) {
+      if (
+        error instanceof ForbiddenException ||
+        error instanceof UnauthorizedException
+      ) {
         throw error
       }
       this.logger.error(`HTTP signature verification failed: ${error.message}`)
@@ -235,7 +259,10 @@ export class FederationImageController {
       // Decrypt if encrypted
       let finalData = imageData
       if (this.encryptionService.isEnabled() && image.thumbnailEncryptionIv) {
-        finalData = await this.encryptionService.decrypt(imageData, image.thumbnailEncryptionIv)
+        finalData = await this.encryptionService.decrypt(
+          imageData,
+          image.thumbnailEncryptionIv,
+        )
       }
 
       res.set({
@@ -271,7 +298,10 @@ export class FederationImageController {
       // Decrypt if encrypted
       let finalData = imageData
       if (this.encryptionService.isEnabled() && image.encryptionIv) {
-        finalData = await this.encryptionService.decrypt(imageData, image.encryptionIv)
+        finalData = await this.encryptionService.decrypt(
+          imageData,
+          image.encryptionIv,
+        )
       }
 
       res.set({
@@ -306,12 +336,17 @@ export class FederationImageController {
     }
 
     try {
-      const imageData = await this.storageService.getObject(image.originalStorageKey)
+      const imageData = await this.storageService.getObject(
+        image.originalStorageKey,
+      )
 
       // Decrypt if encrypted
       let finalData = imageData
       if (this.encryptionService.isEnabled() && image.originalEncryptionIv) {
-        finalData = await this.encryptionService.decrypt(imageData, image.originalEncryptionIv)
+        finalData = await this.encryptionService.decrypt(
+          imageData,
+          image.originalEncryptionIv,
+        )
       }
 
       res.set({

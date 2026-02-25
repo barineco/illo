@@ -165,15 +165,17 @@ export class AdminService {
         }),
         this.prisma.user.count({ where: { suspendedAt: { not: null } } }),
         this.prisma.user.count({ where: { rejectedAt: { not: null } } }),
-      ]).then(([total, local, remote, pending, active, suspended, rejected]) => ({
-        total,
-        local,
-        remote,
-        pending,
-        active,
-        suspended,
-        rejected,
-      })),
+      ]).then(
+        ([total, local, remote, pending, active, suspended, rejected]) => ({
+          total,
+          local,
+          remote,
+          pending,
+          active,
+          suspended,
+          rejected,
+        }),
+      ),
     ])
 
     return {

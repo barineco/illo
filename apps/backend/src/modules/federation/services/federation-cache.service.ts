@@ -1,4 +1,9 @@
-import { Injectable, Logger, OnModuleInit, OnModuleDestroy } from '@nestjs/common'
+import {
+  Injectable,
+  Logger,
+  OnModuleInit,
+  OnModuleDestroy,
+} from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import Redis from 'ioredis'
 
@@ -40,11 +45,18 @@ export class FederationCacheService implements OnModuleInit, OnModuleDestroy {
   constructor(private readonly configService: ConfigService) {
     this.enabled = this.configService.get<string>('REDIS_HOST') !== undefined
     // Allow cache to be disabled via environment variable
-    this.cacheEnabled = this.configService.get<string>('FEDERATION_CACHE_ENABLED', 'true') === 'true'
+    this.cacheEnabled =
+      this.configService.get<string>('FEDERATION_CACHE_ENABLED', 'true') ===
+      'true'
     // TTL from environment variable (default: 3600 seconds = 1 hour)
-    this.defaultTtl = this.configService.get<number>('FEDERATION_CACHE_TTL', 3600)
+    this.defaultTtl = this.configService.get<number>(
+      'FEDERATION_CACHE_TTL',
+      3600,
+    )
 
-    this.logger.log(`Federation cache: enabled=${this.cacheEnabled}, TTL=${this.defaultTtl}s`)
+    this.logger.log(
+      `Federation cache: enabled=${this.cacheEnabled}, TTL=${this.defaultTtl}s`,
+    )
   }
 
   async onModuleInit() {
@@ -54,7 +66,10 @@ export class FederationCacheService implements OnModuleInit, OnModuleDestroy {
     }
 
     try {
-      const redisHost = this.configService.get<string>('REDIS_HOST', 'localhost')
+      const redisHost = this.configService.get<string>(
+        'REDIS_HOST',
+        'localhost',
+      )
       const redisPort = this.configService.get<number>('REDIS_PORT', 6379)
 
       this.redis = new Redis({
@@ -282,7 +297,9 @@ export class FederationCacheService implements OnModuleInit, OnModuleDestroy {
       const keys = await this.redis.keys(pattern)
       if (keys.length > 0) {
         await this.redis.del(...keys)
-        this.logger.debug(`Invalidated ${keys.length} cache entries matching: ${pattern}`)
+        this.logger.debug(
+          `Invalidated ${keys.length} cache entries matching: ${pattern}`,
+        )
       }
     } catch (error) {
       this.logger.error(`Failed to invalidate cache pattern: ${pattern}`, error)

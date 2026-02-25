@@ -32,10 +32,7 @@ export class BookmarksController {
    * POST /api/bookmarks/:artworkId
    */
   @Post(':artworkId')
-  async bookmarkArtwork(
-    @Param('artworkId') artworkId: string,
-    @Request() req,
-  ) {
+  async bookmarkArtwork(@Param('artworkId') artworkId: string, @Request() req) {
     return this.bookmarksService.bookmarkArtwork(req.user.id, artworkId)
   }
 

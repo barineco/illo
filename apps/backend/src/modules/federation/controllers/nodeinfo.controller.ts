@@ -48,7 +48,10 @@ export class NodeInfoController {
    */
   @Public()
   @Get('nodeinfo/2.1')
-  @Header('Content-Type', 'application/json; profile="http://nodeinfo.diaspora.software/ns/schema/2.1#"')
+  @Header(
+    'Content-Type',
+    'application/json; profile="http://nodeinfo.diaspora.software/ns/schema/2.1#"',
+  )
   async getNodeInfo() {
     const settings = await this.prisma.instanceSettings.findFirst()
 
@@ -97,7 +100,7 @@ export class NodeInfoController {
           'federation',
           'webfinger',
           'http_signatures',
-          'dm_encryption',      // AES-256-GCM DB-level encryption
+          'dm_encryption', // AES-256-GCM DB-level encryption
           'mls_over_activitypub', // MLS over ActivityPub (RFC 9420)
         ],
       },

@@ -23,8 +23,11 @@ export class ActivityDeliveryProcessor extends WorkerHost {
     super()
   }
 
-  async process(job: Job<ActivityDeliveryJobData>): Promise<ActivityDeliveryResult> {
-    const { deliveryLogId, senderId, inboxUrl, activity, activityType } = job.data
+  async process(
+    job: Job<ActivityDeliveryJobData>,
+  ): Promise<ActivityDeliveryResult> {
+    const { deliveryLogId, senderId, inboxUrl, activity, activityType } =
+      job.data
 
     this.logger.log(
       `Processing ${activityType} delivery to ${inboxUrl} (attempt ${job.attemptsMade + 1}/${job.opts.attempts})`,
@@ -60,7 +63,8 @@ export class ActivityDeliveryProcessor extends WorkerHost {
       this.logger.log(`Successfully delivered ${activityType} to ${inboxUrl}`)
       return { success: true }
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : String(error)
+      const errorMessage =
+        error instanceof Error ? error.message : String(error)
 
       // Update attempt count and error
       await this.prisma.activityDeliveryLog.update({
@@ -82,7 +86,10 @@ export class ActivityDeliveryProcessor extends WorkerHost {
     inboxUrl: string,
     activity: Record<string, unknown>,
   ): Promise<void> {
-    const publicUrl = this.configService.get<string>('PUBLIC_URL', 'http://localhost:11104')
+    const publicUrl = this.configService.get<string>(
+      'PUBLIC_URL',
+      'http://localhost:11104',
+    )
     const keyId = `${publicUrl}/users/${sender.username}#main-key`
 
     const url = new URL(inboxUrl)
@@ -118,7 +125,10 @@ export class ActivityDeliveryProcessor extends WorkerHost {
     }
   }
 
-  private async updateDeliveryLogFailed(id: string, error: string): Promise<void> {
+  private async updateDeliveryLogFailed(
+    id: string,
+    error: string,
+  ): Promise<void> {
     await this.prisma.activityDeliveryLog.update({
       where: { id },
       data: {
@@ -130,7 +140,10 @@ export class ActivityDeliveryProcessor extends WorkerHost {
   }
 
   @OnWorkerEvent('failed')
-  async onFailed(job: Job<ActivityDeliveryJobData>, error: Error): Promise<void> {
+  async onFailed(
+    job: Job<ActivityDeliveryJobData>,
+    error: Error,
+  ): Promise<void> {
     const { deliveryLogId, activityType, inboxUrl } = job.data
     const maxAttempts = job.opts.attempts || 4
 

@@ -125,7 +125,9 @@ export class BlueskyOAuthService implements OnModuleInit {
 
     try {
       // Load private JWK from environment variable
-      const privateJwkString = this.configService.get<string>('BLUESKY_OAUTH_PRIVATE_JWK')
+      const privateJwkString = this.configService.get<string>(
+        'BLUESKY_OAUTH_PRIVATE_JWK',
+      )
 
       if (!privateJwkString) {
         this.logger.warn(
@@ -142,19 +144,29 @@ export class BlueskyOAuthService implements OnModuleInit {
         privateJwk = JSON.parse(privateJwkString)
       } catch (parseError) {
         try {
-          const decoded = Buffer.from(privateJwkString, 'base64').toString('utf-8')
+          const decoded = Buffer.from(privateJwkString, 'base64').toString(
+            'utf-8',
+          )
           privateJwk = JSON.parse(decoded)
-          this.logger.log('Successfully decoded Base64-encoded BLUESKY_OAUTH_PRIVATE_JWK')
+          this.logger.log(
+            'Successfully decoded Base64-encoded BLUESKY_OAUTH_PRIVATE_JWK',
+          )
         } catch (base64Error) {
-          this.logger.error('Failed to parse BLUESKY_OAUTH_PRIVATE_JWK: invalid JSON or Base64 format')
-          this.logger.error('Please check the BLUESKY_OAUTH_PRIVATE_JWK environment variable')
+          this.logger.error(
+            'Failed to parse BLUESKY_OAUTH_PRIVATE_JWK: invalid JSON or Base64 format',
+          )
+          this.logger.error(
+            'Please check the BLUESKY_OAUTH_PRIVATE_JWK environment variable',
+          )
           return
         }
       }
 
       // Validate required JWK fields
       if (!privateJwk.kty || !privateJwk.kid || !privateJwk.d) {
-        this.logger.error('Invalid BLUESKY_OAUTH_PRIVATE_JWK: missing required fields (kty, kid, d)')
+        this.logger.error(
+          'Invalid BLUESKY_OAUTH_PRIVATE_JWK: missing required fields (kty, kid, d)',
+        )
         return
       }
 
@@ -165,8 +177,14 @@ export class BlueskyOAuthService implements OnModuleInit {
         client_id: `${baseUrl}/api/bluesky/client-metadata.json`,
         client_name: this.instanceName,
         client_uri: frontendUrl,
-        redirect_uris: [`${baseUrl}/api/bluesky/callback`] as [string, ...string[]],
-        grant_types: ['authorization_code', 'refresh_token'] as ['authorization_code', 'refresh_token'],
+        redirect_uris: [`${baseUrl}/api/bluesky/callback`] as [
+          string,
+          ...string[],
+        ],
+        grant_types: ['authorization_code', 'refresh_token'] as [
+          'authorization_code',
+          'refresh_token',
+        ],
         response_types: ['code'] as ['code'],
         scope: 'atproto', // Minimal scope: authentication and DID/handle only
         token_endpoint_auth_method: 'private_key_jwt' as const,
@@ -179,7 +197,10 @@ export class BlueskyOAuthService implements OnModuleInit {
       }
 
       // Create JoseKey instance from the private JWK
-      const keyWithKid = await JoseKey.fromImportable(privateJwk, privateJwk.kid)
+      const keyWithKid = await JoseKey.fromImportable(
+        privateJwk,
+        privateJwk.kid,
+      )
 
       const options: NodeOAuthClientOptions = {
         clientMetadata,
@@ -216,7 +237,9 @@ export class BlueskyOAuthService implements OnModuleInit {
       this.configService.get<string>('FRONTEND_URL') || baseUrl
 
     // Load and parse the public JWK from private JWK
-    const privateJwkString = this.configService.get<string>('BLUESKY_OAUTH_PRIVATE_JWK')
+    const privateJwkString = this.configService.get<string>(
+      'BLUESKY_OAUTH_PRIVATE_JWK',
+    )
     let publicJwk = null
 
     if (privateJwkString) {
@@ -225,13 +248,18 @@ export class BlueskyOAuthService implements OnModuleInit {
         try {
           privateJwk = JSON.parse(privateJwkString)
         } catch {
-          const decoded = Buffer.from(privateJwkString, 'base64').toString('utf-8')
+          const decoded = Buffer.from(privateJwkString, 'base64').toString(
+            'utf-8',
+          )
           privateJwk = JSON.parse(decoded)
         }
         const { d, ...pub } = privateJwk
         publicJwk = pub
       } catch (error) {
-        this.logger.error('Failed to parse public JWK for client metadata:', error)
+        this.logger.error(
+          'Failed to parse public JWK for client metadata:',
+          error,
+        )
       }
     }
 
@@ -273,13 +301,17 @@ export class BlueskyOAuthService implements OnModuleInit {
 
     try {
       this.stateStore.setPendingMetadata({ mode, linkToUserId })
-      this.logger.log(`Set pending OAuth metadata: mode=${mode}, linkToUserId=${linkToUserId}`)
+      this.logger.log(
+        `Set pending OAuth metadata: mode=${mode}, linkToUserId=${linkToUserId}`,
+      )
 
       const url = await this.oauthClient.authorize(handle, {
         scope: 'atproto', // Minimal scope: authentication and DID/handle only
       })
 
-      this.logger.log(`Authorization URL generated: ${url.toString().substring(0, 150)}...`)
+      this.logger.log(
+        `Authorization URL generated: ${url.toString().substring(0, 150)}...`,
+      )
 
       return { url: url.toString(), state: '' }
     } catch (error) {
@@ -304,17 +336,25 @@ export class BlueskyOAuthService implements OnModuleInit {
       let mode: string | undefined
       let linkToUserId: string | undefined
 
-      this.logger.log(`Callback URL: ${callbackUrl.toString().substring(0, 150)}...`)
-      this.logger.log(`State param from callback: "${stateParam}" (length: ${stateParam?.length || 0})`)
+      this.logger.log(
+        `Callback URL: ${callbackUrl.toString().substring(0, 150)}...`,
+      )
+      this.logger.log(
+        `State param from callback: "${stateParam}" (length: ${stateParam?.length || 0})`,
+      )
 
       if (stateParam) {
         // Retrieve our metadata using the state key
         const metadata = this.stateStore.getMetadata(stateParam)
-        this.logger.log(`Metadata lookup result: ${metadata ? JSON.stringify(metadata) : 'null'}`)
+        this.logger.log(
+          `Metadata lookup result: ${metadata ? JSON.stringify(metadata) : 'null'}`,
+        )
         if (metadata) {
           mode = metadata.mode
           linkToUserId = metadata.linkToUserId
-          this.logger.log(`Retrieved OAuth metadata for state="${stateParam}": mode=${mode}, linkToUserId=${linkToUserId}`)
+          this.logger.log(
+            `Retrieved OAuth metadata for state="${stateParam}": mode=${mode}, linkToUserId=${linkToUserId}`,
+          )
           // Clean up after use
           this.stateStore.delMetadata(stateParam)
         } else {
@@ -372,9 +412,7 @@ export class BlueskyOAuthService implements OnModuleInit {
     })
 
     if (existingUser && existingUser.id !== userId) {
-      throw new Error(
-        'This Bluesky account is already linked to another user',
-      )
+      throw new Error('This Bluesky account is already linked to another user')
     }
 
     await this.prisma.user.update({

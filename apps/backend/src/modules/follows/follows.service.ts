@@ -1,4 +1,9 @@
-import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common'
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { PrismaService } from '../prisma/prisma.service'
 import { FollowStatus } from '@prisma/client'
@@ -18,7 +23,10 @@ export class FollowsService {
    * Parse username handle to extract username and domain
    * Supports formats: "username" or "username@domain"
    */
-  private parseUserHandle(handle: string): { username: string; domain: string } {
+  private parseUserHandle(handle: string): {
+    username: string
+    domain: string
+  } {
     const parts = handle.split('@')
     if (parts.length === 1) {
       // Local user: "username"
@@ -180,9 +188,11 @@ export class FollowsService {
 
     // Send Follow activity to remote user's inbox
     if (domain && followingUser.inbox) {
-      this.activityDelivery.sendFollow(followerUser, followingUser).catch((err) => {
-        this.logger.error(`Failed to send Follow activity: ${err}`)
-      })
+      this.activityDelivery
+        .sendFollow(followerUser, followingUser)
+        .catch((err) => {
+          this.logger.error(`Failed to send Follow activity: ${err}`)
+        })
     }
 
     // Emit event for notification creation
@@ -251,9 +261,11 @@ export class FollowsService {
 
     // Send Undo Follow activity to remote user's inbox
     if (domain && followingUser.inbox && followerUser) {
-      this.activityDelivery.sendUndoFollow(followerUser, followingUser).catch((err) => {
-        this.logger.error(`Failed to send Undo Follow activity: ${err}`)
-      })
+      this.activityDelivery
+        .sendUndoFollow(followerUser, followingUser)
+        .catch((err) => {
+          this.logger.error(`Failed to send Undo Follow activity: ${err}`)
+        })
     }
 
     return { message: 'Unfollowed successfully' }

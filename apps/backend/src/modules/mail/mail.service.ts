@@ -1,24 +1,30 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
-import * as nodemailer from 'nodemailer';
-import { Transporter } from 'nodemailer';
+import { Injectable, Logger } from '@nestjs/common'
+import { ConfigService } from '@nestjs/config'
+import * as nodemailer from 'nodemailer'
+import { Transporter } from 'nodemailer'
 
 @Injectable()
 export class MailService {
-  private transporter: Transporter;
-  private readonly logger = new Logger(MailService.name);
-  private readonly fromAddress: string;
-  private readonly frontendUrl: string;
-  private readonly instanceName: string;
+  private transporter: Transporter
+  private readonly logger = new Logger(MailService.name)
+  private readonly fromAddress: string
+  private readonly frontendUrl: string
+  private readonly instanceName: string
 
   constructor(private configService: ConfigService) {
-    this.frontendUrl = this.configService.get<string>('FRONTEND_URL', 'http://localhost:11103');
-    this.fromAddress = this.configService.get<string>('MAIL_FROM', 'noreply@localhost');
-    this.instanceName = this.configService.get<string>('INSTANCE_NAME', 'illo');
+    this.frontendUrl = this.configService.get<string>(
+      'FRONTEND_URL',
+      'http://localhost:11103',
+    )
+    this.fromAddress = this.configService.get<string>(
+      'MAIL_FROM',
+      'noreply@localhost',
+    )
+    this.instanceName = this.configService.get<string>('INSTANCE_NAME', 'illo')
 
     // 開発環境: MailHog/MailCatcher または ethereal.email
     // 本番環境: SMTP設定
-    const nodeEnv = this.configService.get<string>('NODE_ENV', 'development');
+    const nodeEnv = this.configService.get<string>('NODE_ENV', 'development')
     if (nodeEnv === 'production') {
       // 本番環境: SMTP設定
       this.transporter = nodemailer.createTransport({
@@ -29,7 +35,7 @@ export class MailService {
           user: this.configService.get<string>('SMTP_USER'),
           pass: this.configService.get<string>('SMTP_PASS'),
         },
-      });
+      })
     } else {
       // 開発環境: MailHog (デフォルト: localhost:1025)
       this.transporter = nodemailer.createTransport({
@@ -37,17 +43,17 @@ export class MailService {
         port: this.configService.get<number>('SMTP_PORT', 1025),
         secure: false,
         ignoreTLS: true,
-      });
+      })
     }
 
-    this.logger.log('Mail service initialized');
+    this.logger.log('Mail service initialized')
   }
 
   /**
    * メール認証メール送信
    */
   async sendVerificationEmail(email: string, username: string, token: string) {
-    const verifyUrl = `${this.frontendUrl}/verify-email?token=${token}`;
+    const verifyUrl = `${this.frontendUrl}/verify-email?token=${token}`
 
     try {
       await this.transporter.sendMail({
@@ -74,12 +80,12 @@ export class MailService {
             </p>
           </div>
         `,
-      });
+      })
 
-      this.logger.log(`Verification email sent to ${email}`);
+      this.logger.log(`Verification email sent to ${email}`)
     } catch (error) {
-      this.logger.error(`Failed to send verification email to ${email}`, error);
-      throw error;
+      this.logger.error(`Failed to send verification email to ${email}`, error)
+      throw error
     }
   }
 
@@ -87,7 +93,7 @@ export class MailService {
    * パスワードリセットメール送信
    */
   async sendPasswordResetEmail(email: string, username: string, token: string) {
-    const resetUrl = `${this.frontendUrl}/reset-password?token=${token}`;
+    const resetUrl = `${this.frontendUrl}/reset-password?token=${token}`
 
     try {
       await this.transporter.sendMail({
@@ -114,12 +120,15 @@ export class MailService {
             </p>
           </div>
         `,
-      });
+      })
 
-      this.logger.log(`Password reset email sent to ${email}`);
+      this.logger.log(`Password reset email sent to ${email}`)
     } catch (error) {
-      this.logger.error(`Failed to send password reset email to ${email}`, error);
-      throw error;
+      this.logger.error(
+        `Failed to send password reset email to ${email}`,
+        error,
+      )
+      throw error
     }
   }
 
@@ -130,9 +139,9 @@ export class MailService {
     email: string,
     username: string,
     deviceInfo: {
-      deviceName?: string;
-      ipAddress?: string;
-      location?: string;
+      deviceName?: string
+      ipAddress?: string
+      location?: string
     },
   ) {
     try {
@@ -159,12 +168,15 @@ export class MailService {
             </p>
           </div>
         `,
-      });
+      })
 
-      this.logger.log(`New device login notification sent to ${email}`);
+      this.logger.log(`New device login notification sent to ${email}`)
     } catch (error) {
-      this.logger.error(`Failed to send new device login notification to ${email}`, error);
-      throw error;
+      this.logger.error(
+        `Failed to send new device login notification to ${email}`,
+        error,
+      )
+      throw error
     }
   }
 }

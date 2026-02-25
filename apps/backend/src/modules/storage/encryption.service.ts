@@ -27,10 +27,16 @@ export class EncryptionService {
       this.masterKey = Buffer.from(keyHex, 'hex')
       this.logger.log('Image encryption enabled')
     } else if (process.env.NODE_ENV === 'production') {
-      this.logger.error('IMAGE_ENCRYPTION_KEY must be a 64-character hex string (32 bytes) in production')
-      throw new Error('IMAGE_ENCRYPTION_KEY must be a 64-character hex string (32 bytes)')
+      this.logger.error(
+        'IMAGE_ENCRYPTION_KEY must be a 64-character hex string (32 bytes) in production',
+      )
+      throw new Error(
+        'IMAGE_ENCRYPTION_KEY must be a 64-character hex string (32 bytes)',
+      )
     } else {
-      this.logger.warn('IMAGE_ENCRYPTION_KEY not set - image encryption disabled (development mode)')
+      this.logger.warn(
+        'IMAGE_ENCRYPTION_KEY not set - image encryption disabled (development mode)',
+      )
     }
   }
 
@@ -59,10 +65,7 @@ export class EncryptionService {
     const cipher = crypto.createCipheriv('aes-256-gcm', this.masterKey, iv)
 
     // Encrypt data
-    const encrypted = Buffer.concat([
-      cipher.update(data),
-      cipher.final(),
-    ])
+    const encrypted = Buffer.concat([cipher.update(data), cipher.final()])
 
     // Get authentication tag (16 bytes)
     const authTag = cipher.getAuthTag()
@@ -99,9 +102,6 @@ export class EncryptionService {
     decipher.setAuthTag(authTag)
 
     // Decrypt data
-    return Buffer.concat([
-      decipher.update(data),
-      decipher.final(),
-    ])
+    return Buffer.concat([decipher.update(data), decipher.final()])
   }
 }

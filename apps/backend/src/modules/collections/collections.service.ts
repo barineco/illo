@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common'
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+  BadRequestException,
+} from '@nestjs/common'
 import { PrismaService } from '../prisma/prisma.service'
 import { CreateCollectionDto } from './dto/create-collection.dto'
 import { UpdateCollectionDto } from './dto/update-collection.dto'
@@ -22,7 +27,8 @@ export class CollectionsService {
       data: {
         title: dto.title,
         description: dto.description,
-        visibility: dto.visibility || user?.defaultVisibility || Visibility.PUBLIC,
+        visibility:
+          dto.visibility || user?.defaultVisibility || Visibility.PUBLIC,
         userId,
       },
       include: {
@@ -57,7 +63,11 @@ export class CollectionsService {
   /**
    * Get all collections for a user
    */
-  async getUserCollections(username: string, domain: string = '', currentUserId?: string) {
+  async getUserCollections(
+    username: string,
+    domain: string = '',
+    currentUserId?: string,
+  ) {
     const user = await this.prisma.user.findFirst({
       where: { username, domain },
     })
@@ -69,7 +79,10 @@ export class CollectionsService {
     const isOwner = currentUserId === user.id
 
     // Build visibility filter
-    const visibilityFilter: Visibility[] = [Visibility.PUBLIC, Visibility.UNLISTED]
+    const visibilityFilter: Visibility[] = [
+      Visibility.PUBLIC,
+      Visibility.UNLISTED,
+    ]
     if (isOwner) {
       visibilityFilter.push(Visibility.FOLLOWERS_ONLY, Visibility.PRIVATE)
     } else if (currentUserId) {
@@ -219,7 +232,11 @@ export class CollectionsService {
   /**
    * Update a collection
    */
-  async updateCollection(collectionId: string, userId: string, dto: UpdateCollectionDto) {
+  async updateCollection(
+    collectionId: string,
+    userId: string,
+    dto: UpdateCollectionDto,
+  ) {
     const collection = await this.prisma.collection.findUnique({
       where: { id: collectionId },
     })
@@ -294,7 +311,11 @@ export class CollectionsService {
   /**
    * Add artwork to collection
    */
-  async addArtworkToCollection(collectionId: string, artworkId: string, userId: string) {
+  async addArtworkToCollection(
+    collectionId: string,
+    artworkId: string,
+    userId: string,
+  ) {
     const collection = await this.prisma.collection.findUnique({
       where: { id: collectionId },
     })
@@ -304,7 +325,9 @@ export class CollectionsService {
     }
 
     if (collection.userId !== userId) {
-      throw new ForbiddenException('You can only add artworks to your own collections')
+      throw new ForbiddenException(
+        'You can only add artworks to your own collections',
+      )
     }
 
     // Check if artwork exists
@@ -368,7 +391,11 @@ export class CollectionsService {
   /**
    * Remove artwork from collection
    */
-  async removeArtworkFromCollection(collectionId: string, artworkId: string, userId: string) {
+  async removeArtworkFromCollection(
+    collectionId: string,
+    artworkId: string,
+    userId: string,
+  ) {
     const collection = await this.prisma.collection.findUnique({
       where: { id: collectionId },
     })
@@ -378,7 +405,9 @@ export class CollectionsService {
     }
 
     if (collection.userId !== userId) {
-      throw new ForbiddenException('You can only remove artworks from your own collections')
+      throw new ForbiddenException(
+        'You can only remove artworks from your own collections',
+      )
     }
 
     const collectionArtwork = await this.prisma.collectionArtwork.findUnique({
@@ -412,7 +441,11 @@ export class CollectionsService {
   /**
    * Reorder artworks in collection
    */
-  async reorderCollectionArtworks(collectionId: string, artworkIds: string[], userId: string) {
+  async reorderCollectionArtworks(
+    collectionId: string,
+    artworkIds: string[],
+    userId: string,
+  ) {
     const collection = await this.prisma.collection.findUnique({
       where: { id: collectionId },
     })

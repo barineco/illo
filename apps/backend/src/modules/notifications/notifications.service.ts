@@ -169,22 +169,6 @@ export class NotificationsService {
               content: true,
             },
           },
-          character: {
-            select: {
-              id: true,
-              name: true,
-              representativeArtwork: {
-                select: {
-                  id: true,
-                  images: {
-                    take: 1,
-                    orderBy: { order: 'asc' },
-                    select: { thumbnailUrl: true },
-                  },
-                },
-              },
-            },
-          },
         },
         orderBy: { createdAt: 'desc' },
         skip,
@@ -234,7 +218,10 @@ export class NotificationsService {
     })
   }
 
-  async deleteNotification(userId: string, notificationId: string): Promise<void> {
+  async deleteNotification(
+    userId: string,
+    notificationId: string,
+  ): Promise<void> {
     await this.prisma.notification.deleteMany({
       where: {
         id: notificationId,

@@ -142,17 +142,15 @@ export class AuthController {
     return {
       message: '2FA enabled successfully',
       backupCodes,
-      warning: 'Save these backup codes in a safe place. They can only be used once.',
+      warning:
+        'Save these backup codes in a safe place. They can only be used once.',
     }
   }
 
   @Post('2fa/disable')
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
-  async disable2FA(
-    @CurrentUser() user: any,
-    @Body('code') code: string,
-  ) {
+  async disable2FA(@CurrentUser() user: any, @Body('code') code: string) {
     await this.twoFactorService.disable2FA(user.id, code)
 
     return { message: '2FA disabled successfully' }
@@ -206,13 +204,15 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @HttpCode(HttpStatus.OK)
   async regenerateBackupCodes(@CurrentUser() user: any) {
-    const { backupCodes } =
-      await this.twoFactorService.regenerateBackupCodes(user.id)
+    const { backupCodes } = await this.twoFactorService.regenerateBackupCodes(
+      user.id,
+    )
 
     return {
       backupCodes,
       message: 'Backup codes regenerated successfully',
-      warning: 'Old backup codes are now invalid. Save these new codes in a safe place.',
+      warning:
+        'Old backup codes are now invalid. Save these new codes in a safe place.',
     }
   }
 
@@ -238,7 +238,9 @@ export class AuthController {
     @Body() dto: ChangePasswordDto,
     @Req() req: Request,
   ) {
-    const currentRefreshToken = req.headers['x-refresh-token'] as string | undefined
+    const currentRefreshToken = req.headers['x-refresh-token'] as
+      | string
+      | undefined
 
     const result = await this.authService.changePassword(
       user.id,

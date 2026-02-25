@@ -368,86 +368,6 @@
           </div>
         </div>
 
-        <!-- Character Selection -->
-        <div v-if="modelValue.copyrightType === 'CREATOR' || modelValue.copyrightType === 'FAN_ART'" class="sub-section">
-          <label class="sub-label">
-            {{ modelValue.copyrightType === 'CREATOR' ? $t('upload.ownCharacter') : $t('upload.fanArtCharacter') }}
-          </label>
-          <p class="field-hint mb-2">
-            {{ modelValue.copyrightType === 'CREATOR' ? $t('upload.ownCharacterHint') : $t('upload.fanArtCharacterHint') }}
-          </p>
-
-          <!-- Selected Character -->
-          <div v-if="modelValue.character" class="flex items-center gap-3 p-3 bg-[var(--color-surface-secondary)] rounded-lg mb-2">
-            <div class="w-10 h-10 rounded-full bg-[var(--color-surface)] flex items-center justify-center overflow-hidden flex-shrink-0">
-              <img
-                v-if="modelValue.character.avatarThumbnailUrl || modelValue.character.avatarUrl"
-                :src="modelValue.character.avatarThumbnailUrl || modelValue.character.avatarUrl || ''"
-                :alt="modelValue.character.name"
-                class="w-full h-full object-cover"
-              />
-              <Icon v-else name="User" class="w-6 h-6 text-[var(--color-text-muted)]" />
-            </div>
-            <div class="flex-1 min-w-0">
-              <div class="font-medium truncate">{{ modelValue.character.name }}</div>
-              <div v-if="modelValue.character.creator" class="text-sm text-[var(--color-text-muted)] truncate">
-                @{{ modelValue.character.creator.username }}
-              </div>
-            </div>
-            <button
-              type="button"
-              @click="clearCharacter"
-              class="p-1.5 hover:bg-[var(--color-hover)] rounded transition-colors text-[var(--color-text-muted)] hover:text-[var(--color-danger)]"
-            >
-              <Icon name="XMark" class="w-5 h-5" />
-            </button>
-          </div>
-
-          <!-- Character Search Input -->
-          <div v-else class="relative">
-            <input
-              v-model="characterSearch"
-              type="text"
-              class="input-field"
-              :placeholder="$t('upload.fanArtCharacterPlaceholder')"
-              @focus="showCharacterDropdown = true"
-              @blur="handleCharacterDropdownBlur"
-            />
-            <!-- Search Results Dropdown -->
-            <div
-              v-if="showCharacterDropdown && (characterSearchResults.length > 0 || isSearchingCharacters)"
-              class="absolute z-10 w-full mt-1 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg shadow-lg max-h-60 overflow-y-auto"
-            >
-              <div v-if="isSearchingCharacters" class="p-3 text-center text-[var(--color-text-muted)]">
-                <div class="inline-block animate-spin rounded-full h-4 w-4 border-2 border-[var(--color-border)] border-t-[var(--color-primary)]"></div>
-              </div>
-              <button
-                v-for="character in characterSearchResults"
-                :key="character.id"
-                type="button"
-                class="w-full flex items-center gap-3 p-3 hover:bg-[var(--color-hover)] transition-colors text-left"
-                @mousedown.prevent="selectCharacter(character)"
-              >
-                <div class="w-8 h-8 rounded-full bg-[var(--color-surface-secondary)] flex items-center justify-center overflow-hidden flex-shrink-0">
-                  <img
-                    v-if="character.avatarThumbnailUrl || character.avatarUrl"
-                    :src="character.avatarThumbnailUrl || character.avatarUrl || ''"
-                    :alt="character.name"
-                    class="w-full h-full object-cover"
-                  />
-                  <Icon v-else name="User" class="w-5 h-5 text-[var(--color-text-muted)]" />
-                </div>
-                <div class="flex-1 min-w-0">
-                  <div class="font-medium truncate">{{ character.name }}</div>
-                  <div v-if="character.creator" class="text-sm text-[var(--color-text-muted)] truncate">
-                    @{{ character.creator.username }}
-                  </div>
-                </div>
-              </button>
-            </div>
-          </div>
-        </div>
-
         <!-- Copyright Note -->
         <div class="sub-section">
           <label for="copyrightNote" class="sub-label">{{ $t('upload.copyrightNote') }}</label>
@@ -675,18 +595,6 @@ export interface OriginalCreatorInfo {
   avatarUrl?: string
 }
 
-export interface CharacterInfo {
-  id: string
-  name: string
-  avatarUrl?: string | null
-  avatarThumbnailUrl?: string | null
-  creator?: {
-    id: string
-    username: string
-    displayName?: string | null
-  }
-}
-
 export interface ArtworkFormData {
   title: string
   description: string
@@ -715,9 +623,6 @@ export interface ArtworkFormData {
   originalCreatorId?: string
   originalCreator?: OriginalCreatorInfo
   originalCreatorAllowDownload?: boolean
-  // Fan art character
-  characterId?: string
-  character?: CharacterInfo
 }
 
 const props = defineProps<{
@@ -746,18 +651,6 @@ const showUserDropdown = ref(false)
 const handleUserDropdownBlur = () => {
   window.setTimeout(() => {
     showUserDropdown.value = false
-  }, 200)
-}
-
-// Character search for fan art
-const characterSearch = ref('')
-const characterSearchResults = ref<CharacterInfo[]>([])
-const isSearchingCharacters = ref(false)
-const showCharacterDropdown = ref(false)
-
-const handleCharacterDropdownBlur = () => {
-  window.setTimeout(() => {
-    showCharacterDropdown.value = false
   }, 200)
 }
 
@@ -821,71 +714,6 @@ const clearOriginalCreator = () => {
   updateField('originalCreatorId', undefined)
   updateField('originalCreator', undefined)
   updateField('originalCreatorAllowDownload', false)
-}
-
-const { getSignedUrl } = useSignedImageUrlOnce()
-
-const searchCharacters = async (query: string) => {
-  if (!query || query.length < 1) {
-    characterSearchResults.value = []
-    return
-  }
-
-  isSearchingCharacters.value = true
-  try {
-    const isOwnCharacter = props.modelValue.copyrightType === 'CREATOR'
-    const endpoint = isOwnCharacter && currentUser.value
-      ? `/api/users/${currentUser.value.username}/characters`
-      : '/api/ocs'
-    const results = await api.get<{ characters: any[] }>(endpoint, {
-      params: { search: query, limit: 10 },
-    })
-    characterSearchResults.value = await Promise.all(
-      results.characters.map(async (c: any) => {
-        const img = c.representativeArtwork?.images?.[0]
-        let avatarThumbnailUrl: string | null = null
-        if (img?.id) {
-          try {
-            avatarThumbnailUrl = await getSignedUrl(img.id, true)
-          } catch {
-            avatarThumbnailUrl = null
-          }
-        }
-        return {
-          id: c.id,
-          name: c.name,
-          avatarUrl: null,
-          avatarThumbnailUrl,
-          creator: c.creator,
-        }
-      })
-    )
-  } catch (e) {
-    console.error('Failed to search characters:', e)
-    characterSearchResults.value = []
-  } finally {
-    isSearchingCharacters.value = false
-  }
-}
-
-// Debounced character search
-let characterSearchTimeout: ReturnType<typeof setTimeout> | null = null
-watch(characterSearch, (query) => {
-  if (characterSearchTimeout) clearTimeout(characterSearchTimeout)
-  characterSearchTimeout = setTimeout(() => searchCharacters(query), 300)
-})
-
-const selectCharacter = (character: CharacterInfo) => {
-  updateField('characterId', character.id)
-  updateField('character', character)
-  characterSearch.value = ''
-  showCharacterDropdown.value = false
-  characterSearchResults.value = []
-}
-
-const clearCharacter = () => {
-  updateField('characterId', undefined)
-  updateField('character', undefined)
 }
 
 // Auto-expand copyright section if data exists

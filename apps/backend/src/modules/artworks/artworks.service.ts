@@ -1,4 +1,10 @@
-import { Injectable, NotFoundException, ForbiddenException, BadRequestException, Logger } from '@nestjs/common'
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+  BadRequestException,
+  Logger,
+} from '@nestjs/common'
 import { PrismaService } from '../prisma/prisma.service'
 import { StorageService } from '../storage/storage.service'
 import { ImageSigningService } from '../storage/image-signing.service'
@@ -9,7 +15,15 @@ import { InboxService } from '../federation/services/inbox.service'
 import { ActorService } from '../federation/services/actor.service'
 import { MutesService } from '../mutes/mutes.service'
 import { ContentFilters } from '../users/users.service'
-import { ArtworkType, AgeRating, Visibility, Prisma, CreationPeriodUnit, ArtworkMedium, CopyrightType } from '@prisma/client'
+import {
+  ArtworkType,
+  AgeRating,
+  Visibility,
+  Prisma,
+  CreationPeriodUnit,
+  ArtworkMedium,
+  CopyrightType,
+} from '@prisma/client'
 
 export interface CreateArtworkDto {
   title: string
@@ -19,9 +33,9 @@ export interface CreateArtworkDto {
   visibility?: Visibility
   tags?: string[]
   disableRightClick?: boolean
-  license?: string  // Artwork-specific license (e.g., "CC BY 4.0", "All Rights Reserved")
-  customLicenseUrl?: string  // Custom license URL
-  customLicenseText?: string  // Custom license text description
+  license?: string // Artwork-specific license (e.g., "CC BY 4.0", "All Rights Reserved")
+  customLicenseUrl?: string // Custom license URL
+  customLicenseText?: string // Custom license text description
   // Creation metadata (portfolio fields)
   creationDate?: Date | string
   creationPeriodValue?: number
@@ -31,7 +45,7 @@ export interface CreateArtworkDto {
   projectName?: string
   medium?: ArtworkMedium
   externalUrl?: string
-  toolsUsed?: string[]  // Array of tool names
+  toolsUsed?: string[] // Array of tool names
   // OG card crop coordinates (for link card from first image)
   ogCardCrop?: { x: number; y: number; width: number; height: number }
   ogCardBlur?: boolean
@@ -42,10 +56,8 @@ export interface CreateArtworkDto {
   // Fan art original creator linking
   originalCreatorId?: string
   originalCreatorAllowDownload?: boolean
-  // Fan art character linking
-  characterId?: string  // ID of the original character for fan art
   // Collection integration
-  collectionIds?: string[]  // IDs of existing collections to add artwork to
+  collectionIds?: string[] // IDs of existing collections to add artwork to
 }
 
 export interface ImageOperation {
@@ -63,9 +75,9 @@ export interface UpdateArtworkDto {
   tags?: string[]
   imageOperations?: ImageOperation[]
   disableRightClick?: boolean
-  license?: string  // Artwork-specific license
-  customLicenseUrl?: string  // Custom license URL
-  customLicenseText?: string  // Custom license text description
+  license?: string // Artwork-specific license
+  customLicenseUrl?: string // Custom license URL
+  customLicenseText?: string // Custom license text description
   // Creation metadata (portfolio fields)
   creationDate?: Date | string | null
   creationPeriodValue?: number | null
@@ -75,7 +87,7 @@ export interface UpdateArtworkDto {
   projectName?: string | null
   medium?: ArtworkMedium | null
   externalUrl?: string | null
-  toolsUsed?: string[] | null  // Array of tool names
+  toolsUsed?: string[] | null // Array of tool names
   // OG card crop coordinates (for link card from first image)
   ogCardCrop?: { x: number; y: number; width: number; height: number } | null
   ogCardBlur?: boolean
@@ -86,21 +98,19 @@ export interface UpdateArtworkDto {
   // Fan art original creator linking
   originalCreatorId?: string | null
   originalCreatorAllowDownload?: boolean
-  // Fan art character linking
-  characterId?: string | null  // ID of the original character for fan art
 }
 
 export interface OgCardCropRegion {
-  x: number       // X offset in pixels (on original image)
-  y: number       // Y offset in pixels
-  width: number   // Crop width in pixels
-  height: number  // Crop height in pixels
+  x: number // X offset in pixels (on original image)
+  y: number // Y offset in pixels
+  width: number // Crop width in pixels
+  height: number // Crop height in pixels
 }
 
 export interface GenerateOgCardDto {
-  imageId: string                  // Which artwork image to use
-  cropRegion?: OgCardCropRegion   // Optional, defaults to center crop
-  blur?: boolean                   // Optional, auto-enabled for R18/R18G
+  imageId: string // Which artwork image to use
+  cropRegion?: OgCardCropRegion // Optional, defaults to center crop
+  blur?: boolean // Optional, auto-enabled for R18/R18G
 }
 
 export interface ArtworkQueryParams {
@@ -210,17 +220,25 @@ export class ArtworksService {
    * Apply signed URLs to artwork images if signing is enabled
    * This transforms stored URLs to time-limited signed URLs for the API response
    */
-  private applySignedUrls<T extends { images?: Array<{ id: string; url: string; thumbnailUrl: string }> }>(artwork: T): T {
+  private applySignedUrls<
+    T extends {
+      images?: Array<{ id: string; url: string; thumbnailUrl: string }>
+    },
+  >(artwork: T): T {
     if (!this.imageSigningService.isEnabled() || !artwork.images) {
       return artwork
     }
 
     return {
       ...artwork,
-      images: artwork.images.map(image => ({
+      images: artwork.images.map((image) => ({
         ...image,
-        url: this.imageSigningService.generateSignedUrlV2(image.id, 'standard').url,
-        thumbnailUrl: this.imageSigningService.generateSignedUrlV2(image.id, 'thumbnail').url,
+        url: this.imageSigningService.generateSignedUrlV2(image.id, 'standard')
+          .url,
+        thumbnailUrl: this.imageSigningService.generateSignedUrlV2(
+          image.id,
+          'thumbnail',
+        ).url,
       })),
     }
   }
@@ -228,7 +246,9 @@ export class ArtworksService {
   /**
    * Apply signed URL to a single image for thumbnail display
    */
-  private applySignedThumbnailUrl<T extends { thumbnailUrl?: string; images?: Array<{ id: string }> }>(artwork: T): T {
+  private applySignedThumbnailUrl<
+    T extends { thumbnailUrl?: string; images?: Array<{ id: string }> },
+  >(artwork: T): T {
     if (!this.imageSigningService.isEnabled()) {
       return artwork
     }
@@ -238,7 +258,10 @@ export class ArtworksService {
       const firstImageId = artwork.images[0].id
       return {
         ...artwork,
-        thumbnailUrl: this.imageSigningService.generateSignedUrlV2(firstImageId, 'thumbnail').url,
+        thumbnailUrl: this.imageSigningService.generateSignedUrlV2(
+          firstImageId,
+          'thumbnail',
+        ).url,
       }
     }
 
@@ -277,12 +300,16 @@ export class ArtworksService {
     }
 
     // Check image count against tier limit (Admin gets TIER_1 limit)
-    const { getMaxImagesPerArtwork, getStorageQuota } = await import('../../common/constants/supporter-tiers')
-    const effectiveTier = author.role === 'ADMIN' ? 'TIER_1' : author.supporterTier
+    const { getMaxImagesPerArtwork, getStorageQuota } =
+      await import('../../common/constants/supporter-tiers')
+    const effectiveTier =
+      author.role === 'ADMIN' ? 'TIER_1' : author.supporterTier
     const maxImages = getMaxImagesPerArtwork(effectiveTier)
 
     if (imageFiles.length > maxImages) {
-      throw new BadRequestException(`Maximum ${maxImages} images allowed per artwork for your tier`)
+      throw new BadRequestException(
+        `Maximum ${maxImages} images allowed per artwork for your tier`,
+      )
     }
 
     // Check storage quota against tier limit (Admin gets TIER_1 quota)
@@ -290,11 +317,14 @@ export class ArtworksService {
     const totalUploadSize = imageFiles.reduce((sum, file) => sum + file.size, 0)
 
     if (author.usedStorageBytes + BigInt(totalUploadSize) > storageQuota) {
-      throw new ForbiddenException(`Storage quota exceeded. You have used ${Number(author.usedStorageBytes / BigInt(1024 * 1024))}MB of your ${Number(storageQuota / BigInt(1024 * 1024))}MB quota`)
+      throw new ForbiddenException(
+        `Storage quota exceeded. You have used ${Number(author.usedStorageBytes / BigInt(1024 * 1024))}MB of your ${Number(storageQuota / BigInt(1024 * 1024))}MB quota`,
+      )
     }
 
     // Determine visibility
-    const visibility = createDto.visibility || author.defaultVisibility || 'PUBLIC'
+    const visibility =
+      createDto.visibility || author.defaultVisibility || 'PUBLIC'
 
     // Upload all images with format preservation and metadata
     const encryptionEnabled = this.storageService.isEncryptionEnabled()
@@ -321,7 +351,11 @@ export class ArtworksService {
         clientName: createDto.clientName || undefined,
       }
 
-      const result = await this.storageService.uploadArtworkImage(file, 'artworks', metadataInput)
+      const result = await this.storageService.uploadArtworkImage(
+        file,
+        'artworks',
+        metadataInput,
+      )
 
       return {
         // URL and thumbnailUrl will be set after DB insert when we have the image ID
@@ -369,7 +403,9 @@ export class ArtworksService {
           customLicenseUrl: createDto.customLicenseUrl || null,
           customLicenseText: createDto.customLicenseText || null,
           // Creation metadata (portfolio fields)
-          creationDate: createDto.creationDate ? new Date(createDto.creationDate) : null,
+          creationDate: createDto.creationDate
+            ? new Date(createDto.creationDate)
+            : null,
           creationPeriodValue: createDto.creationPeriodValue ?? null,
           creationPeriodUnit: createDto.creationPeriodUnit ?? null,
           isCommission: createDto.isCommission ?? false,
@@ -377,7 +413,9 @@ export class ArtworksService {
           projectName: createDto.projectName || null,
           medium: createDto.medium ?? null,
           externalUrl: createDto.externalUrl || null,
-          toolsUsed: createDto.toolsUsed ? JSON.stringify(createDto.toolsUsed) : null,
+          toolsUsed: createDto.toolsUsed
+            ? JSON.stringify(createDto.toolsUsed)
+            : null,
           // OG card crop coordinates (stored in original image pixels)
           ogCardCropX: createDto.ogCardCrop?.x ?? null,
           ogCardCropY: createDto.ogCardCrop?.y ?? null,
@@ -390,9 +428,8 @@ export class ArtworksService {
           copyrightNote: createDto.copyrightNote || null,
           // Fan art original creator linking
           originalCreatorId: createDto.originalCreatorId || null,
-          originalCreatorAllowDownload: createDto.originalCreatorAllowDownload ?? false,
-          // Fan art character linking
-          characterId: createDto.characterId || null,
+          originalCreatorAllowDownload:
+            createDto.originalCreatorAllowDownload ?? false,
           authorId: authorId,
           images: {
             create: uploadedImages,
@@ -476,7 +513,9 @@ export class ArtworksService {
     if (fullArtwork && fullArtwork.author.domain === '') {
       this.activityDeliveryService
         .sendCreateArtwork(fullArtwork.author, fullArtwork)
-        .catch((err) => this.logger.error(`Failed to send Create Activity: ${err.message}`))
+        .catch((err) =>
+          this.logger.error(`Failed to send Create Activity: ${err.message}`),
+        )
     }
 
     // Add artwork to collections if specified
@@ -507,43 +546,10 @@ export class ArtworksService {
           }
         } catch (error) {
           // Log but don't fail the whole operation
-          this.logger.warn(`Failed to add artwork to collection ${collectionId}: ${error.message}`)
+          this.logger.warn(
+            `Failed to add artwork to collection ${collectionId}: ${error.message}`,
+          )
         }
-      }
-    }
-
-    // Handle character fan art linking
-    if (createDto.characterId) {
-      try {
-        // Get character to find creator
-        const character = await this.prisma.originalCharacter.findUnique({
-          where: { id: createDto.characterId },
-          select: { id: true, creatorId: true, name: true },
-        })
-
-        if (character) {
-          // Increment fan art count
-          await this.prisma.originalCharacter.update({
-            where: { id: character.id },
-            data: { fanArtCount: { increment: 1 } },
-          })
-
-          // Create notification for character creator (if not self)
-          if (character.creatorId !== authorId) {
-            await this.prisma.notification.create({
-              data: {
-                userId: character.creatorId,
-                type: 'CHARACTER_FAN_ART',
-                actorId: authorId,
-                artworkId: artwork.id,
-                characterId: character.id,
-              },
-            })
-          }
-        }
-      } catch (error) {
-        // Log but don't fail the whole operation
-        this.logger.warn(`Failed to handle character fan art linking: ${error.message}`)
       }
     }
 
@@ -557,7 +563,11 @@ export class ArtworksService {
    * @param currentUserId - The current user ID (optional, for access control)
    * @param contentFilters - The user's content filter settings (optional)
    */
-  async getArtworkById(artworkId: string, currentUserId?: string, contentFilters?: ContentFilters) {
+  async getArtworkById(
+    artworkId: string,
+    currentUserId?: string,
+    contentFilters?: ContentFilters,
+  ) {
     const artwork = await this.prisma.artwork.findUnique({
       where: { id: artworkId },
       include: ARTWORK_DETAIL_INCLUDE,
@@ -645,13 +655,15 @@ export class ArtworksService {
     // - FOLLOWERS_ONLY: visible to author and their followers
     if (params.currentUserId) {
       // Logged in user: can see PUBLIC, UNLISTED, own artworks, and FOLLOWERS_ONLY from followed users
-      const followingIds = await this.prisma.follow.findMany({
-        where: {
-          followerId: params.currentUserId,
-          status: 'ACCEPTED',
-        },
-        select: { followingId: true },
-      }).then(follows => follows.map(f => f.followingId))
+      const followingIds = await this.prisma.follow
+        .findMany({
+          where: {
+            followerId: params.currentUserId,
+            status: 'ACCEPTED',
+          },
+          select: { followingId: true },
+        })
+        .then((follows) => follows.map((f) => f.followingId))
 
       const visibilityConditions: Prisma.ArtworkWhereInput[] = [
         { visibility: Visibility.PUBLIC },
@@ -765,7 +777,9 @@ export class ArtworksService {
     }
 
     // Determine sort order
-    let orderBy: Prisma.ArtworkOrderByWithRelationInput | Prisma.ArtworkOrderByWithRelationInput[] = { createdAt: 'desc' }
+    let orderBy:
+      | Prisma.ArtworkOrderByWithRelationInput
+      | Prisma.ArtworkOrderByWithRelationInput[] = { createdAt: 'desc' }
     if (params.sort === 'popular') {
       orderBy = { likeCount: 'desc' }
     } else if (params.sort === 'views') {
@@ -801,7 +815,8 @@ export class ArtworksService {
     let transformedArtworks = artworks.map((artwork) => {
       const baseArtwork = {
         ...artwork,
-        thumbnailUrl: artwork.images[0]?.thumbnailUrl || artwork.images[0]?.url || '',
+        thumbnailUrl:
+          artwork.images[0]?.thumbnailUrl || artwork.images[0]?.url || '',
         imageCount: artwork._count.images,
       }
 
@@ -809,11 +824,20 @@ export class ArtworksService {
       if (signingEnabled && artwork.images.length > 0) {
         return {
           ...baseArtwork,
-          thumbnailUrl: this.imageSigningService.generateSignedUrlV2(artwork.images[0].id, 'thumbnail').url,
-          images: artwork.images.map(img => ({
+          thumbnailUrl: this.imageSigningService.generateSignedUrlV2(
+            artwork.images[0].id,
+            'thumbnail',
+          ).url,
+          images: artwork.images.map((img) => ({
             ...img,
-            url: this.imageSigningService.generateSignedUrlV2(img.id, 'standard').url,
-            thumbnailUrl: this.imageSigningService.generateSignedUrlV2(img.id, 'thumbnail').url,
+            url: this.imageSigningService.generateSignedUrlV2(
+              img.id,
+              'standard',
+            ).url,
+            thumbnailUrl: this.imageSigningService.generateSignedUrlV2(
+              img.id,
+              'thumbnail',
+            ).url,
           })),
         }
       }
@@ -823,7 +847,9 @@ export class ArtworksService {
 
     // Apply word mute filtering (title, description, tags)
     if (params.currentUserId) {
-      const wordMutes = await this.mutesService.getWordMutes(params.currentUserId)
+      const wordMutes = await this.mutesService.getWordMutes(
+        params.currentUserId,
+      )
       if (wordMutes.length > 0) {
         transformedArtworks = transformedArtworks.filter((artwork) => {
           // Check title
@@ -831,7 +857,10 @@ export class ArtworksService {
             return false
           }
           // Check description (if exists)
-          if (artwork.description && this.matchesAnyWordMute(artwork.description, wordMutes)) {
+          if (
+            artwork.description &&
+            this.matchesAnyWordMute(artwork.description, wordMutes)
+          ) {
             return false
           }
           return true
@@ -861,10 +890,14 @@ export class ArtworksService {
     })
 
     // Remove hidden artworks
-    filteredArtworks = filteredArtworks.filter((a) => a._filterSetting !== 'hide')
+    filteredArtworks = filteredArtworks.filter(
+      (a) => a._filterSetting !== 'hide',
+    )
 
     // Remove temporary field and return
-    const finalArtworks = filteredArtworks.map(({ _filterSetting, ...artwork }) => artwork)
+    const finalArtworks = filteredArtworks.map(
+      ({ _filterSetting, ...artwork }) => artwork,
+    )
 
     return {
       artworks: finalArtworks,
@@ -881,7 +914,10 @@ export class ArtworksService {
    * Parse username handle to extract username and domain
    * Supports formats: "username" or "username@domain"
    */
-  private parseUserHandle(handle: string): { username: string; domain: string } {
+  private parseUserHandle(handle: string): {
+    username: string
+    domain: string
+  } {
     const parts = handle.split('@')
     if (parts.length === 1) {
       // Local user: "username"
@@ -904,7 +940,12 @@ export class ArtworksService {
     limit: number = 20,
     currentUserId?: string,
     contentFilters?: ContentFilters,
-    sort?: 'latest' | 'popular' | 'views' | 'creationDateDesc' | 'creationDateAsc',
+    sort?:
+      | 'latest'
+      | 'popular'
+      | 'views'
+      | 'creationDateDesc'
+      | 'creationDateAsc',
     tag?: string,
   ) {
     const { username, domain } = this.parseUserHandle(handle)
@@ -928,7 +969,12 @@ export class ArtworksService {
     }
 
     return this.getArtworks({
-      page, limit, authorId: user.id, currentUserId, contentFilters, sort,
+      page,
+      limit,
+      authorId: user.id,
+      currentUserId,
+      contentFilters,
+      sort,
       tags: tag ? [tag] : undefined,
     })
   }
@@ -970,8 +1016,10 @@ export class ArtworksService {
     }
 
     // Check tier limit for total image count and storage quota
-    const { getMaxImagesPerArtwork, getStorageQuota } = await import('../../common/constants/supporter-tiers')
-    const effectiveTier = artwork.author.role === 'ADMIN' ? 'TIER_1' : artwork.author.supporterTier
+    const { getMaxImagesPerArtwork, getStorageQuota } =
+      await import('../../common/constants/supporter-tiers')
+    const effectiveTier =
+      artwork.author.role === 'ADMIN' ? 'TIER_1' : artwork.author.supporterTier
     const maxImages = getMaxImagesPerArtwork(effectiveTier)
     const storageQuota = getStorageQuota(effectiveTier)
 
@@ -996,14 +1044,24 @@ export class ArtworksService {
     const finalCount = existingCount - imagesToDelete.length + newCount
 
     if (finalCount > maxImages) {
-      throw new BadRequestException(`Maximum ${maxImages} images allowed per artwork for your tier. Current: ${existingCount}, Deleting: ${imagesToDelete.length}, Adding: ${newCount}, Final: ${finalCount}`)
+      throw new BadRequestException(
+        `Maximum ${maxImages} images allowed per artwork for your tier. Current: ${existingCount}, Deleting: ${imagesToDelete.length}, Adding: ${newCount}, Final: ${finalCount}`,
+      )
     }
 
     // Check storage quota for new images
     if (newImageFiles && newImageFiles.length > 0) {
-      const totalUploadSize = newImageFiles.reduce((sum, file) => sum + file.size, 0)
-      if (artwork.author.usedStorageBytes + BigInt(totalUploadSize) > storageQuota) {
-        throw new ForbiddenException(`Storage quota exceeded. You have used ${Number(artwork.author.usedStorageBytes / BigInt(1024 * 1024))}MB of your ${Number(storageQuota / BigInt(1024 * 1024))}MB quota`)
+      const totalUploadSize = newImageFiles.reduce(
+        (sum, file) => sum + file.size,
+        0,
+      )
+      if (
+        artwork.author.usedStorageBytes + BigInt(totalUploadSize) >
+        storageQuota
+      ) {
+        throw new ForbiddenException(
+          `Storage quota exceeded. You have used ${Number(artwork.author.usedStorageBytes / BigInt(1024 * 1024))}MB of your ${Number(storageQuota / BigInt(1024 * 1024))}MB quota`,
+        )
       }
     }
 
@@ -1053,7 +1111,9 @@ export class ArtworksService {
       const baseUrl = process.env.BASE_URL || 'http://localhost:11104'
 
       for (const file of newImageFiles) {
-        const order = addOperations[newImageIndex]?.order ?? (artwork.images.length + newImageIndex)
+        const order =
+          addOperations[newImageIndex]?.order ??
+          artwork.images.length + newImageIndex
 
         // Prepare metadata input
         const metadataInput = {
@@ -1061,18 +1121,31 @@ export class ArtworksService {
           displayName: artwork.author.displayName || undefined,
           artworkTitle: updateDto.title || artwork.title,
           artworkUrl: `${baseUrl}/artworks/${artwork.id}`,
-          license: updateDto.license || artwork.license || artwork.author.defaultLicense || 'All Rights Reserved',
-          customLicenseUrl: updateDto.customLicenseUrl || artwork.customLicenseUrl || undefined,
+          license:
+            updateDto.license ||
+            artwork.license ||
+            artwork.author.defaultLicense ||
+            'All Rights Reserved',
+          customLicenseUrl:
+            updateDto.customLicenseUrl || artwork.customLicenseUrl || undefined,
           // Extended creation metadata (use updated values or fall back to existing)
-          creationDate: updateDto.creationDate ?? artwork.creationDate ?? undefined,
-          toolsUsed: updateDto.toolsUsed ?? (artwork.toolsUsed ? JSON.parse(artwork.toolsUsed) : undefined),
+          creationDate:
+            updateDto.creationDate ?? artwork.creationDate ?? undefined,
+          toolsUsed:
+            updateDto.toolsUsed ??
+            (artwork.toolsUsed ? JSON.parse(artwork.toolsUsed) : undefined),
           medium: updateDto.medium ?? artwork.medium ?? undefined,
-          projectName: updateDto.projectName ?? artwork.projectName ?? undefined,
+          projectName:
+            updateDto.projectName ?? artwork.projectName ?? undefined,
           isCommission: updateDto.isCommission ?? artwork.isCommission ?? false,
           clientName: updateDto.clientName ?? artwork.clientName ?? undefined,
         }
 
-        const result = await this.storageService.uploadArtworkImage(file, 'artworks', metadataInput)
+        const result = await this.storageService.uploadArtworkImage(
+          file,
+          'artworks',
+          metadataInput,
+        )
 
         uploadedImages.push({
           // URLs will be set after DB insert when we have image IDs
@@ -1120,10 +1193,15 @@ export class ArtworksService {
           try {
             await this.storageService.deleteFile(img.storageKey)
             // Delete thumbnail
-            const thumbKey = img.storageKey.replace('/artworks/', '/artworks/thumb/')
+            const thumbKey = img.storageKey.replace(
+              '/artworks/',
+              '/artworks/thumb/',
+            )
             await this.storageService.deleteFile(thumbKey).catch(() => {})
           } catch (error) {
-            this.logger.warn(`Failed to delete image from storage: ${error.message}`)
+            this.logger.warn(
+              `Failed to delete image from storage: ${error.message}`,
+            )
           }
         }
       }
@@ -1190,7 +1268,9 @@ export class ArtworksService {
           customLicenseText: updateDto.customLicenseText,
           // Creation metadata (portfolio fields) - use undefined for fields not provided
           ...(updateDto.creationDate !== undefined && {
-            creationDate: updateDto.creationDate ? new Date(updateDto.creationDate) : null,
+            creationDate: updateDto.creationDate
+              ? new Date(updateDto.creationDate)
+              : null,
           }),
           ...(updateDto.creationPeriodValue !== undefined && {
             creationPeriodValue: updateDto.creationPeriodValue,
@@ -1214,7 +1294,9 @@ export class ArtworksService {
             externalUrl: updateDto.externalUrl || null,
           }),
           ...(updateDto.toolsUsed !== undefined && {
-            toolsUsed: updateDto.toolsUsed ? JSON.stringify(updateDto.toolsUsed) : null,
+            toolsUsed: updateDto.toolsUsed
+              ? JSON.stringify(updateDto.toolsUsed)
+              : null,
           }),
           // OG card crop coordinates
           ...(updateDto.ogCardCrop !== undefined && {
@@ -1241,10 +1323,8 @@ export class ArtworksService {
             originalCreatorId: updateDto.originalCreatorId || null,
           }),
           ...(updateDto.originalCreatorAllowDownload !== undefined && {
-            originalCreatorAllowDownload: updateDto.originalCreatorAllowDownload,
-          }),
-          ...(updateDto.characterId !== undefined && {
-            characterId: updateDto.characterId || null,
+            originalCreatorAllowDownload:
+              updateDto.originalCreatorAllowDownload,
           }),
         },
       })
@@ -1291,7 +1371,9 @@ export class ArtworksService {
       if (updatedArtworkWithRelations) {
         this.activityDeliveryService
           .sendUpdateArtwork(artwork.author, updatedArtworkWithRelations)
-          .catch((err) => this.logger.error(`Failed to send Update Activity: ${err.message}`))
+          .catch((err) =>
+            this.logger.error(`Failed to send Update Activity: ${err.message}`),
+          )
       }
     }
 
@@ -1332,7 +1414,9 @@ export class ArtworksService {
     if (artwork.author.domain === '') {
       this.activityDeliveryService
         .sendDeleteArtwork(artwork.author, artworkId)
-        .catch((err) => this.logger.error(`Failed to send Delete activity: ${err.message}`))
+        .catch((err) =>
+          this.logger.error(`Failed to send Delete activity: ${err.message}`),
+        )
     }
 
     // Delete images from storage (best effort, don't fail if storage delete fails)
@@ -1380,18 +1464,26 @@ export class ArtworksService {
       throw new NotFoundException('Artwork not found')
     }
     if (artwork.authorId !== userId) {
-      throw new ForbiddenException('You can only generate OG cards for your own artworks')
+      throw new ForbiddenException(
+        'You can only generate OG cards for your own artworks',
+      )
     }
 
     // Find source image
-    const sourceImage = artwork.images.find(img => img.id === generateDto.imageId)
+    const sourceImage = artwork.images.find(
+      (img) => img.id === generateDto.imageId,
+    )
     if (!sourceImage) {
       throw new NotFoundException('Source image not found')
     }
 
     const useOriginal = sourceImage.originalStorageKey !== null
-    const storageKey = useOriginal ? sourceImage.originalStorageKey! : sourceImage.storageKey
-    const encryptionIv = useOriginal ? sourceImage.originalEncryptionIv : sourceImage.encryptionIv
+    const storageKey = useOriginal
+      ? sourceImage.originalStorageKey!
+      : sourceImage.storageKey
+    const encryptionIv = useOriginal
+      ? sourceImage.originalEncryptionIv
+      : sourceImage.encryptionIv
 
     // Get image dimensions for crop calculation
     // If using original, use originalWidth/originalHeight; otherwise use standard dimensions
@@ -1444,7 +1536,8 @@ export class ArtworksService {
     }
 
     // Determine blur requirement (R18/R18G is mandatory)
-    const requireBlur = generateDto.blur ??
+    const requireBlur =
+      generateDto.blur ??
       (artwork.ageRating === 'R18' || artwork.ageRating === 'R18G')
 
     // Generate OG card
@@ -1478,7 +1571,9 @@ export class ArtworksService {
       throw new NotFoundException('Artwork not found')
     }
     if (artwork.authorId !== userId) {
-      throw new ForbiddenException('You can only delete OG cards for your own artworks')
+      throw new ForbiddenException(
+        'You can only delete OG cards for your own artworks',
+      )
     }
 
     // Delete from MinIO if exists
@@ -1487,7 +1582,9 @@ export class ArtworksService {
       try {
         await this.storageService.deleteFile(key)
       } catch (error) {
-        this.logger.warn(`Failed to delete OG card from storage: ${error.message}`)
+        this.logger.warn(
+          `Failed to delete OG card from storage: ${error.message}`,
+        )
       }
     }
 
@@ -1518,7 +1615,9 @@ export class ArtworksService {
       throw new NotFoundException('Artwork not found')
     }
     if (artwork.authorId !== userId) {
-      throw new ForbiddenException('You can only upload Link Cards for your own artworks')
+      throw new ForbiddenException(
+        'You can only upload Link Cards for your own artworks',
+      )
     }
 
     // Delete old Link Card if exists
@@ -1533,7 +1632,11 @@ export class ArtworksService {
 
     // Upload new Link Card
     const blur = uploadDto.blur ?? false
-    const result = await this.storageService.uploadLinkCard(file, blur, artworkId)
+    const result = await this.storageService.uploadLinkCard(
+      file,
+      blur,
+      artworkId,
+    )
 
     // Update artwork record
     await this.prisma.artwork.update({
@@ -1552,7 +1655,12 @@ export class ArtworksService {
   /**
    * Get artworks from users that the requester is following
    */
-  async getFollowingArtworks(userId: string, page = 1, limit = 20, contentFilters?: ContentFilters) {
+  async getFollowingArtworks(
+    userId: string,
+    page = 1,
+    limit = 20,
+    contentFilters?: ContentFilters,
+  ) {
     const skip = (page - 1) * limit
 
     // Get list of users that the requester is following
@@ -1640,7 +1748,8 @@ export class ArtworksService {
     let transformedArtworks = artworks.map((artwork) => {
       const baseArtwork = {
         ...artwork,
-        thumbnailUrl: artwork.images[0]?.thumbnailUrl || artwork.images[0]?.url || '',
+        thumbnailUrl:
+          artwork.images[0]?.thumbnailUrl || artwork.images[0]?.url || '',
         imageCount: artwork._count.images,
       }
 
@@ -1648,11 +1757,20 @@ export class ArtworksService {
       if (signingEnabled && artwork.images.length > 0) {
         return {
           ...baseArtwork,
-          thumbnailUrl: this.imageSigningService.generateSignedUrlV2(artwork.images[0].id, 'thumbnail').url,
-          images: artwork.images.map(img => ({
+          thumbnailUrl: this.imageSigningService.generateSignedUrlV2(
+            artwork.images[0].id,
+            'thumbnail',
+          ).url,
+          images: artwork.images.map((img) => ({
             ...img,
-            url: this.imageSigningService.generateSignedUrlV2(img.id, 'standard').url,
-            thumbnailUrl: this.imageSigningService.generateSignedUrlV2(img.id, 'thumbnail').url,
+            url: this.imageSigningService.generateSignedUrlV2(
+              img.id,
+              'standard',
+            ).url,
+            thumbnailUrl: this.imageSigningService.generateSignedUrlV2(
+              img.id,
+              'thumbnail',
+            ).url,
           })),
         }
       }
@@ -1682,10 +1800,14 @@ export class ArtworksService {
       })
 
       // Remove hidden artworks
-      filteredArtworks = filteredArtworks.filter((a) => a._filterSetting !== 'hide')
+      filteredArtworks = filteredArtworks.filter(
+        (a) => a._filterSetting !== 'hide',
+      )
 
       // Remove temporary field
-      transformedArtworks = filteredArtworks.map(({ _filterSetting, ...artwork }) => artwork)
+      transformedArtworks = filteredArtworks.map(
+        ({ _filterSetting, ...artwork }) => artwork,
+      )
     }
 
     return {
@@ -1702,7 +1824,12 @@ export class ArtworksService {
    */
   private matchesAnyWordMute(
     text: string,
-    wordMutes: { keyword: string; regex: boolean; wholeWord: boolean; caseSensitive: boolean }[],
+    wordMutes: {
+      keyword: string
+      regex: boolean
+      wholeWord: boolean
+      caseSensitive: boolean
+    }[],
   ): boolean {
     for (const mute of wordMutes) {
       if (this.textMatchesWordMute(text, mute)) {
@@ -1717,10 +1844,17 @@ export class ArtworksService {
    */
   private textMatchesWordMute(
     text: string,
-    mute: { keyword: string; regex: boolean; wholeWord: boolean; caseSensitive: boolean },
+    mute: {
+      keyword: string
+      regex: boolean
+      wholeWord: boolean
+      caseSensitive: boolean
+    },
   ): boolean {
     const searchText = mute.caseSensitive ? text : text.toLowerCase()
-    const keyword = mute.caseSensitive ? mute.keyword : mute.keyword.toLowerCase()
+    const keyword = mute.caseSensitive
+      ? mute.keyword
+      : mute.keyword.toLowerCase()
 
     if (mute.regex) {
       try {
@@ -1734,7 +1868,10 @@ export class ArtworksService {
 
     if (mute.wholeWord) {
       const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-      const regex = new RegExp(`\\b${escapedKeyword}\\b`, mute.caseSensitive ? '' : 'i')
+      const regex = new RegExp(
+        `\\b${escapedKeyword}\\b`,
+        mute.caseSensitive ? '' : 'i',
+      )
       return regex.test(text)
     }
 
@@ -1782,13 +1919,18 @@ export class ArtworksService {
       const credentials = await this.actorService.getSystemActorCredentials()
 
       // Fetch the latest Note from the remote server
-      const note = await this.remoteFetchService.fetchObject(artwork.apObjectId, {
-        keyId: credentials.keyId,
-        privateKey: credentials.privateKey,
-      })
+      const note = await this.remoteFetchService.fetchObject(
+        artwork.apObjectId,
+        {
+          keyId: credentials.keyId,
+          privateKey: credentials.privateKey,
+        },
+      )
 
       if (!note) {
-        this.logger.warn(`Failed to fetch remote artwork: ${artwork.apObjectId}`)
+        this.logger.warn(
+          `Failed to fetch remote artwork: ${artwork.apObjectId}`,
+        )
         // Return existing data if remote is unreachable
         return this.getArtworkById(id)
       }
@@ -1799,7 +1941,9 @@ export class ArtworksService {
       // Return the refreshed artwork
       return this.getArtworkById(id)
     } catch (error) {
-      this.logger.error(`Error refreshing remote artwork ${id}: ${error.message}`)
+      this.logger.error(
+        `Error refreshing remote artwork ${id}: ${error.message}`,
+      )
       // Return existing data on error
       return this.getArtworkById(id)
     }
@@ -1811,7 +1955,10 @@ export class ArtworksService {
    * - Artwork author
    * - Original creator (if originalCreatorAllowDownload is true)
    */
-  async canDownloadArtwork(artworkId: string, userId: string): Promise<boolean> {
+  async canDownloadArtwork(
+    artworkId: string,
+    userId: string,
+  ): Promise<boolean> {
     const artwork = await this.prisma.artwork.findUnique({
       where: { id: artworkId },
       select: {
@@ -1853,7 +2000,9 @@ export class ArtworksService {
     // Check download permission
     const canDownload = await this.canDownloadArtwork(artworkId, userId)
     if (!canDownload) {
-      throw new ForbiddenException('You do not have permission to download this artwork')
+      throw new ForbiddenException(
+        'You do not have permission to download this artwork',
+      )
     }
 
     // Get the image
@@ -1877,7 +2026,10 @@ export class ArtworksService {
 
     // Generate signed URL for the original image (or standard if no original)
     const variant = image.originalStorageKey ? 'original' : 'standard'
-    const signedUrl = this.imageSigningService.generateSignedUrlV2(imageId, variant)
+    const signedUrl = this.imageSigningService.generateSignedUrlV2(
+      imageId,
+      variant,
+    )
 
     // Generate filename
     const safeTitle = (image.artwork.title || 'artwork')
@@ -1899,11 +2051,15 @@ export class ArtworksService {
   async getArtworkDownloadInfos(
     artworkId: string,
     userId: string,
-  ): Promise<Array<{ imageId: string; url: string; filename: string; mimeType: string }>> {
+  ): Promise<
+    Array<{ imageId: string; url: string; filename: string; mimeType: string }>
+  > {
     // Check download permission
     const canDownload = await this.canDownloadArtwork(artworkId, userId)
     if (!canDownload) {
-      throw new ForbiddenException('You do not have permission to download this artwork')
+      throw new ForbiddenException(
+        'You do not have permission to download this artwork',
+      )
     }
 
     // Get all images for the artwork
@@ -1925,15 +2081,19 @@ export class ArtworksService {
 
     return images.map((image, index) => {
       const variant = image.originalStorageKey ? 'original' : 'standard'
-      const signedUrl = this.imageSigningService.generateSignedUrlV2(image.id, variant)
+      const signedUrl = this.imageSigningService.generateSignedUrlV2(
+        image.id,
+        variant,
+      )
 
       const safeTitle = (image.artwork.title || 'artwork')
         .replace(/[^a-zA-Z0-9\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF]/g, '_')
         .substring(0, 50)
       const extension = image.mimeType.split('/')[1] || 'jpg'
-      const filename = images.length > 1
-        ? `${safeTitle}_${index + 1}.${extension}`
-        : `${safeTitle}.${extension}`
+      const filename =
+        images.length > 1
+          ? `${safeTitle}_${index + 1}.${extension}`
+          : `${safeTitle}.${extension}`
 
       return {
         imageId: image.id,

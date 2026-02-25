@@ -25,7 +25,8 @@ export class RemoteArtworkService {
   constructor(
     private readonly outboxFetch: OutboxFetchService,
     private readonly prisma: PrismaService,
-    @InjectQueue(REMOTE_IMAGE_CACHE_QUEUE) private readonly cacheQueue: Queue<CacheImageJobData>,
+    @InjectQueue(REMOTE_IMAGE_CACHE_QUEUE)
+    private readonly cacheQueue: Queue<CacheImageJobData>,
   ) {}
 
   /**
@@ -62,7 +63,9 @@ export class RemoteArtworkService {
           `Synced ${result.artworks.length} artworks for ${user.username}@${user.domain}`,
         )
       } else {
-        this.logger.debug(`No artworks found for ${user.username}@${user.domain}`)
+        this.logger.debug(
+          `No artworks found for ${user.username}@${user.domain}`,
+        )
       }
 
       // Update last fetched timestamp
@@ -96,7 +99,10 @@ export class RemoteArtworkService {
    * @param userId - Local database user ID
    * @param artworks - Parsed artwork data
    */
-  private async syncArtworks(userId: string, artworks: RemoteArtworkData[]): Promise<void> {
+  private async syncArtworks(
+    userId: string,
+    artworks: RemoteArtworkData[],
+  ): Promise<void> {
     for (const artwork of artworks) {
       try {
         // Check if artwork already exists
@@ -127,7 +133,10 @@ export class RemoteArtworkService {
               publishedAt: artwork.publishedAt,
               createdAt: artwork.publishedAt,
               type: 'ILLUSTRATION',
-              ageRating: this.parseAgeRatingFromSensitive(artwork.sensitive || false, artwork.summary),
+              ageRating: this.parseAgeRatingFromSensitive(
+                artwork.sensitive || false,
+                artwork.summary,
+              ),
               visibility: 'PUBLIC',
               images: {
                 create: artwork.images.map((img, idx) => ({
@@ -156,10 +165,15 @@ export class RemoteArtworkService {
           }
 
           // Queue image caching jobs if auto-cache is enabled
-          await this.queueImageCacheJobs(createdArtwork.images.map((img) => img.id))
+          await this.queueImageCacheJobs(
+            createdArtwork.images.map((img) => img.id),
+          )
         }
       } catch (error) {
-        this.logger.error(`Failed to sync artwork: ${artwork.apObjectId}`, error)
+        this.logger.error(
+          `Failed to sync artwork: ${artwork.apObjectId}`,
+          error,
+        )
         // Continue with other artworks
       }
     }
@@ -168,7 +182,10 @@ export class RemoteArtworkService {
   /**
    * Sync tags for an artwork
    */
-  private async syncArtworkTags(apObjectId: string, tags: string[]): Promise<void> {
+  private async syncArtworkTags(
+    apObjectId: string,
+    tags: string[],
+  ): Promise<void> {
     const artwork = await this.prisma.artwork.findUnique({
       where: { apObjectId },
     })
@@ -199,7 +216,9 @@ export class RemoteArtworkService {
           },
         })
       } catch (error) {
-        this.logger.warn(`Failed to sync tag "${tagName}" for artwork ${apObjectId}`)
+        this.logger.warn(
+          `Failed to sync tag "${tagName}" for artwork ${apObjectId}`,
+        )
       }
     }
   }
@@ -230,7 +249,10 @@ export class RemoteArtworkService {
    * Parse age rating from ActivityPub sensitive flag and summary (CW text)
    * Same logic as inbox.service.ts
    */
-  private parseAgeRatingFromSensitive(sensitive: boolean, summary?: string): 'ALL_AGES' | 'NSFW' | 'R18' | 'R18G' {
+  private parseAgeRatingFromSensitive(
+    sensitive: boolean,
+    summary?: string,
+  ): 'ALL_AGES' | 'NSFW' | 'R18' | 'R18G' {
     if (!sensitive) {
       return 'ALL_AGES'
     }
@@ -269,7 +291,10 @@ export class RemoteArtworkService {
     try {
       // Check if auto-cache is enabled
       const settings = await this.prisma.instanceSettings.findFirst()
-      if (!settings?.remoteImageAutoCache || !settings?.remoteImageCacheEnabled) {
+      if (
+        !settings?.remoteImageAutoCache ||
+        !settings?.remoteImageCacheEnabled
+      ) {
         this.logger.debug('Auto-cache disabled, skipping queue')
         return
       }

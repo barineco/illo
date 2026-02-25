@@ -13,7 +13,11 @@ import {
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard'
 import { AdminGuard } from '../guards/admin.guard'
 import { PrismaService } from '../../prisma/prisma.service'
-import { RemoteImageCacheService, CacheStats, CleanupResult } from '../../federation/services/remote-image-cache.service'
+import {
+  RemoteImageCacheService,
+  CacheStats,
+  CleanupResult,
+} from '../../federation/services/remote-image-cache.service'
 import { UpdateCacheSettingsDto } from '../dto/cache-settings.dto'
 
 export interface CacheSettingsResponse {

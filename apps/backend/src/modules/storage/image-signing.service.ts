@@ -16,7 +16,10 @@ export class ImageSigningService {
 
   constructor(private configService: ConfigService) {
     const keyHex = this.configService.get<string>('IMAGE_SIGNING_KEY')
-    this.baseUrl = this.configService.get<string>('BASE_URL', 'http://localhost:11104')
+    this.baseUrl = this.configService.get<string>(
+      'BASE_URL',
+      'http://localhost:11104',
+    )
 
     if (keyHex && keyHex.length === 64) {
       this.signingKey = Buffer.from(keyHex, 'hex')

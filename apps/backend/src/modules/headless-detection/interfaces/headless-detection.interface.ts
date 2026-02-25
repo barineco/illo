@@ -3,12 +3,12 @@
  * HeadlessChrome, Puppeteer等のパターンを検出
  */
 export interface UserAgentSignal {
-  isHeadless: boolean; // HeadlessChrome, Puppeteer等
-  isEmpty: boolean; // 空のUA
-  isSuspicious: boolean; // PhantomJS, Selenium等
-  knownBotPattern: boolean; // 既知のスクレイパー
-  score: number; // 0-30
-  details: string[];
+  isHeadless: boolean // HeadlessChrome, Puppeteer等
+  isEmpty: boolean // 空のUA
+  isSuspicious: boolean // PhantomJS, Selenium等
+  knownBotPattern: boolean // 既知のスクレイパー
+  score: number // 0-30
+  details: string[]
 }
 
 /**
@@ -16,12 +16,12 @@ export interface UserAgentSignal {
  * Sec-CH-UA ヘッダーの有無と整合性を検証
  */
 export interface ClientHintsSignal {
-  hasSecChUa: boolean; // Sec-CH-UAヘッダー存在
-  hasSecChUaMobile: boolean; // モバイル判定
-  hasSecChUaPlatform: boolean; // プラットフォーム情報
-  consistency: boolean; // UAとの整合性
-  score: number; // 0-25
-  details: string[];
+  hasSecChUa: boolean // Sec-CH-UAヘッダー存在
+  hasSecChUaMobile: boolean // モバイル判定
+  hasSecChUaPlatform: boolean // プラットフォーム情報
+  consistency: boolean // UAとの整合性
+  score: number // 0-25
+  details: string[]
 }
 
 /**
@@ -29,12 +29,12 @@ export interface ClientHintsSignal {
  * Accept-Language/Encoding の異常を検出
  */
 export interface HeaderConsistencySignal {
-  hasAcceptLanguage: boolean;
-  hasAcceptEncoding: boolean;
-  acceptEncodingValid: boolean; // gzip, deflate等の標準値
-  connectionHeaderNormal: boolean;
-  score: number; // 0-25
-  details: string[];
+  hasAcceptLanguage: boolean
+  hasAcceptEncoding: boolean
+  acceptEncodingValid: boolean // gzip, deflate等の標準値
+  connectionHeaderNormal: boolean
+  score: number // 0-25
+  details: string[]
 }
 
 /**
@@ -42,10 +42,10 @@ export interface HeaderConsistencySignal {
  * 既存の検出スコアと連携
  */
 export interface RateLimitSignal {
-  currentTier: string; // RateLimitTier
-  recentViolations: number;
-  patternScore: number;
-  score: number; // 0-20
+  currentTier: string // RateLimitTier
+  recentViolations: number
+  patternScore: number
+  score: number // 0-20
 }
 
 /**
@@ -53,13 +53,13 @@ export interface RateLimitSignal {
  * マウス/タッチ/キーボードイベントの有無を検証
  */
 export interface UserInteractionSignal {
-  hasToken: boolean; // インタラクショントークンの存在
-  tokenValid: boolean; // トークンの検証結果
-  tokenAge: number; // トークンの年齢（秒）
-  tokenExpired: boolean; // トークンの有効期限切れ
-  hasRealInteraction: boolean; // 実際のユーザーイベント（マウス、タッチ、キーボード）の有無
-  score: number; // 0-30
-  details: string[];
+  hasToken: boolean // インタラクショントークンの存在
+  tokenValid: boolean // トークンの検証結果
+  tokenAge: number // トークンの年齢（秒）
+  tokenExpired: boolean // トークンの有効期限切れ
+  hasRealInteraction: boolean // 実際のユーザーイベント（マウス、タッチ、キーボード）の有無
+  score: number // 0-30
+  details: string[]
 }
 
 /**
@@ -67,30 +67,30 @@ export interface UserInteractionSignal {
  * Canvas/WebGL/navigator特性を検出
  */
 export interface DeviceFingerprintSignal {
-  hasFingerprint: boolean;
-  webdriverDetected: boolean;
-  suspiciousPlugins: boolean;
-  suspiciousWebGL: boolean;
-  suspiciousCanvas: boolean;
-  score: number; // 0-25
-  details: string[];
+  hasFingerprint: boolean
+  webdriverDetected: boolean
+  suspiciousPlugins: boolean
+  suspiciousWebGL: boolean
+  suspiciousCanvas: boolean
+  score: number // 0-25
+  details: string[]
 }
 
 /**
  * 複合ヘッドレス判定
  */
 export interface HeadlessBotScore {
-  totalScore: number;
+  totalScore: number
   signals: {
-    userAgent: UserAgentSignal;
-    clientHints: ClientHintsSignal;
-    headerConsistency: HeaderConsistencySignal;
-    rateLimit: RateLimitSignal;
-    userInteraction: UserInteractionSignal;
-    deviceFingerprint: DeviceFingerprintSignal;
-  };
-  verdict: 'normal' | 'suspicious' | 'likely_bot' | 'definite_bot';
-  confidence: number; // 0-1
+    userAgent: UserAgentSignal
+    clientHints: ClientHintsSignal
+    headerConsistency: HeaderConsistencySignal
+    rateLimit: RateLimitSignal
+    userInteraction: UserInteractionSignal
+    deviceFingerprint: DeviceFingerprintSignal
+  }
+  verdict: 'normal' | 'suspicious' | 'likely_bot' | 'definite_bot'
+  confidence: number // 0-1
 }
 
 /**
@@ -109,47 +109,47 @@ export enum HeadlessDetectionAction {
  */
 export interface HeadlessDetectionConfig {
   // 機能フラグ
-  enabled: boolean;
-  measurementMode: boolean; // true: ログのみ, false: 実際にアクションを実行
+  enabled: boolean
+  measurementMode: boolean // true: ログのみ, false: 実際にアクションを実行
 
   // スコア閾値
-  suspiciousThreshold: number; // 31
-  likelyBotThreshold: number; // 51
-  definiteBotThreshold: number; // 76
+  suspiciousThreshold: number // 31
+  likelyBotThreshold: number // 51
+  definiteBotThreshold: number // 76
 
   // 各シグナルの重み
-  userAgentWeight: number;
-  clientHintsWeight: number;
-  headerWeight: number;
-  rateLimitWeight: number;
-  userInteractionWeight: number;
-  deviceFingerprintWeight: number;
+  userAgentWeight: number
+  clientHintsWeight: number
+  headerWeight: number
+  rateLimitWeight: number
+  userInteractionWeight: number
+  deviceFingerprintWeight: number
 
   // 対応設定
-  suspiciousAction: HeadlessDetectionAction;
-  likelyBotAction: HeadlessDetectionAction;
-  definiteBotAction: HeadlessDetectionAction;
+  suspiciousAction: HeadlessDetectionAction
+  likelyBotAction: HeadlessDetectionAction
+  definiteBotAction: HeadlessDetectionAction
 
   // ホワイトリスト
-  allowedUserAgents: string[];
-  allowedIpRanges: string[];
+  allowedUserAgents: string[]
+  allowedIpRanges: string[]
 }
 
 /**
  * ヘッドレス検出統計
  */
 export interface HeadlessDetectionStats {
-  totalChecks: number;
+  totalChecks: number
   byVerdict: {
-    normal: number;
-    suspicious: number;
-    likely_bot: number;
-    definite_bot: number;
-  };
-  topDetectedUserAgents: { userAgent: string; count: number }[];
+    normal: number
+    suspicious: number
+    likely_bot: number
+    definite_bot: number
+  }
+  topDetectedUserAgents: { userAgent: string; count: number }[]
   last24Hours: {
-    checks: number;
-    blocked: number;
-    degraded: number;
-  };
+    checks: number
+    blocked: number
+    degraded: number
+  }
 }

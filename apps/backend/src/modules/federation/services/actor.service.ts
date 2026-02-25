@@ -79,7 +79,9 @@ export class ActorService {
     // Fallback to BASE_URL environment variable
     const baseUrl = this.configService.get<string>('BASE_URL')
     if (!baseUrl) {
-      throw new Error('Public URL not configured in database or BASE_URL environment variable')
+      throw new Error(
+        'Public URL not configured in database or BASE_URL environment variable',
+      )
     }
 
     return baseUrl
@@ -91,12 +93,17 @@ export class ActorService {
    * @param user - User entity
    * @param includeKeyPackages - Whether to include MLS KeyPackages (default: true)
    */
-  async buildActorObject(user: User, includeKeyPackages = true): Promise<Actor> {
+  async buildActorObject(
+    user: User,
+    includeKeyPackages = true,
+  ): Promise<Actor> {
     const publicUrl = await this.getPublicUrl()
 
     // Ensure user has keys
     const userWithKeys =
-      user.publicKey && user.privateKey ? user : await this.ensureUserHasKeys(user.id)
+      user.publicKey && user.privateKey
+        ? user
+        : await this.ensureUserHasKeys(user.id)
 
     if (!userWithKeys.publicKey) {
       throw new Error(`User ${user.username} has no public key`)
@@ -119,7 +126,9 @@ export class ActorService {
 
     // Determine context based on MLS support
     const context =
-      mlsKeyPackages.length > 0 ? [...DEFAULT_CONTEXT, MLS_CONTEXT] : DEFAULT_CONTEXT
+      mlsKeyPackages.length > 0
+        ? [...DEFAULT_CONTEXT, MLS_CONTEXT]
+        : DEFAULT_CONTEXT
 
     const actor: Actor = {
       '@context': context,

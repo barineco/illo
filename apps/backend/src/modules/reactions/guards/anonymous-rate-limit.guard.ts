@@ -29,7 +29,9 @@ export class AnonymousReactionRateLimitGuard implements CanActivate {
     private prisma: PrismaService,
     private configService: ConfigService,
   ) {
-    this.ipSalt = this.configService.get<string>('REACTION_IP_SALT') || 'default-reaction-salt'
+    this.ipSalt =
+      this.configService.get<string>('REACTION_IP_SALT') ||
+      'default-reaction-salt'
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -74,7 +76,9 @@ export class AnonymousReactionRateLimitGuard implements CanActivate {
           statusCode: HttpStatus.TOO_MANY_REQUESTS,
           message: 'Rate limit exceeded. Please try again later.',
           error: 'Too Many Requests',
-          retryAfter: Math.ceil((limitRecord.expiresAt.getTime() - now.getTime()) / 1000),
+          retryAfter: Math.ceil(
+            (limitRecord.expiresAt.getTime() - now.getTime()) / 1000,
+          ),
         },
         HttpStatus.TOO_MANY_REQUESTS,
       )

@@ -71,23 +71,23 @@ describe('RateLimitService - calculateRegularityScore', () => {
   })
 
   it('returns 30 for CV 0.15-0.25', () => {
-    expect(svc.calculateRegularityScore(0.20)).toBe(30)
+    expect(svc.calculateRegularityScore(0.2)).toBe(30)
   })
 
   it('returns 20 for CV 0.25-0.40', () => {
-    expect(svc.calculateRegularityScore(0.30)).toBe(20)
+    expect(svc.calculateRegularityScore(0.3)).toBe(20)
   })
 
   it('returns 10 for CV 0.40-0.60', () => {
-    expect(svc.calculateRegularityScore(0.50)).toBe(10)
+    expect(svc.calculateRegularityScore(0.5)).toBe(10)
   })
 
   it('returns 5 for CV 0.60-0.80', () => {
-    expect(svc.calculateRegularityScore(0.70)).toBe(5)
+    expect(svc.calculateRegularityScore(0.7)).toBe(5)
   })
 
   it('returns 0 for CV >= 0.80 (human-like randomness)', () => {
-    expect(svc.calculateRegularityScore(0.90)).toBe(0)
+    expect(svc.calculateRegularityScore(0.9)).toBe(0)
   })
 })
 
@@ -100,12 +100,12 @@ describe('RateLimitService - calculateRiskScore', () => {
   })
 
   it('returns low score for slow irregular requests', () => {
-    const result = svc.calculateRiskScore(20000, 0.90, 30)
+    const result = svc.calculateRiskScore(20000, 0.9, 30)
     expect(result.score).toBe(0) // 0 + 0
   })
 
   it('returns moderate score for fast but irregular requests', () => {
-    const result = svc.calculateRiskScore(500, 0.90, 20)
+    const result = svc.calculateRiskScore(500, 0.9, 20)
     expect(result.score).toBe(50) // 50 + 0
     expect(result.factors.intervalScore).toBe(50)
     expect(result.factors.regularityScore).toBe(0)
@@ -156,9 +156,7 @@ describe('RateLimitService - determineTier (legacy)', () => {
   })
 
   it('returns HARD_LIMIT when window hard limit exceeded', () => {
-    expect(svc.determineTier(11, 10, pattern, config, false)).toBe(
-      'HARD_LIMIT',
-    )
+    expect(svc.determineTier(11, 10, pattern, config, false)).toBe('HARD_LIMIT')
   })
 
   it('applies 50% stricter limits for anonymous users', () => {

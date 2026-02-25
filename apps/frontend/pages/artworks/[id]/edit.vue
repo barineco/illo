@@ -289,8 +289,6 @@ const form = ref<ArtworkFormData>({
   originalCreatorId: undefined,
   originalCreator: undefined,
   originalCreatorAllowDownload: false,
-  characterId: undefined,
-  character: undefined,
 })
 
 const tagsInput = ref('')
@@ -454,14 +452,6 @@ const fetchArtwork = async () => {
         avatarUrl: data.originalCreator.avatarUrl,
       } : undefined,
       originalCreatorAllowDownload: data.originalCreatorAllowDownload ?? false,
-      characterId: data.characterId || undefined,
-      character: data.character ? {
-        id: data.character.id,
-        name: data.character.name,
-        avatarUrl: null,
-        avatarThumbnailUrl: null,
-        creator: data.character.creator,
-      } : undefined,
     }
 
     tagsInput.value = data.tags?.map((t: any) => t.name).join(', ') || ''
@@ -661,10 +651,6 @@ const handleSubmit = async () => {
     if (form.value.originalCreatorAllowDownload) {
       formData.append('originalCreatorAllowDownload', String(form.value.originalCreatorAllowDownload))
     }
-    if (form.value.characterId) {
-      formData.append('characterId', form.value.characterId)
-    }
-
     // Add new image files
     for (const img of managedImages.value) {
       if (img.isNew && img.file) {

@@ -1,4 +1,9 @@
-import { Injectable, Logger, NotFoundException, ConflictException } from '@nestjs/common'
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common'
 import { EventEmitter2 } from '@nestjs/event-emitter'
 import { PrismaService } from '../prisma/prisma.service'
 import { ActivityDeliveryService } from '../federation/services/activity-delivery.service'
@@ -102,9 +107,11 @@ export class LikesService {
     ])
 
     if (isFederatedArtwork && artwork.author.inbox && artwork.apObjectId) {
-      this.activityDelivery.sendLike(likerUser, artwork.apObjectId, artwork.author.inbox).catch((err) => {
-        this.logger.error(`Failed to send Like activity: ${err}`)
-      })
+      this.activityDelivery
+        .sendLike(likerUser, artwork.apObjectId, artwork.author.inbox)
+        .catch((err) => {
+          this.logger.error(`Failed to send Like activity: ${err}`)
+        })
     }
 
     if (userId !== artwork.authorId) {
@@ -166,9 +173,11 @@ export class LikesService {
     ])
 
     if (artwork?.apObjectId && artwork.author.inbox && likerUser) {
-      this.activityDelivery.sendUndoLike(likerUser, artwork.apObjectId, artwork.author.inbox).catch((err) => {
-        this.logger.error(`Failed to send Undo Like activity: ${err}`)
-      })
+      this.activityDelivery
+        .sendUndoLike(likerUser, artwork.apObjectId, artwork.author.inbox)
+        .catch((err) => {
+          this.logger.error(`Failed to send Undo Like activity: ${err}`)
+        })
     }
 
     return { message: 'Unliked successfully' }
@@ -279,7 +288,10 @@ export class LikesService {
     }
   }
 
-  private parseUserHandle(handle: string): { username: string; domain: string } {
+  private parseUserHandle(handle: string): {
+    username: string
+    domain: string
+  } {
     const parts = handle.split('@')
     if (parts.length === 1) {
       return { username: parts[0], domain: '' }
@@ -289,11 +301,7 @@ export class LikesService {
     throw new NotFoundException(`Invalid user handle format: ${handle}`)
   }
 
-  async getUserLikedArtworksByUsername(
-    handle: string,
-    page = 1,
-    limit = 20,
-  ) {
+  async getUserLikedArtworksByUsername(handle: string, page = 1, limit = 20) {
     const { username, domain } = this.parseUserHandle(handle)
 
     const user = await this.prisma.user.findUnique({

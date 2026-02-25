@@ -14,12 +14,12 @@ export interface ImageMetadata {
     }
   }
   iptc?: {
-    '2#80'?: string   // By-line (Creator)
-    '2#116'?: string  // Copyright Notice
-    '2#110'?: string  // Credit
-    '2#105'?: string  // Headline (Title)
+    '2#80'?: string // By-line (Creator)
+    '2#116'?: string // Copyright Notice
+    '2#110'?: string // Credit
+    '2#105'?: string // Headline (Title)
   }
-  xmp?: string  // Dublin Core RDF XML
+  xmp?: string // Dublin Core RDF XML
 }
 
 export interface MetadataInput {
@@ -70,10 +70,10 @@ export function generateImageMetadata(input: MetadataInput): ImageMetadata {
 
     // IPTC metadata (standard for journalism/photography)
     iptc: {
-      '2#80': authorName,           // Creator/By-line
-      '2#116': license,              // Copyright Notice
-      '2#110': input.artworkUrl,     // Credit/Source URL
-      '2#105': input.artworkTitle,   // Headline
+      '2#80': authorName, // Creator/By-line
+      '2#116': license, // Copyright Notice
+      '2#110': input.artworkUrl, // Credit/Source URL
+      '2#105': input.artworkTitle, // Headline
       // Add software/tools (IPTC 2#65)
       ...(toolsString && { '2#65': toolsString }),
       // Add subject/project (IPTC 2#25 Keywords)
@@ -113,7 +113,9 @@ function generateDublinCoreXMP(
 
   // Format tools as XMP list
   const toolsList = input.toolsUsed?.length
-    ? input.toolsUsed.map(t => `          <rdf:li>${escapeXml(t)}</rdf:li>`).join('\n')
+    ? input.toolsUsed
+        .map((t) => `          <rdf:li>${escapeXml(t)}</rdf:li>`)
+        .join('\n')
     : null
 
   // Map medium enum to readable string
@@ -143,27 +145,51 @@ function generateDublinCoreXMP(
           <rdf:li xml:lang="x-default">${escapeXml(copyrightNotice)}</rdf:li>
         </rdf:Alt>
       </dc:rights>
-      <dc:source>${escapeXml(input.artworkUrl)}</dc:source>${input.projectName ? `
+      <dc:source>${escapeXml(input.artworkUrl)}</dc:source>${
+        input.projectName
+          ? `
       <dc:subject>
         <rdf:Bag>
           <rdf:li>${escapeXml(input.projectName)}</rdf:li>
         </rdf:Bag>
-      </dc:subject>` : ''}
+      </dc:subject>`
+          : ''
+      }
       <xmpRights:UsageTerms>
         <rdf:Alt>
           <rdf:li xml:lang="x-default">${escapeXml(license)}</rdf:li>
         </rdf:Alt>
       </xmpRights:UsageTerms>
-      <xmpRights:WebStatement>${escapeXml(input.artworkUrl)}</xmpRights:WebStatement>${creationDateStr ? `
-      <xmp:CreateDate>${creationDateStr}</xmp:CreateDate>` : ''}${toolsList ? `
+      <xmpRights:WebStatement>${escapeXml(input.artworkUrl)}</xmpRights:WebStatement>${
+        creationDateStr
+          ? `
+      <xmp:CreateDate>${creationDateStr}</xmp:CreateDate>`
+          : ''
+      }${
+        toolsList
+          ? `
       <xmp:CreatorTool>
         <rdf:Bag>
 ${toolsList}
         </rdf:Bag>
-      </xmp:CreatorTool>` : ''}${mediumLabel ? `
-      <illustboard:medium>${escapeXml(mediumLabel)}</illustboard:medium>` : ''}${input.isCommission ? `
-      <illustboard:isCommission>true</illustboard:isCommission>` : ''}${input.clientName ? `
-      <illustboard:client>${escapeXml(input.clientName)}</illustboard:client>` : ''}
+      </xmp:CreatorTool>`
+          : ''
+      }${
+        mediumLabel
+          ? `
+      <illustboard:medium>${escapeXml(mediumLabel)}</illustboard:medium>`
+          : ''
+      }${
+        input.isCommission
+          ? `
+      <illustboard:isCommission>true</illustboard:isCommission>`
+          : ''
+      }${
+        input.clientName
+          ? `
+      <illustboard:client>${escapeXml(input.clientName)}</illustboard:client>`
+          : ''
+      }
     </rdf:Description>
   </rdf:RDF>
 </x:xmpmeta>
@@ -183,10 +209,10 @@ function formatXmpDate(date: Date | string): string {
  */
 function getMediumLabel(medium: string): string {
   const labels: Record<string, string> = {
-    'DIGITAL': 'Digital',
-    'TRADITIONAL': 'Traditional',
-    'THREE_D': '3D',
-    'MIXED': 'Mixed Media',
+    DIGITAL: 'Digital',
+    TRADITIONAL: 'Traditional',
+    THREE_D: '3D',
+    MIXED: 'Mixed Media',
   }
   return labels[medium] || medium
 }
@@ -221,15 +247,39 @@ export function generateSVGMetadata(input: MetadataInput): string {
       <dc:title>${escapeXml(input.artworkTitle)}</dc:title>
       <dc:creator>${escapeXml(authorName)}</dc:creator>
       <dc:rights>${escapeXml(copyrightNotice)}</dc:rights>
-      <dc:source>${escapeXml(input.artworkUrl)}</dc:source>${input.projectName ? `
-      <dc:subject>${escapeXml(input.projectName)}</dc:subject>` : ''}
+      <dc:source>${escapeXml(input.artworkUrl)}</dc:source>${
+        input.projectName
+          ? `
+      <dc:subject>${escapeXml(input.projectName)}</dc:subject>`
+          : ''
+      }
       <cc:license>${escapeXml(license)}</cc:license>
-      <cc:attributionURL>${escapeXml(input.artworkUrl)}</cc:attributionURL>${creationDateStr ? `
-      <xmp:CreateDate>${creationDateStr}</xmp:CreateDate>` : ''}${toolsString ? `
-      <xmp:CreatorTool>${escapeXml(toolsString)}</xmp:CreatorTool>` : ''}${mediumLabel ? `
-      <illustboard:medium>${escapeXml(mediumLabel)}</illustboard:medium>` : ''}${input.isCommission ? `
-      <illustboard:isCommission>true</illustboard:isCommission>` : ''}${input.clientName ? `
-      <illustboard:client>${escapeXml(input.clientName)}</illustboard:client>` : ''}
+      <cc:attributionURL>${escapeXml(input.artworkUrl)}</cc:attributionURL>${
+        creationDateStr
+          ? `
+      <xmp:CreateDate>${creationDateStr}</xmp:CreateDate>`
+          : ''
+      }${
+        toolsString
+          ? `
+      <xmp:CreatorTool>${escapeXml(toolsString)}</xmp:CreatorTool>`
+          : ''
+      }${
+        mediumLabel
+          ? `
+      <illustboard:medium>${escapeXml(mediumLabel)}</illustboard:medium>`
+          : ''
+      }${
+        input.isCommission
+          ? `
+      <illustboard:isCommission>true</illustboard:isCommission>`
+          : ''
+      }${
+        input.clientName
+          ? `
+      <illustboard:client>${escapeXml(input.clientName)}</illustboard:client>`
+          : ''
+      }
     </rdf:Description>
   </rdf:RDF>
 </metadata>`

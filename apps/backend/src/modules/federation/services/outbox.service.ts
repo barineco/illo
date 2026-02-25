@@ -162,7 +162,8 @@ export class OutboxService {
    * - PRIVATE: Not delivered via ActivityPub
    */
   artworkToNote(artwork: any, actorUrl: string, publicUrl: string): Note {
-    const objectUrl = artwork.apObjectId || `${publicUrl}/artworks/${artwork.id}`
+    const objectUrl =
+      artwork.apObjectId || `${publicUrl}/artworks/${artwork.id}`
     const followersUrl = `${actorUrl}/followers`
 
     // Determine to/cc based on visibility (Mastodon-compatible)
@@ -193,7 +194,8 @@ export class OutboxService {
       id: objectUrl,
       type: 'Note',
       content: this.buildContent(artwork),
-      published: artwork.publishedAt?.toISOString() || artwork.createdAt.toISOString(),
+      published:
+        artwork.publishedAt?.toISOString() || artwork.createdAt.toISOString(),
       attributedTo: actorUrl,
       to,
       cc,
@@ -204,7 +206,9 @@ export class OutboxService {
         mediaType: 'image/jpeg', // Federation endpoint always serves JPEG thumbnails
         // Use federation endpoint for local images
         // This returns THUMBNAIL (320px) only - high-res requires HTTP signature auth
-        url: img.storageKey?.startsWith('remote:') ? img.url : `${publicUrl}/api/federation/images/${img.id}`,
+        url: img.storageKey?.startsWith('remote:')
+          ? img.url
+          : `${publicUrl}/api/federation/images/${img.id}`,
         name: artwork.title,
         // width/height intentionally omitted to prevent external crawlers from knowing full resolution
       })),
@@ -244,7 +248,8 @@ export class OutboxService {
     const note = this.artworkToNote(artwork, actorUrl, publicUrl)
 
     // Use existing apObjectId or generate one
-    const activityId = artwork.apObjectId || `${publicUrl}/artworks/${artwork.id}#activity`
+    const activityId =
+      artwork.apObjectId || `${publicUrl}/artworks/${artwork.id}#activity`
 
     return {
       '@context': AP_CONTEXT,

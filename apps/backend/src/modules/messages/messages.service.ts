@@ -13,7 +13,10 @@ import { NodeInfoCheckService } from '../federation/services/nodeinfo-check.serv
 import { MessageEncryptionService } from './message-encryption.service'
 import { CreateConversationDto } from './dto/create-conversation.dto'
 import { SendMessageDto } from './dto/send-message.dto'
-import { ConversationQueryDto, MessageQueryDto } from './dto/conversation-query.dto'
+import {
+  ConversationQueryDto,
+  MessageQueryDto,
+} from './dto/conversation-query.dto'
 
 @Injectable()
 export class MessagesService {
@@ -93,7 +96,9 @@ export class MessagesService {
           participant?.lastReadAt,
         )
 
-        const otherParticipant = conv.participants.find((p) => p.userId !== userId)
+        const otherParticipant = conv.participants.find(
+          (p) => p.userId !== userId,
+        )
 
         const lastMessage = conv.messages[0]
           ? {
@@ -125,7 +130,11 @@ export class MessagesService {
     }
   }
 
-  async getConversation(conversationId: string, userId: string, query: MessageQueryDto) {
+  async getConversation(
+    conversationId: string,
+    userId: string,
+    query: MessageQueryDto,
+  ) {
     const { page = 1, limit = 50 } = query
 
     const participant = await this.prisma.conversationParticipant.findUnique({
@@ -138,7 +147,9 @@ export class MessagesService {
     })
 
     if (!participant || participant.hasLeft) {
-      throw new ForbiddenException('You are not a participant in this conversation')
+      throw new ForbiddenException(
+        'You are not a participant in this conversation',
+      )
     }
 
     const conversation = await this.prisma.conversation.findUnique({
@@ -213,7 +224,9 @@ export class MessagesService {
       },
     })
 
-    const otherParticipant = conversation.participants.find((p) => p.userId !== userId)
+    const otherParticipant = conversation.participants.find(
+      (p) => p.userId !== userId,
+    )
 
     return {
       id: conversation.id,
@@ -237,14 +250,23 @@ export class MessagesService {
 
     const recipient = await this.prisma.user.findUnique({
       where: { id: recipientId },
-      select: { id: true, username: true, displayName: true, avatarUrl: true, domain: true },
+      select: {
+        id: true,
+        username: true,
+        displayName: true,
+        avatarUrl: true,
+        domain: true,
+      },
     })
 
     if (!recipient) {
       throw new NotFoundException('Recipient not found')
     }
 
-    const existingConversation = await this.findExistingConversation(senderId, recipientId)
+    const existingConversation = await this.findExistingConversation(
+      senderId,
+      recipientId,
+    )
 
     if (existingConversation) {
       if (initialMessage) {
@@ -273,10 +295,7 @@ export class MessagesService {
       data: {
         isGroup: false,
         participants: {
-          create: [
-            { userId: senderId },
-            { userId: recipientId },
-          ],
+          create: [{ userId: senderId }, { userId: recipientId }],
         },
       },
       include: {
@@ -318,7 +337,11 @@ export class MessagesService {
     }
   }
 
-  async sendMessage(conversationId: string, senderId: string, dto: SendMessageDto) {
+  async sendMessage(
+    conversationId: string,
+    senderId: string,
+    dto: SendMessageDto,
+  ) {
     const participant = await this.prisma.conversationParticipant.findUnique({
       where: {
         conversationId_userId: {
@@ -329,7 +352,9 @@ export class MessagesService {
     })
 
     if (!participant || participant.hasLeft) {
-      throw new ForbiddenException('You are not a participant in this conversation')
+      throw new ForbiddenException(
+        'You are not a participant in this conversation',
+      )
     }
 
     return this.sendMessageToConversation(conversationId, senderId, dto)
@@ -398,7 +423,9 @@ export class MessagesService {
     })
 
     const remoteRecipients = message.conversation.participants
-      .filter((p) => p.userId !== senderId && p.user.domain !== '' && p.user.inbox)
+      .filter(
+        (p) => p.userId !== senderId && p.user.domain !== '' && p.user.inbox,
+      )
       .map((p) => ({
         id: p.user.id,
         inbox: p.user.inbox,
@@ -437,7 +464,11 @@ export class MessagesService {
           }
 
           this.activityDelivery
-            .sendDirectMessage(sender, messageForFederation, recipientsWithActors)
+            .sendDirectMessage(
+              sender,
+              messageForFederation,
+              recipientsWithActors,
+            )
             .then((results) => {
               const successful = results.filter((r) => r.success).length
               const encrypted = results.filter((r) => r.encrypted).length
@@ -589,7 +620,9 @@ export class MessagesService {
       return null
     }
 
-    const otherParticipant = conversation.participants.find((p) => p.userId !== userId1)
+    const otherParticipant = conversation.participants.find(
+      (p) => p.userId !== userId1,
+    )
 
     return {
       id: conversation.id,
@@ -599,7 +632,9 @@ export class MessagesService {
     }
   }
 
-  async findOrCreateConversationByActors(actorUrls: string[]): Promise<string | null> {
+  async findOrCreateConversationByActors(
+    actorUrls: string[],
+  ): Promise<string | null> {
     const users = await this.prisma.user.findMany({
       where: {
         actorUrl: { in: actorUrls },
@@ -671,7 +706,10 @@ export class MessagesService {
     return message
   }
 
-  async getEncryptionStatus(conversationId: string, userId: string): Promise<{
+  async getEncryptionStatus(
+    conversationId: string,
+    userId: string,
+  ): Promise<{
     encryptionSupported: boolean
     status: 'all_local' | 'all_supported' | 'partial' | 'none'
     supportedDomains: string[]
@@ -719,11 +757,15 @@ export class MessagesService {
       }
     }
 
-    this.logger.debug(`Checking encryption support for domains: ${Array.from(remoteDomains).join(', ')}`)
+    this.logger.debug(
+      `Checking encryption support for domains: ${Array.from(remoteDomains).join(', ')}`,
+    )
     const encryptionSupport = await this.nodeInfoCheck.checkEncryptionSupport(
       Array.from(remoteDomains),
     )
-    this.logger.debug(`Encryption support result: supported=${encryptionSupport.supportedDomains.join(',')}, unsupported=${encryptionSupport.unsupportedDomains.join(',')}`)
+    this.logger.debug(
+      `Encryption support result: supported=${encryptionSupport.supportedDomains.join(',')}, unsupported=${encryptionSupport.unsupportedDomains.join(',')}`,
+    )
 
     let status: 'all_local' | 'all_supported' | 'partial' | 'none'
     if (encryptionSupport.unsupportedDomains.length === 0) {

@@ -93,7 +93,9 @@ export class AuthService {
 
     // Email verification check (skip for Bluesky OAuth users who have no email)
     if (user.email && !user.isEmailVerified) {
-      throw new UnauthorizedException('Please verify your email before logging in')
+      throw new UnauthorizedException(
+        'Please verify your email before logging in',
+      )
     }
 
     if (user.twoFactorEnabled) {
@@ -186,9 +188,13 @@ export class AuthService {
     const emailVerifyExpires = new Date()
     emailVerifyExpires.setHours(emailVerifyExpires.getHours() + 24)
 
-    const { publicKey, privateKey } = await this.httpSignatureService.generateKeyPair()
+    const { publicKey, privateKey } =
+      await this.httpSignatureService.generateKeyPair()
 
-    const baseUrl = this.configService.get<string>('BASE_URL', 'http://localhost:11104')
+    const baseUrl = this.configService.get<string>(
+      'BASE_URL',
+      'http://localhost:11104',
+    )
     const actorUrl = `${baseUrl}/users/${registerDto.username}`
     const inbox = `${actorUrl}/inbox`
     const outbox = `${actorUrl}/outbox`
@@ -341,7 +347,10 @@ export class AuthService {
       throw new UnauthorizedException('User not found')
     }
 
-    const isPasswordValid = await bcrypt.compare(currentPassword, user.passwordHash)
+    const isPasswordValid = await bcrypt.compare(
+      currentPassword,
+      user.passwordHash,
+    )
 
     if (!isPasswordValid) {
       throw new UnauthorizedException('Current password is incorrect')
@@ -350,7 +359,9 @@ export class AuthService {
     const isSamePassword = await bcrypt.compare(newPassword, user.passwordHash)
 
     if (isSamePassword) {
-      throw new ConflictException('New password must be different from current password')
+      throw new ConflictException(
+        'New password must be different from current password',
+      )
     }
 
     const newPasswordHash = await bcrypt.hash(newPassword, 10)
@@ -431,7 +442,9 @@ export class AuthService {
       throw new UnauthorizedException('User not found')
     }
 
-    const isAdult = user.birthday ? this.calculateAge(user.birthday) >= 18 : false
+    const isAdult = user.birthday
+      ? this.calculateAge(user.birthday) >= 18
+      : false
     const { birthday, ...userWithoutBirthday } = user
 
     return {
@@ -445,7 +458,10 @@ export class AuthService {
     const birthDate = new Date(birthday)
     let age = today.getFullYear() - birthDate.getFullYear()
     const monthDiff = today.getMonth() - birthDate.getMonth()
-    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
       age--
     }
     return age
@@ -520,7 +536,9 @@ export class AuthService {
     })
 
     if (!user) {
-      return { message: 'If the email exists, a password reset link has been sent' }
+      return {
+        message: 'If the email exists, a password reset link has been sent',
+      }
     }
 
     const resetPasswordToken = crypto.randomBytes(32).toString('hex')
@@ -545,7 +563,9 @@ export class AuthService {
       console.error('Failed to send password reset email:', error)
     }
 
-    return { message: 'If the email exists, a password reset link has been sent' }
+    return {
+      message: 'If the email exists, a password reset link has been sent',
+    }
   }
 
   async resetPassword(token: string, newPassword: string) {
@@ -628,9 +648,13 @@ export class AuthService {
     const randomPassword = crypto.randomBytes(32).toString('hex')
     const passwordHash = await bcrypt.hash(randomPassword, 10)
 
-    const { publicKey, privateKey } = await this.httpSignatureService.generateKeyPair()
+    const { publicKey, privateKey } =
+      await this.httpSignatureService.generateKeyPair()
 
-    const baseUrl = this.configService.get<string>('BASE_URL', 'http://localhost:11104')
+    const baseUrl = this.configService.get<string>(
+      'BASE_URL',
+      'http://localhost:11104',
+    )
     const actorUrl = `${baseUrl}/users/${data.username}`
     const inbox = `${actorUrl}/inbox`
     const outbox = `${actorUrl}/outbox`
@@ -642,7 +666,9 @@ export class AuthService {
     })
 
     if (existingBlueskyUser) {
-      throw new ConflictException('This Bluesky account is already linked to another user')
+      throw new ConflictException(
+        'This Bluesky account is already linked to another user',
+      )
     }
 
     if (!data.tosAccepted) {

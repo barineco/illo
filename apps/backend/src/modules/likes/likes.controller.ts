@@ -51,10 +51,7 @@ export class LikesController {
    */
   @Get(':artworkId/check')
   async checkLike(@Param('artworkId') artworkId: string, @Request() req) {
-    const hasLiked = await this.likesService.hasLiked(
-      req.user.id,
-      artworkId,
-    )
+    const hasLiked = await this.likesService.hasLiked(req.user.id, artworkId)
     return { hasLiked }
   }
 

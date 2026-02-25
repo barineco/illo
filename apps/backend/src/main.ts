@@ -16,7 +16,11 @@ import { AppModule } from './app.module'
 /**
  * Custom middleware to parse ActivityPub content types as JSON
  */
-function activityPubBodyParser(req: RawBodyRequest<Request>, res: Response, next: NextFunction) {
+function activityPubBodyParser(
+  req: RawBodyRequest<Request>,
+  res: Response,
+  next: NextFunction,
+) {
   const contentType = req.headers['content-type'] || ''
   if (
     contentType.includes('application/activity+json') ||

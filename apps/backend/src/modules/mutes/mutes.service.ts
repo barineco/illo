@@ -1,6 +1,16 @@
-import { Injectable, Logger, NotFoundException, BadRequestException } from '@nestjs/common'
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common'
 import { PrismaService } from '../prisma/prisma.service'
-import { CreateUserMuteDto, CreateWordMuteDto, UpdateWordMuteDto, CreateTagMuteDto } from './dto'
+import {
+  CreateUserMuteDto,
+  CreateWordMuteDto,
+  UpdateWordMuteDto,
+  CreateTagMuteDto,
+} from './dto'
 
 @Injectable()
 export class MutesService {
@@ -8,7 +18,12 @@ export class MutesService {
 
   constructor(private prisma: PrismaService) {}
 
-  async muteUser(muterId: string, username: string, domain: string = '', dto: CreateUserMuteDto) {
+  async muteUser(
+    muterId: string,
+    username: string,
+    domain: string = '',
+    dto: CreateUserMuteDto,
+  ) {
     const targetUser = await this.prisma.user.findFirst({
       where: { username, domain },
     })
@@ -57,7 +72,9 @@ export class MutesService {
       },
     })
 
-    this.logger.log(`User ${muterId} muted ${targetUser.username}@${domain || 'local'}`)
+    this.logger.log(
+      `User ${muterId} muted ${targetUser.username}@${domain || 'local'}`,
+    )
     return mute
   }
 
@@ -87,7 +104,9 @@ export class MutesService {
       where: { id: mute.id },
     })
 
-    this.logger.log(`User ${muterId} unmuted ${targetUser.username}@${domain || 'local'}`)
+    this.logger.log(
+      `User ${muterId} unmuted ${targetUser.username}@${domain || 'local'}`,
+    )
     return { success: true }
   }
 
@@ -111,7 +130,11 @@ export class MutesService {
     return true
   }
 
-  async checkUserMuteStatus(muterId: string, username: string, domain: string = '') {
+  async checkUserMuteStatus(
+    muterId: string,
+    username: string,
+    domain: string = '',
+  ) {
     const targetUser = await this.prisma.user.findFirst({
       where: { username, domain },
     })
@@ -132,10 +155,7 @@ export class MutesService {
       this.prisma.userMute.findMany({
         where: {
           muterId: userId,
-          OR: [
-            { expiresAt: null },
-            { expiresAt: { gt: now } },
-          ],
+          OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
         },
         include: {
           muted: {
@@ -155,10 +175,7 @@ export class MutesService {
       this.prisma.userMute.count({
         where: {
           muterId: userId,
-          OR: [
-            { expiresAt: null },
-            { expiresAt: { gt: now } },
-          ],
+          OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
         },
       }),
     ])
@@ -177,14 +194,11 @@ export class MutesService {
     const mutes = await this.prisma.userMute.findMany({
       where: {
         muterId: userId,
-        OR: [
-          { expiresAt: null },
-          { expiresAt: { gt: now } },
-        ],
+        OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
       },
       select: { mutedId: true },
     })
-    return mutes.map(m => m.mutedId)
+    return mutes.map((m) => m.mutedId)
   }
 
   async createWordMute(userId: string, dto: CreateWordMuteDto) {
@@ -225,9 +239,12 @@ export class MutesService {
       throw new NotFoundException('Word mute not found')
     }
 
-    const expiresAt = dto.duration !== undefined
-      ? (dto.duration ? new Date(Date.now() + dto.duration * 1000) : null)
-      : mute.expiresAt
+    const expiresAt =
+      dto.duration !== undefined
+        ? dto.duration
+          ? new Date(Date.now() + dto.duration * 1000)
+          : null
+        : mute.expiresAt
 
     return this.prisma.wordMute.update({
       where: { id: muteId },
@@ -260,10 +277,7 @@ export class MutesService {
     return this.prisma.wordMute.findMany({
       where: {
         userId,
-        OR: [
-          { expiresAt: null },
-          { expiresAt: { gt: now } },
-        ],
+        OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
       },
       orderBy: { createdAt: 'desc' },
     })
@@ -283,10 +297,17 @@ export class MutesService {
 
   private textMatchesWordMute(
     text: string,
-    mute: { keyword: string; regex: boolean; wholeWord: boolean; caseSensitive: boolean }
+    mute: {
+      keyword: string
+      regex: boolean
+      wholeWord: boolean
+      caseSensitive: boolean
+    },
   ): boolean {
     const searchText = mute.caseSensitive ? text : text.toLowerCase()
-    const keyword = mute.caseSensitive ? mute.keyword : mute.keyword.toLowerCase()
+    const keyword = mute.caseSensitive
+      ? mute.keyword
+      : mute.keyword.toLowerCase()
 
     if (mute.regex) {
       try {
@@ -299,7 +320,10 @@ export class MutesService {
     }
 
     if (mute.wholeWord) {
-      const regex = new RegExp(`\\b${this.escapeRegex(keyword)}\\b`, mute.caseSensitive ? '' : 'i')
+      const regex = new RegExp(
+        `\\b${this.escapeRegex(keyword)}\\b`,
+        mute.caseSensitive ? '' : 'i',
+      )
       return regex.test(text)
     }
 
@@ -383,10 +407,7 @@ export class MutesService {
     return this.prisma.tagMute.findMany({
       where: {
         userId,
-        OR: [
-          { expiresAt: null },
-          { expiresAt: { gt: now } },
-        ],
+        OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
       },
       include: {
         tag: true,
@@ -400,14 +421,11 @@ export class MutesService {
     const mutes = await this.prisma.tagMute.findMany({
       where: {
         userId,
-        OR: [
-          { expiresAt: null },
-          { expiresAt: { gt: now } },
-        ],
+        OR: [{ expiresAt: null }, { expiresAt: { gt: now } }],
       },
       select: { tagId: true },
     })
-    return mutes.map(m => m.tagId)
+    return mutes.map((m) => m.tagId)
   }
 
   async cleanupExpiredMutes() {
