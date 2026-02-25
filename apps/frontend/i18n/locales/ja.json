@@ -200,6 +200,8 @@
       "followers_only": "フォロワー限定",
       "private": "非公開"
     },
+    "noArtworks": "作品がありません",
+    "searchPlaceholder": "作品を検索...",
     "notFound": "作品が見つかりません",
     "notFoundDescription": "お探しの作品は存在しないか、削除された可能性があります。",
     "private": "非公開の作品です",
@@ -1044,7 +1046,8 @@
     "followingLatest": "フォロー中のユーザーの最新作",
     "noFollowingYet": "まだフォローしているユーザーの作品がありません",
     "findWorks": "作品を探す",
-    "loadMore": "もっと見る"
+    "loadMore": "もっと見る",
+    "goToHome": "ホームへ戻る"
   },
   "security": {
     "twoFactor": "二段階認証 (2FA)",

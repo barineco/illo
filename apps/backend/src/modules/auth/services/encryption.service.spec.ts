@@ -45,14 +45,17 @@ describe('EncryptionService', () => {
     expect(parts).toHaveLength(3)
   })
 
-  it('should throw error for tampered ciphertext', () => {
+  it('should throw error for tampered authTag', () => {
     const plaintext = 'JBSWY3DPEHPK3PXP'
     const encrypted = service.encrypt(plaintext)
 
-    // Tamper with ciphertext (change last character)
-    const tampered = encrypted.slice(0, -1) + 'X'
+    const parts = encrypted.split(':')
+    // Flip a character in the authTag to ensure GCM authentication fails
+    const authTagChars = parts[1].split('')
+    authTagChars[0] = authTagChars[0] === 'A' ? 'B' : 'A'
+    parts[1] = authTagChars.join('')
 
-    expect(() => service.decrypt(tampered)).toThrow()
+    expect(() => service.decrypt(parts.join(':'))).toThrow()
   })
 
   it('should throw error for invalid format', () => {
