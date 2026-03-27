@@ -1,19 +1,26 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-[var(--color-background)] px-4">
+  <div
+    class="min-h-screen flex items-center justify-center bg-[var(--color-background)] px-4"
+  >
     <div class="max-w-md w-full">
       <!-- Card -->
       <div class="bg-[var(--color-surface)] rounded-lg p-8 shadow-xl">
         <div class="text-center mb-8">
-          <h1 class="text-2xl font-bold text-[var(--color-text)] mb-2">{{ $t('auth.twoFactorTitle') }}</h1>
+          <h1 class="text-2xl font-bold text-[var(--color-text)] mb-2">
+            {{ $t('auth.twoFactorTitle') }}
+          </h1>
           <p class="text-[var(--color-text-muted)] text-sm">
             {{ $t('auth.twoFactorDesc') }}
           </p>
         </div>
 
-        <form @submit.prevent="handleSubmit" class="space-y-6">
+        <form class="space-y-6" @submit.prevent="handleSubmit">
           <!-- Code Input -->
           <div>
-            <label for="code" class="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
+            <label
+              for="code"
+              class="block text-sm font-medium text-[var(--color-text-secondary)] mb-2"
+            >
               {{ $t('auth.authCode') }}
             </label>
             <input
@@ -30,7 +37,11 @@
               @input="formatCode"
             />
             <p class="text-xs text-[var(--color-text-muted)] mt-2 text-center">
-              {{ isBackupCode ? $t('auth.backupCodeLabel') : $t('auth.totpCodeLabel') }}
+              {{
+                isBackupCode
+                  ? $t('auth.backupCodeLabel')
+                  : $t('auth.totpCodeLabel')
+              }}
             </p>
           </div>
 
@@ -63,8 +74,8 @@
           <div class="text-center">
             <button
               type="button"
-              @click="showBackupCodeHelp"
               class="text-sm text-[var(--color-primary)] hover:text-[var(--color-primary-hover)] transition-colors"
+              @click="showBackupCodeHelp"
             >
               {{ $t('auth.cantAccessAuthApp') }}
             </button>
@@ -132,7 +143,7 @@ const handleSubmit = async () => {
         userId: userId.value,
         code: code.value,
       },
-      rememberMe.value
+      rememberMe.value,
     )
 
     if (result.usedBackupCode) {
@@ -149,7 +160,8 @@ const handleSubmit = async () => {
     if (error.response?.status === 401) {
       errorMessage.value = t('auth.invalidAuthCode')
     } else {
-      errorMessage.value = error.response?.data?.message || t('auth.twoFactorFailed')
+      errorMessage.value =
+        error.response?.data?.message || t('auth.twoFactorFailed')
     }
     code.value = '' // Clear code on error
   } finally {

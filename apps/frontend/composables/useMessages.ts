@@ -6,7 +6,9 @@ export function useMessages() {
 
   const fetchUnreadCount = async () => {
     try {
-      const data = await api.get<{ count: number }>('/api/messages/unread-count')
+      const data = await api.get<{ count: number }>(
+        '/api/messages/unread-count',
+      )
       unreadMessageCount.value = data.count
     } catch (error) {
       console.error('Failed to fetch unread message count:', error)

@@ -2,8 +2,12 @@
   <div class="max-w-7xl mx-auto">
     <!-- Loading State -->
     <div v-if="loading" class="text-center py-12">
-      <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[var(--color-border)] border-t-[var(--color-primary)]"></div>
-      <p class="mt-4 text-[var(--color-text-muted)]">{{ $t('common.loading') }}</p>
+      <div
+        class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[var(--color-border)] border-t-[var(--color-primary)]"
+      />
+      <p class="mt-4 text-[var(--color-text-muted)]">
+        {{ $t('common.loading') }}
+      </p>
     </div>
 
     <!-- Error State -->
@@ -164,7 +168,9 @@ const isOwnProfile = computed(() => {
   if (!user.value || !profileUser.value) return false
   // Current user is always local (no domain), profile user may be remote
   const profileDomain = profileUser.value.domain || ''
-  return user.value.username === profileUser.value.username && profileDomain === ''
+  return (
+    user.value.username === profileUser.value.username && profileDomain === ''
+  )
 })
 
 // Dynamic tabs based on profile ownership
@@ -188,7 +194,7 @@ const tabLabels = computed(() => ({
 }))
 
 const tabItems = computed(() => {
-  return tabs.value.map(tab => ({
+  return tabs.value.map((tab) => ({
     value: tab,
     label: tabLabels.value[tab as keyof typeof tabLabels.value] || tab,
   }))
@@ -205,7 +211,11 @@ const fetchUserData = async () => {
 
     let baseURL = ''
     if (import.meta.server) {
-      baseURL = process.env.API_BASE_SERVER || config.apiBaseServer || config.public.apiBase || ''
+      baseURL =
+        process.env.API_BASE_SERVER ||
+        config.apiBaseServer ||
+        config.public.apiBase ||
+        ''
     } else {
       baseURL = config.public.apiBase || ''
     }
@@ -218,7 +228,9 @@ const fetchUserData = async () => {
     })
 
     if (!response.ok) {
-      throw new Error(`Failed to fetch user: ${response.status} ${response.statusText}`)
+      throw new Error(
+        `Failed to fetch user: ${response.status} ${response.statusText}`,
+      )
     }
 
     const userData = await response.json()
@@ -242,14 +254,24 @@ const fetchUserData = async () => {
     }
 
     // Fetch user's artworks
-    const artworksData = await api.get<any>(`/api/artworks/user/${username}?limit=20`)
+    const artworksData = await api.get<any>(
+      `/api/artworks/user/${username}?limit=20`,
+    )
     artworks.value = artworksData.artworks.map((artwork: any) => ({
       id: artwork.id,
       title: artwork.title,
-      thumbnailUrl: artwork.thumbnailUrl || artwork.images[0]?.thumbnailUrl || artwork.images[0]?.url || '',
+      thumbnailUrl:
+        artwork.thumbnailUrl ||
+        artwork.images[0]?.thumbnailUrl ||
+        artwork.images[0]?.url ||
+        '',
       likeCount: artwork._count?.likes || 0,
       bookmarkCount: artwork._count?.bookmarks || 0,
-      imageCount: artwork.imageCount || artwork._count?.images || artwork.images?.length || 1,
+      imageCount:
+        artwork.imageCount ||
+        artwork._count?.images ||
+        artwork.images?.length ||
+        1,
       images: artwork.images || [],
       visibility: artwork.visibility,
       ageRating: artwork.ageRating,
@@ -276,7 +298,7 @@ const checkFollowStatus = async () => {
 
   try {
     const followData = await api.get<{ isFollowing: boolean }>(
-      `/api/follows/${encodeURIComponent(userHandle.value)}/check`
+      `/api/follows/${encodeURIComponent(userHandle.value)}/check`,
     )
     isFollowing.value = followData.isFollowing
   } catch (e: any) {
@@ -286,14 +308,20 @@ const checkFollowStatus = async () => {
 
 // Toggle follow
 const toggleFollow = async () => {
-  if (!user.value || !profileUser.value || isLoadingFollow.value || isOwnProfile.value) return
+  if (
+    !user.value ||
+    !profileUser.value ||
+    isLoadingFollow.value ||
+    isOwnProfile.value
+  )
+    return
 
   try {
     isLoadingFollow.value = true
     const previousFollowing = isFollowing.value
 
     const result = await api.post<{ following: boolean }>(
-      `/api/follows/${encodeURIComponent(userHandle.value)}/toggle`
+      `/api/follows/${encodeURIComponent(userHandle.value)}/toggle`,
     )
 
     isFollowing.value = result.following
@@ -302,13 +330,17 @@ const toggleFollow = async () => {
         profileUser.value.followersCount++
         addToast({
           type: 'success',
-          message: t('user.followSuccess', { name: profileUser.value.displayName }),
+          message: t('user.followSuccess', {
+            name: profileUser.value.displayName,
+          }),
         })
       } else if (!result.following && previousFollowing) {
         profileUser.value.followersCount--
         addToast({
           type: 'success',
-          message: t('user.unfollowSuccess', { name: profileUser.value.displayName }),
+          message: t('user.unfollowSuccess', {
+            name: profileUser.value.displayName,
+          }),
         })
       }
     }
@@ -329,7 +361,7 @@ const checkMuteStatus = async () => {
 
   try {
     const response = await api.get<{ isMuted: boolean }>(
-      `/api/mutes/users/${encodeURIComponent(userHandle.value)}/check`
+      `/api/mutes/users/${encodeURIComponent(userHandle.value)}/check`,
     )
     isMuted.value = response.isMuted
   } catch (error) {
@@ -343,14 +375,19 @@ const toggleMuteUser = async () => {
 
   try {
     if (isMuted.value) {
-      await api.delete(`/api/mutes/users/${encodeURIComponent(userHandle.value)}`)
+      await api.delete(
+        `/api/mutes/users/${encodeURIComponent(userHandle.value)}`,
+      )
       isMuted.value = false
       addToast({
         type: 'success',
         message: t('mutes.unmuteSuccess'),
       })
     } else {
-      await api.post(`/api/mutes/users/${encodeURIComponent(userHandle.value)}`, {})
+      await api.post(
+        `/api/mutes/users/${encodeURIComponent(userHandle.value)}`,
+        {},
+      )
       isMuted.value = true
       addToast({
         type: 'success',
@@ -413,10 +450,13 @@ onMounted(async () => {
 })
 
 // Watch for auth changes
-watch(() => user.value, async (newUser) => {
-  if (newUser && profileUser.value && !isOwnProfile.value) {
-    await checkFollowStatus()
-    await checkMuteStatus()
-  }
-})
+watch(
+  () => user.value,
+  async (newUser) => {
+    if (newUser && profileUser.value && !isOwnProfile.value) {
+      await checkFollowStatus()
+      await checkMuteStatus()
+    }
+  },
+)
 </script>

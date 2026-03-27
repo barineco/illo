@@ -107,6 +107,9 @@
     "invalidCodeFormat": "Please enter a 6-digit TOTP code or 8-digit backup code.",
     "invalidAuthCode": "Invalid authentication code. Please try again.",
     "twoFactorFailed": "Two-factor authentication failed.",
+    "emailChangeVerified": "Email address has been changed",
+    "emailChangeVerificationFailed": "Email change verification failed",
+    "emailAlreadyInUse": "This email address is already in use",
     "bluesky": {
       "loginWithBluesky": "Login with Bluesky",
       "registerWithBluesky": "Register with Bluesky",
@@ -424,7 +427,21 @@
       "alreadyExists": "This tool is already registered",
       "myTools": "My Tools",
       "registered": "registered"
-    }
+    },
+    "emailSection": "Email Address",
+    "emailSectionDescription": "Used for account recovery and password reset",
+    "emailNotSet": "Email address not set",
+    "emailNotSetWarning": "No email address is set. Please set an email address for account recovery.",
+    "emailVerified": "Verified",
+    "emailNotVerified": "Not verified",
+    "setEmail": "Set Email Address",
+    "changeEmail": "Change",
+    "emailChangePending": "A verification email has been sent to the new address",
+    "cancelEmailChange": "Cancel",
+    "emailChangeRequested": "Verification email sent",
+    "emailPlaceholder": "mail{'@'}example.com",
+    "submitEmailChange": "Send Verification",
+    "unlinkRequiresEmail": "Please set and verify your email before unlinking"
   },
   "twoFactor": {
     "title": "Two-Factor Authentication",
@@ -1074,6 +1091,10 @@
     "passwordMustBeDifferent": "New password must be different from current password",
     "passwordChanged": "Password changed successfully",
     "passwordChangeFailed": "Failed to change password",
+    "setPassword": "Set Password",
+    "setPasswordDescription": "Set a password for logging in",
+    "setPasswordButton": "Set Password",
+    "passwordSet": "Password set successfully",
     "passkeys": "Passkeys"
   },
   "passkey": {

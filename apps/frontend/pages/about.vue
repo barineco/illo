@@ -3,13 +3,19 @@
     <!-- Header -->
     <div class="mb-6">
       <h1 class="text-3xl font-bold">{{ $t('about.pageTitle') }}</h1>
-      <p class="text-[var(--color-text-muted)] mt-2">{{ $t('about.pageDescription') }}</p>
+      <p class="text-[var(--color-text-muted)] mt-2">
+        {{ $t('about.pageDescription') }}
+      </p>
     </div>
 
     <!-- Loading State -->
     <div v-if="loading" class="text-center py-12">
-      <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[var(--color-border)] border-t-[var(--color-primary)]"></div>
-      <p class="mt-4 text-[var(--color-text-muted)]">{{ $t('common.loading') }}</p>
+      <div
+        class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[var(--color-border)] border-t-[var(--color-primary)]"
+      />
+      <p class="mt-4 text-[var(--color-text-muted)]">
+        {{ $t('common.loading') }}
+      </p>
     </div>
 
     <!-- Error State -->
@@ -30,11 +36,7 @@
       <!-- Instance Overview -->
       <div class="bg-[var(--color-surface)] rounded-xl p-6 shadow-sm">
         <div class="flex items-center gap-4 mb-4">
-          <img
-            src="/assets/logo/illo-logo.svg"
-            alt="Logo"
-            class="w-16 h-16"
-          />
+          <img src="/assets/logo/illo-logo.svg" alt="Logo" class="w-16 h-16" />
           <div>
             <h2 class="text-2xl font-bold">{{ instanceInfo.instanceName }}</h2>
             <span
@@ -46,7 +48,10 @@
           </div>
         </div>
 
-        <p v-if="instanceInfo.description" class="text-[var(--color-text-muted)] mb-4">
+        <p
+          v-if="instanceInfo.description"
+          class="text-[var(--color-text-muted)] mb-4"
+        >
           {{ instanceInfo.description }}
         </p>
 
@@ -55,12 +60,19 @@
           <Icon
             :name="instanceInfo.allowRegistration ? 'CheckCircle' : 'XCircle'"
             class="w-5 h-5"
-            :class="instanceInfo.allowRegistration ? 'text-green-500' : 'text-[var(--color-text-muted)]'"
+            :class="
+              instanceInfo.allowRegistration
+                ? 'text-green-500'
+                : 'text-[var(--color-text-muted)]'
+            "
           />
           <span>
-            {{ instanceInfo.allowRegistration
-              ? (instanceInfo.requireApproval ? $t('about.registrationApproval') : $t('about.registrationOpen'))
-              : $t('about.registrationClosed')
+            {{
+              instanceInfo.allowRegistration
+                ? instanceInfo.requireApproval
+                  ? $t('about.registrationApproval')
+                  : $t('about.registrationOpen')
+                : $t('about.registrationClosed')
             }}
           </span>
         </div>
@@ -68,43 +80,69 @@
 
       <!-- Legal Links -->
       <div class="bg-[var(--color-surface)] rounded-xl p-6 shadow-sm">
-        <h3 class="text-lg font-semibold mb-4">{{ $t('about.legalDocuments') }}</h3>
+        <h3 class="text-lg font-semibold mb-4">
+          {{ $t('about.legalDocuments') }}
+        </h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
           <NuxtLink
             to="/tos"
             class="flex items-center gap-3 p-4 bg-[var(--color-surface-secondary)] rounded-lg hover:bg-[var(--color-surface-hover)] transition-colors"
           >
-            <Icon name="DocumentText" class="w-6 h-6 text-[var(--color-primary)]" />
+            <Icon
+              name="DocumentText"
+              class="w-6 h-6 text-[var(--color-primary)]"
+            />
             <div>
               <div class="font-medium">{{ $t('about.termsOfService') }}</div>
               <div class="text-sm text-[var(--color-text-muted)]">
-                {{ $t('about.tosVersion', { version: instanceInfo.tosVersion }) }}
+                {{
+                  $t('about.tosVersion', { version: instanceInfo.tosVersion })
+                }}
               </div>
             </div>
-            <Icon name="ChevronRight" class="w-5 h-5 ml-auto text-[var(--color-text-muted)]" />
+            <Icon
+              name="ChevronRight"
+              class="w-5 h-5 ml-auto text-[var(--color-text-muted)]"
+            />
           </NuxtLink>
 
           <NuxtLink
             to="/privacy"
             class="flex items-center gap-3 p-4 bg-[var(--color-surface-secondary)] rounded-lg hover:bg-[var(--color-surface-hover)] transition-colors"
           >
-            <Icon name="ShieldCheck" class="w-6 h-6 text-[var(--color-primary)]" />
+            <Icon
+              name="ShieldCheck"
+              class="w-6 h-6 text-[var(--color-primary)]"
+            />
             <div>
               <div class="font-medium">{{ $t('about.privacyPolicy') }}</div>
-              <div class="text-sm text-[var(--color-text-muted)]">{{ $t('about.privacyDescription') }}</div>
+              <div class="text-sm text-[var(--color-text-muted)]">
+                {{ $t('about.privacyDescription') }}
+              </div>
             </div>
-            <Icon name="ChevronRight" class="w-5 h-5 ml-auto text-[var(--color-text-muted)]" />
+            <Icon
+              name="ChevronRight"
+              class="w-5 h-5 ml-auto text-[var(--color-text-muted)]"
+            />
           </NuxtLink>
         </div>
       </div>
 
       <!-- Contact Information -->
-      <div v-if="instanceInfo.adminUsername || instanceInfo.contactInfo" class="bg-[var(--color-surface)] rounded-xl p-6 shadow-sm">
+      <div
+        v-if="instanceInfo.adminUsername || instanceInfo.contactInfo"
+        class="bg-[var(--color-surface)] rounded-xl p-6 shadow-sm"
+      >
         <h3 class="text-lg font-semibold mb-4">{{ $t('about.contact') }}</h3>
         <div class="space-y-3">
-          <div v-if="instanceInfo.adminUsername" class="flex items-center gap-3">
+          <div
+            v-if="instanceInfo.adminUsername"
+            class="flex items-center gap-3"
+          >
             <Icon name="User" class="w-5 h-5 text-[var(--color-text-muted)]" />
-            <span class="text-[var(--color-text-muted)]">{{ $t('about.administrator') }}:</span>
+            <span class="text-[var(--color-text-muted)]"
+              >{{ $t('about.administrator') }}:</span
+            >
             <NuxtLink
               :to="`/users/${instanceInfo.adminUsername}`"
               class="text-[var(--color-primary)] hover:underline"
@@ -113,12 +151,20 @@
             </NuxtLink>
           </div>
           <div v-if="instanceInfo.contactInfo" class="flex items-center gap-3">
-            <Icon name="Envelope" class="w-5 h-5 text-[var(--color-text-muted)]" />
-            <span class="text-[var(--color-text-muted)]">{{ $t('about.contactInfo') }}:</span>
+            <Icon
+              name="Envelope"
+              class="w-5 h-5 text-[var(--color-text-muted)]"
+            />
+            <span class="text-[var(--color-text-muted)]"
+              >{{ $t('about.contactInfo') }}:</span
+            >
             <span>{{ instanceInfo.contactInfo }}</span>
           </div>
           <div v-if="instanceInfo.publicUrl" class="flex items-center gap-3">
-            <Icon name="GlobeAlt" class="w-5 h-5 text-[var(--color-text-muted)]" />
+            <Icon
+              name="GlobeAlt"
+              class="w-5 h-5 text-[var(--color-text-muted)]"
+            />
             <span class="text-[var(--color-text-muted)]">URL:</span>
             <a
               :href="instanceInfo.publicUrl"
@@ -136,11 +182,7 @@
       <div class="bg-[var(--color-surface)] rounded-xl p-6 shadow-sm">
         <h3 class="text-lg font-semibold mb-4">{{ $t('about.software') }}</h3>
         <div class="flex items-center gap-3">
-          <img
-            src="/assets/logo/illo-logo.svg"
-            alt="illo"
-            class="w-8 h-8"
-          />
+          <img src="/assets/logo/illo-logo.svg" alt="illo" class="w-8 h-8" />
           <div>
             <div class="font-medium">illo</div>
             <div class="text-sm text-[var(--color-text-muted)]">

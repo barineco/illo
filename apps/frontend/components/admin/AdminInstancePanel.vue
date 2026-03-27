@@ -2,8 +2,12 @@
   <div>
     <!-- Loading State -->
     <div v-if="loading" class="text-center py-12">
-      <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[var(--color-border)] border-t-[var(--color-primary)]"></div>
-      <p class="mt-4 text-[var(--color-text-muted)]">{{ $t('common.loading') }}</p>
+      <div
+        class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[var(--color-border)] border-t-[var(--color-primary)]"
+      />
+      <p class="mt-4 text-[var(--color-text-muted)]">
+        {{ $t('common.loading') }}
+      </p>
     </div>
 
     <!-- Error State -->
@@ -22,12 +26,18 @@
     <!-- Settings Content -->
     <div v-else class="space-y-6">
       <!-- Success Message -->
-      <div v-if="successMessage" class="bg-[var(--color-success-bg)] border border-[var(--color-success-border)] rounded-lg p-4">
+      <div
+        v-if="successMessage"
+        class="bg-[var(--color-success-bg)] border border-[var(--color-success-border)] rounded-lg p-4"
+      >
         <p class="text-[var(--color-success-text)]">{{ successMessage }}</p>
       </div>
 
       <!-- Error Message -->
-      <div v-if="submitError" class="bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] rounded-lg p-4">
+      <div
+        v-if="submitError"
+        class="bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] rounded-lg p-4"
+      >
         <p class="text-[var(--color-danger-text)]">{{ submitError }}</p>
       </div>
 
@@ -37,7 +47,10 @@
         <div class="space-y-4">
           <!-- Instance Name -->
           <div>
-            <label for="instanceName" class="block text-sm text-[var(--color-text-muted)] mb-1">
+            <label
+              for="instanceName"
+              class="block text-sm text-[var(--color-text-muted)] mb-1"
+            >
               {{ $t('admin.instanceName') }}
             </label>
             <div class="flex gap-3">
@@ -53,7 +66,10 @@
 
           <!-- Description -->
           <div>
-            <label for="instanceDescription" class="block text-sm text-[var(--color-text-muted)] mb-1">
+            <label
+              for="instanceDescription"
+              class="block text-sm text-[var(--color-text-muted)] mb-1"
+            >
               {{ $t('admin.description') }}
             </label>
             <textarea
@@ -88,16 +104,23 @@
         <div class="space-y-4">
           <!-- Current Mode -->
           <div>
-            <div class="text-sm text-[var(--color-text-muted)] mb-2">{{ $t('admin.currentMode') }}</div>
+            <div class="text-sm text-[var(--color-text-muted)] mb-2">
+              {{ $t('admin.currentMode') }}
+            </div>
             <div class="flex items-center gap-3">
-              <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[var(--color-info-bg)] text-[var(--color-info-text)] border border-[var(--color-info-border)]">
+              <span
+                class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[var(--color-info-bg)] text-[var(--color-info-text)] border border-[var(--color-info-border)]"
+              >
                 {{ getModeLabel(instanceInfo?.instanceMode) }}
               </span>
             </div>
           </div>
 
           <!-- Federation Mode Notice (shown right after current mode) -->
-          <div v-if="instanceInfo?.instanceMode !== 'PERSONAL'" class="bg-[var(--color-info-bg)] border border-[var(--color-info-border)] rounded-lg p-4">
+          <div
+            v-if="instanceInfo?.instanceMode !== 'PERSONAL'"
+            class="bg-[var(--color-info-bg)] border border-[var(--color-info-border)] rounded-lg p-4"
+          >
             <p class="text-[var(--color-info-text)] text-sm">
               {{ $t('admin.federationModeNotice') }}
             </p>
@@ -106,7 +129,9 @@
           <!-- Mode Description -->
           <div class="bg-[var(--color-surface-secondary)] rounded-lg p-4">
             <p class="text-sm text-[var(--color-text)] mb-3">
-              <strong class="text-[var(--color-text)]">{{ getModeLabel(instanceInfo?.instanceMode) }}</strong>
+              <strong class="text-[var(--color-text)]">{{
+                getModeLabel(instanceInfo?.instanceMode)
+              }}</strong>
             </p>
             <p class="text-sm text-[var(--color-text-muted)]">
               {{ getModeDescription(instanceInfo?.instanceMode) }}
@@ -114,14 +139,23 @@
           </div>
 
           <!-- Registration Settings -->
-          <div v-if="instanceInfo?.instanceMode === 'FEDERATION_ONLY'" class="space-y-4">
-            <h3 class="text-md font-medium">{{ $t('admin.registrationSettings') }}</h3>
+          <div
+            v-if="instanceInfo?.instanceMode === 'FEDERATION_ONLY'"
+            class="space-y-4"
+          >
+            <h3 class="text-md font-medium">
+              {{ $t('admin.registrationSettings') }}
+            </h3>
 
             <!-- Allow Registration Toggle -->
-            <div class="flex items-center justify-between bg-[var(--color-background)] rounded-lg p-4">
+            <div
+              class="flex items-center justify-between bg-[var(--color-background)] rounded-lg p-4"
+            >
               <div class="flex-1">
                 <div class="flex items-center gap-2 mb-1">
-                  <span class="font-medium text-sm">{{ $t('admin.allowRegistration') }}</span>
+                  <span class="font-medium text-sm">{{
+                    $t('admin.allowRegistration')
+                  }}</span>
                 </div>
                 <p class="text-xs text-[var(--color-text-muted)]">
                   {{ $t('admin.allowRegistrationDesc') }}
@@ -136,10 +170,14 @@
             </div>
 
             <!-- Require Approval Toggle -->
-            <div class="flex items-center justify-between bg-[var(--color-background)] rounded-lg p-4">
+            <div
+              class="flex items-center justify-between bg-[var(--color-background)] rounded-lg p-4"
+            >
               <div class="flex-1">
                 <div class="flex items-center gap-2 mb-1">
-                  <span class="font-medium text-sm">{{ $t('admin.requireApproval') }}</span>
+                  <span class="font-medium text-sm">{{
+                    $t('admin.requireApproval')
+                  }}</span>
                 </div>
                 <p class="text-xs text-[var(--color-text-muted)]">
                   {{ $t('admin.requireApprovalDesc') }}
@@ -152,18 +190,23 @@
                 @change="toggleRequireApproval"
               />
             </div>
-
           </div>
 
           <!-- SEO Settings (shown for all modes) -->
-          <div class="space-y-4 mt-6 pt-6 border-t border-[var(--color-border)]">
+          <div
+            class="space-y-4 mt-6 pt-6 border-t border-[var(--color-border)]"
+          >
             <h3 class="text-md font-medium">{{ $t('admin.seoSettings') }}</h3>
 
             <!-- Search Engine Indexing Toggle -->
-            <div class="flex items-center justify-between bg-[var(--color-background)] rounded-lg p-4">
+            <div
+              class="flex items-center justify-between bg-[var(--color-background)] rounded-lg p-4"
+            >
               <div class="flex-1">
                 <div class="flex items-center gap-2 mb-1">
-                  <span class="font-medium text-sm">{{ $t('admin.allowSearchEngineIndexing') }}</span>
+                  <span class="font-medium text-sm">{{
+                    $t('admin.allowSearchEngineIndexing')
+                  }}</span>
                 </div>
                 <p class="text-xs text-[var(--color-text-muted)]">
                   {{ $t('admin.allowSearchEngineIndexingDesc') }}
@@ -179,18 +222,38 @@
           </div>
 
           <!-- Terms of Service Settings -->
-          <div class="space-y-4 mt-6 pt-6 border-t border-[var(--color-border)]">
-            <h3 class="text-md font-medium">{{ $t('admin.tosSettings.title') }}</h3>
+          <div
+            class="space-y-4 mt-6 pt-6 border-t border-[var(--color-border)]"
+          >
+            <h3 class="text-md font-medium">
+              {{ $t('admin.tosSettings.title') }}
+            </h3>
 
             <div class="bg-[var(--color-background)] rounded-lg p-4 space-y-4">
               <!-- Info about file-based management -->
               <div class="text-sm text-[var(--color-text-muted)]">
                 <p class="mb-2">{{ $t('admin.tosSettings.fileBasedInfo') }}</p>
                 <ul class="list-disc list-inside space-y-1 text-xs">
-                  <li><code class="bg-[var(--color-surface)] px-1 rounded">content/legal/tos-ja.md</code></li>
-                  <li><code class="bg-[var(--color-surface)] px-1 rounded">content/legal/tos-en.md</code></li>
-                  <li><code class="bg-[var(--color-surface)] px-1 rounded">content/legal/privacy-ja.md</code></li>
-                  <li><code class="bg-[var(--color-surface)] px-1 rounded">content/legal/privacy-en.md</code></li>
+                  <li>
+                    <code class="bg-[var(--color-surface)] px-1 rounded"
+                      >content/legal/tos-ja.md</code
+                    >
+                  </li>
+                  <li>
+                    <code class="bg-[var(--color-surface)] px-1 rounded"
+                      >content/legal/tos-en.md</code
+                    >
+                  </li>
+                  <li>
+                    <code class="bg-[var(--color-surface)] px-1 rounded"
+                      >content/legal/privacy-ja.md</code
+                    >
+                  </li>
+                  <li>
+                    <code class="bg-[var(--color-surface)] px-1 rounded"
+                      >content/legal/privacy-en.md</code
+                    >
+                  </li>
                 </ul>
               </div>
 
@@ -213,20 +276,30 @@
               </div>
 
               <!-- Current Version Display -->
-              <div class="flex items-center justify-between bg-[var(--color-surface)] rounded-lg p-3">
+              <div
+                class="flex items-center justify-between bg-[var(--color-surface)] rounded-lg p-3"
+              >
                 <div>
-                  <span class="text-sm text-[var(--color-text-muted)]">{{ $t('admin.tosSettings.currentVersion') }}:</span>
+                  <span class="text-sm text-[var(--color-text-muted)]"
+                    >{{ $t('admin.tosSettings.currentVersion') }}:</span
+                  >
                   <span class="ml-2 font-medium">v{{ tosVersion }}</span>
                 </div>
-                <div v-if="tosUpdatedAt" class="text-xs text-[var(--color-text-muted)]">
-                  {{ $t('admin.tosSettings.lastUpdated') }}: {{ formatDate(tosUpdatedAt) }}
+                <div
+                  v-if="tosUpdatedAt"
+                  class="text-xs text-[var(--color-text-muted)]"
+                >
+                  {{ $t('admin.tosSettings.lastUpdated') }}:
+                  {{ formatDate(tosUpdatedAt) }}
                 </div>
               </div>
 
               <!-- Increment Version Button -->
               <div class="flex items-center justify-between">
                 <div>
-                  <p class="text-sm">{{ $t('admin.tosSettings.incrementVersion') }}</p>
+                  <p class="text-sm">
+                    {{ $t('admin.tosSettings.incrementVersion') }}
+                  </p>
                   <p class="text-xs text-[var(--color-text-muted)]">
                     {{ $t('admin.tosSettings.incrementVersionDesc') }}
                   </p>
@@ -246,14 +319,26 @@
           </div>
 
           <!-- Mode Change Section -->
-          <div v-if="instanceInfo?.instanceMode === 'PERSONAL'" class="mt-6 pt-6 border-t border-[var(--color-border)]">
-            <h3 class="text-lg font-medium mb-3">{{ $t('admin.modeChange') }}</h3>
-            <div class="bg-[var(--color-warning-bg)] border border-[var(--color-warning-text)] rounded-lg p-4 mb-4">
-              <p class="text-[var(--color-warning-text)] text-sm font-medium mb-2 flex items-center gap-2">
-                <Icon name="ExclamationTriangle" class="w-5 h-5" /> {{ $t('admin.importantNotes') }}
+          <div
+            v-if="instanceInfo?.instanceMode === 'PERSONAL'"
+            class="mt-6 pt-6 border-t border-[var(--color-border)]"
+          >
+            <h3 class="text-lg font-medium mb-3">
+              {{ $t('admin.modeChange') }}
+            </h3>
+            <div
+              class="bg-[var(--color-warning-bg)] border border-[var(--color-warning-text)] rounded-lg p-4 mb-4"
+            >
+              <p
+                class="text-[var(--color-warning-text)] text-sm font-medium mb-2 flex items-center gap-2"
+              >
+                <Icon name="ExclamationTriangle" class="w-5 h-5" />
+                {{ $t('admin.importantNotes') }}
               </p>
-              <ul class="text-sm text-[var(--color-warning-text)] space-y-1 list-disc list-inside">
-                <li v-html="$t('admin.modeChangeWarning1')"></li>
+              <ul
+                class="text-sm text-[var(--color-warning-text)] space-y-1 list-disc list-inside"
+              >
+                <li v-html="$t('admin.modeChangeWarning1')" />
                 <li>{{ $t('admin.modeChangeWarning2') }}</li>
                 <li>{{ $t('admin.modeChangeWarning3') }}</li>
                 <li>{{ $t('admin.modeChangeWarning4') }}</li>
@@ -272,7 +357,6 @@
               </BaseButton>
             </div>
           </div>
-
         </div>
       </div>
 
@@ -284,20 +368,35 @@
           @click.self="showConfirmDialog = false"
         >
           <div class="bg-[var(--color-surface)] rounded-lg p-6 max-w-md w-full">
-            <h3 class="text-xl font-bold mb-4">{{ $t('admin.modeChangeConfirm') }}</h3>
+            <h3 class="text-xl font-bold mb-4">
+              {{ $t('admin.modeChangeConfirm') }}
+            </h3>
 
             <!-- Success Message in Modal -->
-            <div v-if="modalSuccessMessage" class="bg-[var(--color-success-bg)] border border-[var(--color-success-border)] rounded-lg p-4 mb-4">
-              <p class="text-[var(--color-success-text)]">{{ modalSuccessMessage }}</p>
+            <div
+              v-if="modalSuccessMessage"
+              class="bg-[var(--color-success-bg)] border border-[var(--color-success-border)] rounded-lg p-4 mb-4"
+            >
+              <p class="text-[var(--color-success-text)]">
+                {{ modalSuccessMessage }}
+              </p>
             </div>
 
             <!-- Error Message in Modal -->
-            <div v-if="modalErrorMessage" class="bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] rounded-lg p-4 mb-4">
-              <p class="text-[var(--color-danger-text)]">{{ modalErrorMessage }}</p>
+            <div
+              v-if="modalErrorMessage"
+              class="bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] rounded-lg p-4 mb-4"
+            >
+              <p class="text-[var(--color-danger-text)]">
+                {{ modalErrorMessage }}
+              </p>
             </div>
 
-            <p v-if="!modalSuccessMessage" class="text-[var(--color-text)] mb-6" v-html="$t('admin.modeChangeConfirmMessage')">
-            </p>
+            <p
+              v-if="!modalSuccessMessage"
+              class="text-[var(--color-text)] mb-6"
+              v-html="$t('admin.modeChangeConfirmMessage')"
+            />
             <div v-if="!modalSuccessMessage" class="flex gap-3 justify-end">
               <BaseButton
                 variant="secondary"
@@ -376,7 +475,9 @@ const fetchInstanceInfo = async () => {
     loading.value = true
     error.value = null
 
-    const data = await api.get<{ instanceInfo: InstanceInfo }>('/api/setup/status')
+    const data = await api.get<{ instanceInfo: InstanceInfo }>(
+      '/api/setup/status',
+    )
     instanceInfo.value = data.instanceInfo
 
     if (data.instanceInfo) {
@@ -496,7 +597,9 @@ const toggleAllowRegistration = async () => {
       instanceInfo.value.allowRegistration = newValue
     }
 
-    successMessage.value = newValue ? t('admin.registrationAllowed') : t('admin.registrationDisallowed')
+    successMessage.value = newValue
+      ? t('admin.registrationAllowed')
+      : t('admin.registrationDisallowed')
     setTimeout(() => {
       successMessage.value = null
     }, 3000)
@@ -524,7 +627,9 @@ const toggleRequireApproval = async () => {
       instanceInfo.value.requireApproval = newValue
     }
 
-    successMessage.value = newValue ? t('admin.approvalEnabled') : t('admin.approvalDisabled')
+    successMessage.value = newValue
+      ? t('admin.approvalEnabled')
+      : t('admin.approvalDisabled')
     setTimeout(() => {
       successMessage.value = null
     }, 3000)
@@ -552,7 +657,9 @@ const toggleSearchEngineIndexing = async () => {
       instanceInfo.value.allowSearchEngineIndexing = newValue
     }
 
-    successMessage.value = newValue ? t('admin.searchEngineIndexingEnabled') : t('admin.searchEngineIndexingDisabled')
+    successMessage.value = newValue
+      ? t('admin.searchEngineIndexingEnabled')
+      : t('admin.searchEngineIndexingDisabled')
     setTimeout(() => {
       successMessage.value = null
     }, 3000)

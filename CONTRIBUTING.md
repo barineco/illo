@@ -26,12 +26,14 @@ illoへの貢献を検討いただきありがとうございます。
 ### Pull Request
 
 1. フォークとクローン
+
    ```bash
    git clone https://github.com/YOUR_USERNAME/illo.git
    cd illo
    ```
 
 2. ブランチ作成
+
    ```bash
    git checkout -b feature/your-feature-name
    # または
@@ -51,12 +53,14 @@ illoへの貢献を検討いただきありがとうございます。
    ```
 
 4. 変更をコミット
+
    ```bash
    git add .
    git commit -m "feat: add your feature"
    ```
 
 5. Push & PR作成
+
    ```bash
    git push origin feature/your-feature-name
    ```

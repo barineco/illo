@@ -21,8 +21,8 @@
         <button
           type="button"
           class="crop-button"
-          @click="openCropper"
           :title="$t('linkCard.setCropArea')"
+          @click="openCropper"
         >
           <Icon name="ArrowUpTray" class="h-5 w-5" />
           {{ $t('linkCard.setCropArea') }}
@@ -57,7 +57,9 @@
             @change="updateBlur"
           />
           <span>{{ $t('linkCard.blurOption') }}</span>
-          <span v-if="blurRequired" class="required-badge">{{ $t('linkCard.blurRequired') }}</span>
+          <span v-if="blurRequired" class="required-badge">{{
+            $t('linkCard.blurRequired')
+          }}</span>
         </label>
       </div>
     </div>
@@ -66,7 +68,7 @@
     <CropperModal
       :is-open="showCropper"
       :image-source="imageSource"
-      :aspect-ratio="16/9"
+      :aspect-ratio="16 / 9"
       stencil-type="rectangle"
       :initial-crop="cropCoordinates"
       :original-width="originalWidth"
@@ -161,7 +163,12 @@ watch(
 
 // Generate cropped preview when crop coordinates change
 watch(
-  [() => props.cropCoordinates, () => props.originalWidth, () => props.originalHeight, previewUrl],
+  [
+    () => props.cropCoordinates,
+    () => props.originalWidth,
+    () => props.originalHeight,
+    previewUrl,
+  ],
   async ([coords, origW, origH, srcUrl]) => {
     // Clear previous cropped preview
     if (croppedPreviewUrl.value) {
@@ -175,7 +182,12 @@ watch(
     }
 
     try {
-      const croppedUrl = await generateCroppedPreview(srcUrl, coords, origW, origH)
+      const croppedUrl = await generateCroppedPreview(
+        srcUrl,
+        coords,
+        origW,
+        origH,
+      )
       croppedPreviewUrl.value = croppedUrl
     } catch (e) {
       console.error('Failed to generate cropped preview:', e)
@@ -228,8 +240,14 @@ async function generateCroppedPreview(
       // Draw cropped region to canvas
       ctx.drawImage(
         img,
-        cropX, cropY, cropW, cropH, // Source rectangle
-        0, 0, previewWidth, previewHeight, // Destination rectangle
+        cropX,
+        cropY,
+        cropW,
+        cropH, // Source rectangle
+        0,
+        0,
+        previewWidth,
+        previewHeight, // Destination rectangle
       )
 
       // Convert to blob URL
@@ -282,11 +300,14 @@ const updateBlur = (event: Event) => {
 }
 
 // Watch for age rating changes - auto-enable blur for R18/R18G
-watch(() => props.ageRating, (newRating) => {
-  if ((newRating === 'R18' || newRating === 'R18G') && hasImage.value) {
-    emit('update:blur', true)
-  }
-})
+watch(
+  () => props.ageRating,
+  (newRating) => {
+    if ((newRating === 'R18' || newRating === 'R18G') && hasImage.value) {
+      emit('update:blur', true)
+    }
+  },
+)
 
 // Cleanup blob URLs on unmount
 onUnmounted(() => {
@@ -437,13 +458,13 @@ onUnmounted(() => {
   font-size: 0.875rem;
 }
 
-.checkbox-label input[type="checkbox"] {
+.checkbox-label input[type='checkbox'] {
   width: 18px;
   height: 18px;
   cursor: pointer;
 }
 
-.checkbox-label input[type="checkbox"]:disabled {
+.checkbox-label input[type='checkbox']:disabled {
   cursor: not-allowed;
 }
 

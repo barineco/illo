@@ -5,13 +5,20 @@
       class="fixed inset-0 z-50 flex items-center justify-center bg-[var(--color-overlay)]"
       @click.self="close"
     >
-      <div class="bg-[var(--color-surface)] rounded-xl p-8 max-w-md w-full mx-4">
-        <h2 class="text-2xl font-bold mb-6">{{ $t('security.changePassword') }}</h2>
+      <div
+        class="bg-[var(--color-surface)] rounded-xl p-8 max-w-md w-full mx-4"
+      >
+        <h2 class="text-2xl font-bold mb-6">
+          {{ $t('security.changePassword') }}
+        </h2>
 
         <div class="space-y-4">
           <!-- Current Password -->
           <div>
-            <label for="current-password" class="block text-sm font-medium mb-2">
+            <label
+              for="current-password"
+              class="block text-sm font-medium mb-2"
+            >
               {{ $t('security.currentPassword') }}
             </label>
             <input
@@ -41,7 +48,10 @@
 
           <!-- Confirm New Password -->
           <div>
-            <label for="confirm-password" class="block text-sm font-medium mb-2">
+            <label
+              for="confirm-password"
+              class="block text-sm font-medium mb-2"
+            >
               {{ $t('security.confirmNewPassword') }}
             </label>
             <input
@@ -55,7 +65,9 @@
           </div>
 
           <!-- Revoke Other Sessions Checkbox -->
-          <div class="bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg p-4">
+          <div
+            class="bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg p-4"
+          >
             <label class="flex items-start cursor-pointer">
               <input
                 v-model="revokeOtherSessions"
@@ -64,7 +76,9 @@
                 class="mt-0.5 mr-3"
               />
               <div>
-                <p class="font-medium text-sm">{{ $t('security.revokeOtherDevices') }}</p>
+                <p class="font-medium text-sm">
+                  {{ $t('security.revokeOtherDevices') }}
+                </p>
                 <p class="text-xs text-[var(--color-text-muted)] mt-1">
                   {{ $t('security.revokeOtherDevicesDesc') }}
                 </p>
@@ -73,13 +87,21 @@
           </div>
 
           <!-- Error Message -->
-          <div v-if="error" class="bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] rounded-lg p-3">
+          <div
+            v-if="error"
+            class="bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] rounded-lg p-3"
+          >
             <p class="text-[var(--color-danger-text)] text-sm">{{ error }}</p>
           </div>
 
           <!-- Success Message -->
-          <div v-if="success" class="bg-[var(--color-success-bg)] border border-[var(--color-success-border)] rounded-lg p-3">
-            <p class="text-[var(--color-success-text)] text-sm">{{ success }}</p>
+          <div
+            v-if="success"
+            class="bg-[var(--color-success-bg)] border border-[var(--color-success-border)] rounded-lg p-3"
+          >
+            <p class="text-[var(--color-success-text)] text-sm">
+              {{ success }}
+            </p>
           </div>
 
           <!-- Action Buttons -->
@@ -200,7 +222,8 @@ const changePassword = async () => {
       emit('close')
     }, 1500)
   } catch (err: any) {
-    error.value = err.response?.data?.message || t('security.passwordChangeFailed')
+    error.value =
+      err.response?.data?.message || t('security.passwordChangeFailed')
   } finally {
     changing.value = false
   }
@@ -227,6 +250,6 @@ watch(
       confirmPassword.value = ''
       revokeOtherSessions.value = true
     }
-  }
+  },
 )
 </script>

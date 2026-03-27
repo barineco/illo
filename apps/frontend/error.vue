@@ -1,9 +1,14 @@
 <template>
   <div class="min-h-screen bg-[var(--color-background)] flex flex-col">
     <!-- Simple Header -->
-    <header class="border-b border-[var(--color-border)] bg-[var(--color-surface)]">
+    <header
+      class="border-b border-[var(--color-border)] bg-[var(--color-surface)]"
+    >
       <div class="max-w-7xl mx-auto px-4 h-16 flex items-center">
-        <NuxtLink to="/" class="flex items-center gap-2 text-[var(--color-text)] hover:opacity-80 transition-opacity">
+        <NuxtLink
+          to="/"
+          class="flex items-center gap-2 text-[var(--color-text)] hover:opacity-80 transition-opacity"
+        >
           <span class="font-bold text-lg">{{ instanceName }}</span>
         </NuxtLink>
       </div>
@@ -38,15 +43,15 @@
         <!-- Action Buttons -->
         <div class="flex gap-3">
           <button
-            @click="handleRetry"
             class="inline-flex items-center gap-2 px-4 py-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-hover)] transition-colors"
+            @click="handleRetry"
           >
             <ArrowPathIcon class="w-4 h-4" />
             {{ $t('error.retry') }}
           </button>
           <button
-            @click="handleGoHome"
             class="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-[var(--color-primary)] text-[var(--color-primary-text)] hover:opacity-90 transition-opacity"
+            @click="handleGoHome"
           >
             <HomeIcon class="w-4 h-4" />
             {{ $t('common.backToHome') }}
@@ -57,8 +62,13 @@
 
     <!-- Simple Footer -->
     <footer class="border-t border-[var(--color-border)] py-4">
-      <div class="max-w-7xl mx-auto px-4 text-center text-sm text-[var(--color-text-muted)]">
-        <NuxtLink to="/" class="hover:text-[var(--color-text)] transition-colors">
+      <div
+        class="max-w-7xl mx-auto px-4 text-center text-sm text-[var(--color-text-muted)]"
+      >
+        <NuxtLink
+          to="/"
+          class="hover:text-[var(--color-text)] transition-colors"
+        >
           {{ instanceName }}
         </NuxtLink>
       </div>

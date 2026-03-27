@@ -17,9 +17,9 @@ interface InteractionToken {
   signature: string
 }
 
-let hasInteraction = ref(false)
-let hasRealInteraction = ref(false) // Track actual user events
-let interactionToken = ref<string | null>(null)
+const hasInteraction = ref(false)
+const hasRealInteraction = ref(false) // Track actual user events
+const interactionToken = ref<string | null>(null)
 let eventListenersAttached = false
 let tokenGenerationPromise: Promise<string> | null = null
 
@@ -30,7 +30,7 @@ if (import.meta.client) {
     interactionToken.value = stored
   } else {
     // Start token generation immediately (don't wait)
-    tokenGenerationPromise = generateToken().then(token => {
+    tokenGenerationPromise = generateToken().then((token) => {
       interactionToken.value = token
       tokenGenerationPromise = null
       return token
@@ -51,12 +51,12 @@ async function generateHmac(message: string, secret: string): Promise<string> {
     keyData,
     { name: 'HMAC', hash: 'SHA-256' },
     false,
-    ['sign']
+    ['sign'],
   )
 
   const signature = await crypto.subtle.sign('HMAC', key, messageData)
   const hashArray = Array.from(new Uint8Array(signature))
-  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
+  const hashHex = hashArray.map((b) => b.toString(16).padStart(2, '0')).join('')
   return hashHex
 }
 
@@ -66,7 +66,8 @@ async function generateHmac(message: string, secret: string): Promise<string> {
 async function generateToken(): Promise<string> {
   const timestamp = Math.floor(Date.now() / 1000)
   // Use HMAC-SHA256 with a secret (should match backend secret)
-  const secret = useRuntimeConfig().public.interactionSecret || 'default-secret-change-me'
+  const secret =
+    useRuntimeConfig().public.interactionSecret || 'default-secret-change-me'
   console.log('[generateToken] Using secret:', secret.substring(0, 20) + '...')
   const signature = await generateHmac(timestamp.toString(), secret)
 
@@ -115,8 +116,11 @@ function attachEventListeners() {
     'click',
   ]
 
-  events.forEach(event => {
-    window.addEventListener(event, handleRealInteraction, { once: true, passive: true })
+  events.forEach((event) => {
+    window.addEventListener(event, handleRealInteraction, {
+      once: true,
+      passive: true,
+    })
   })
 
   eventListenersAttached = true
@@ -138,7 +142,7 @@ function removeEventListeners() {
     'click',
   ]
 
-  events.forEach(event => {
+  events.forEach((event) => {
     window.removeEventListener(event, handleRealInteraction)
   })
 
@@ -155,7 +159,16 @@ function isTokenValid(token: string): boolean {
     const now = Math.floor(Date.now() / 1000)
     const age = now - timestamp
 
-    console.log('[isTokenValid] timestamp:', timestamp, 'now:', now, 'age:', age, 'valid:', age >= 0 && age <= TOKEN_VALIDITY)
+    console.log(
+      '[isTokenValid] timestamp:',
+      timestamp,
+      'now:',
+      now,
+      'age:',
+      age,
+      'valid:',
+      age >= 0 && age <= TOKEN_VALIDITY,
+    )
 
     return age >= 0 && age <= TOKEN_VALIDITY
   } catch (error) {
@@ -189,7 +202,10 @@ export function useUserInteraction() {
       console.log('[useUserInteraction] Generating new token')
       hasInteraction.value = true
       interactionToken.value = await generateToken()
-      console.log('[useUserInteraction] Token generated:', interactionToken.value?.substring(0, 20) + '...')
+      console.log(
+        '[useUserInteraction] Token generated:',
+        interactionToken.value?.substring(0, 20) + '...',
+      )
     }
 
     // Always attach event listeners to detect real interactions
@@ -217,13 +233,19 @@ export function useUserInteraction() {
     const stored = sessionStorage.getItem(STORAGE_KEY)
     console.log('[getToken] sessionStorage value:', stored ? 'EXISTS' : 'NULL')
     if (stored && isTokenValid(stored)) {
-      console.log('[getToken] Token valid, returning:', stored.substring(0, 20) + '...')
+      console.log(
+        '[getToken] Token valid, returning:',
+        stored.substring(0, 20) + '...',
+      )
       return stored
     }
 
     // If sessionStorage doesn't have a valid token, but we have one in memory, use it
     if (interactionToken.value && isTokenValid(interactionToken.value)) {
-      console.log('[getToken] Using in-memory token:', interactionToken.value.substring(0, 20) + '...')
+      console.log(
+        '[getToken] Using in-memory token:',
+        interactionToken.value.substring(0, 20) + '...',
+      )
       return interactionToken.value
     }
 

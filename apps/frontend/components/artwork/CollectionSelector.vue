@@ -11,8 +11,8 @@
         <span>{{ collection.title }}</span>
         <button
           type="button"
-          @click="removeCollection(collection.id)"
           class="ml-1 p-0.5 hover:bg-[var(--color-primary)]/20 rounded-full transition-colors"
+          @click="removeCollection(collection.id)"
         >
           <Icon name="XMark" class="w-3 h-3 text-[var(--color-primary)]" />
         </button>
@@ -22,8 +22,8 @@
     <!-- Add to Collection Button -->
     <button
       type="button"
-      @click="isModalOpen = true"
       class="w-full p-3 border border-dashed border-[var(--color-border)] rounded-lg text-[var(--color-text-muted)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] transition-colors flex items-center justify-center gap-2"
+      @click="isModalOpen = true"
     >
       <Icon name="FolderPlus" class="w-5 h-5" />
       <span>{{ $t('upload.addToCollection') }}</span>
@@ -36,14 +36,20 @@
         class="fixed inset-0 z-50 flex items-center justify-center bg-[var(--color-overlay)]"
         @click.self="isModalOpen = false"
       >
-        <div class="bg-[var(--color-surface)] rounded-lg w-full max-w-md mx-4 max-h-[80vh] flex flex-col">
+        <div
+          class="bg-[var(--color-surface)] rounded-lg w-full max-w-md mx-4 max-h-[80vh] flex flex-col"
+        >
           <!-- Header -->
-          <div class="flex items-center justify-between p-4 border-b border-[var(--color-border)]">
-            <h2 class="text-lg font-bold">{{ $t('upload.selectCollections') }}</h2>
+          <div
+            class="flex items-center justify-between p-4 border-b border-[var(--color-border)]"
+          >
+            <h2 class="text-lg font-bold">
+              {{ $t('upload.selectCollections') }}
+            </h2>
             <button
               type="button"
-              @click="isModalOpen = false"
               class="p-1 hover:bg-[var(--color-hover)] rounded transition-colors"
+              @click="isModalOpen = false"
             >
               <Icon name="XMark" class="w-5 h-5" />
             </button>
@@ -53,8 +59,12 @@
           <div class="p-4 overflow-y-auto flex-1">
             <!-- Loading -->
             <div v-if="isLoading" class="text-center py-8">
-              <div class="inline-block animate-spin rounded-full h-8 w-8 border-2 border-[var(--color-border)] border-t-[var(--color-primary)]"></div>
-              <p class="mt-2 text-[var(--color-text-muted)] text-sm">{{ $t('common.loading') }}</p>
+              <div
+                class="inline-block animate-spin rounded-full h-8 w-8 border-2 border-[var(--color-border)] border-t-[var(--color-primary)]"
+              />
+              <p class="mt-2 text-[var(--color-text-muted)] text-sm">
+                {{ $t('common.loading') }}
+              </p>
             </div>
 
             <template v-else>
@@ -63,15 +73,18 @@
                 <button
                   v-if="!showCreateForm"
                   type="button"
-                  @click="showCreateForm = true"
                   class="w-full p-3 border border-dashed border-[var(--color-border)] rounded-lg text-[var(--color-text-muted)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] transition-colors flex items-center justify-center gap-2"
+                  @click="showCreateForm = true"
                 >
                   <Icon name="Plus" class="w-4 h-4" />
                   <span>{{ $t('collection.createNew') }}</span>
                 </button>
 
                 <!-- Create form -->
-                <div v-else class="border border-[var(--color-border)] rounded-lg p-3">
+                <div
+                  v-else
+                  class="border border-[var(--color-border)] rounded-lg p-3"
+                >
                   <input
                     v-model="newCollectionTitle"
                     type="text"
@@ -85,22 +98,26 @@
                     rows="2"
                     class="w-full px-3 py-2 bg-[var(--color-background)] rounded border border-[var(--color-border)] focus:border-[var(--color-primary)] focus:outline-none mb-2 resize-none"
                     maxlength="2000"
-                  ></textarea>
+                  />
                   <div class="flex gap-2">
                     <button
                       type="button"
-                      @click="showCreateForm = false; newCollectionTitle = ''; newCollectionDescription = ''"
                       class="flex-1 px-3 py-2 bg-[var(--color-button-secondary)] hover:bg-[var(--color-button-secondary-hover)] rounded transition-colors text-sm"
+                      @click="cancelCreate"
                     >
                       {{ $t('common.cancel') }}
                     </button>
                     <button
                       type="button"
-                      @click="createCollection"
                       :disabled="!newCollectionTitle.trim() || isCreating"
                       class="flex-1 px-3 py-2 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white rounded transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                      @click="createCollection"
                     >
-                      {{ isCreating ? $t('collection.creating') : $t('common.add') }}
+                      {{
+                        isCreating
+                          ? $t('collection.creating')
+                          : $t('common.add')
+                      }}
                     </button>
                   </div>
                 </div>
@@ -108,26 +125,47 @@
 
               <!-- Existing collections -->
               <div v-if="collections.length > 0" class="space-y-2">
-                <p class="text-sm text-[var(--color-text-muted)] mb-2">{{ $t('collection.existingCollections') }}</p>
+                <p class="text-sm text-[var(--color-text-muted)] mb-2">
+                  {{ $t('collection.existingCollections') }}
+                </p>
                 <button
                   v-for="collection in collections"
                   :key="collection.id"
                   type="button"
-                  @click="toggleCollection(collection)"
                   class="w-full p-3 rounded-lg text-left transition-colors flex items-center justify-between"
-                  :class="isSelected(collection.id) ? 'bg-[var(--color-primary)]/20 border border-[var(--color-primary)]' : 'bg-[var(--color-button-secondary)] hover:bg-[var(--color-button-secondary-hover)]'"
+                  :class="
+                    isSelected(collection.id)
+                      ? 'bg-[var(--color-primary)]/20 border border-[var(--color-primary)]'
+                      : 'bg-[var(--color-button-secondary)] hover:bg-[var(--color-button-secondary-hover)]'
+                  "
+                  @click="toggleCollection(collection)"
                 >
                   <div>
                     <div class="font-medium">{{ collection.title }}</div>
-                    <div class="text-sm text-[var(--color-text-muted)]">{{ $t('collection.artworkCount', { count: collection.artworkCount }) }}</div>
+                    <div class="text-sm text-[var(--color-text-muted)]">
+                      {{
+                        $t('collection.artworkCount', {
+                          count: collection.artworkCount,
+                        })
+                      }}
+                    </div>
                   </div>
-                  <Icon v-if="isSelected(collection.id)" name="Check" class="w-5 h-5 text-[var(--color-primary)]" />
+                  <Icon
+                    v-if="isSelected(collection.id)"
+                    name="Check"
+                    class="w-5 h-5 text-[var(--color-primary)]"
+                  />
                 </button>
               </div>
 
-              <div v-else-if="!showCreateForm" class="text-center py-8 text-[var(--color-text-muted)]">
+              <div
+                v-else-if="!showCreateForm"
+                class="text-center py-8 text-[var(--color-text-muted)]"
+              >
                 <p>{{ $t('collection.noCollectionsYet') }}</p>
-                <p class="text-sm mt-1">{{ $t('collection.createFromAbove') }}</p>
+                <p class="text-sm mt-1">
+                  {{ $t('collection.createFromAbove') }}
+                </p>
               </div>
             </template>
           </div>
@@ -136,8 +174,8 @@
           <div class="p-4 border-t border-[var(--color-border)]">
             <button
               type="button"
-              @click="isModalOpen = false"
               class="w-full px-4 py-2 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-white rounded-lg transition-colors"
+              @click="isModalOpen = false"
             >
               {{ $t('common.done') }}
             </button>
@@ -175,10 +213,16 @@ const newCollectionTitle = ref('')
 const newCollectionDescription = ref('')
 const collections = ref<Collection[]>([])
 
+const cancelCreate = () => {
+  showCreateForm.value = false
+  newCollectionTitle.value = ''
+  newCollectionDescription.value = ''
+}
+
 // Track selected collections with full data for display
 const selectedCollections = computed<Collection[]>(() => {
   return props.modelValue
-    .map(id => collections.value.find(c => c.id === id))
+    .map((id) => collections.value.find((c) => c.id === id))
     .filter((c): c is Collection => c !== undefined)
 })
 
@@ -200,7 +244,10 @@ const toggleCollection = (collection: Collection) => {
 }
 
 const removeCollection = (collectionId: string) => {
-  emit('update:modelValue', props.modelValue.filter(id => id !== collectionId))
+  emit(
+    'update:modelValue',
+    props.modelValue.filter((id) => id !== collectionId),
+  )
 }
 
 const fetchCollections = async () => {

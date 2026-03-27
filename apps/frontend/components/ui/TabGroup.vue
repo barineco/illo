@@ -1,5 +1,13 @@
 <script setup lang="ts">
-import { provide, ref, computed, onMounted, watch, nextTick, type ComponentPublicInstance } from 'vue'
+import {
+  provide,
+  ref,
+  computed,
+  onMounted,
+  watch,
+  nextTick,
+  type ComponentPublicInstance,
+} from 'vue'
 
 interface Tab {
   value: string
@@ -31,7 +39,11 @@ const indicatorLeft = ref(0)
 const indicatorWidth = ref(0)
 
 // 選択されているタブがあるかどうか
-const hasSelection = computed(() => props.modelValue !== '' && props.tabs.some(t => t.value === props.modelValue))
+const hasSelection = computed(
+  () =>
+    props.modelValue !== '' &&
+    props.tabs.some((t) => t.value === props.modelValue),
+)
 
 // インジケーターの位置を更新
 const updateIndicator = () => {
@@ -52,15 +64,18 @@ const updateIndicator = () => {
 
 // タブ選択時
 const selectTab = (value: string) => {
-  const tab = props.tabs.find(t => t.value === value)
+  const tab = props.tabs.find((t) => t.value === value)
   if (tab?.disabled) return
   emit('update:modelValue', value)
 }
 
 // modelValue変更時にインジケーター更新
-watch(() => props.modelValue, () => {
-  nextTick(updateIndicator)
-})
+watch(
+  () => props.modelValue,
+  () => {
+    nextTick(updateIndicator)
+  },
+)
 
 // マウント時にインジケーター初期化
 onMounted(() => {
@@ -92,9 +107,10 @@ const underlineTabClasses = (tab: Tab) => [
 ]
 
 // タブref設定用
-const setTabRef = (value: string) => (el: Element | ComponentPublicInstance | null) => {
-  tabRefs.value[value] = el as HTMLElement | null
-}
+const setTabRef =
+  (value: string) => (el: Element | ComponentPublicInstance | null) => {
+    tabRefs.value[value] = el as HTMLElement | null
+  }
 </script>
 
 <template>

@@ -20,7 +20,10 @@ export const useUsername = () => {
    * @param user - User object with username and domain fields
    * @returns Formatted username string
    */
-  const formatUserHandle = (user: { username: string; domain?: string | null }): string => {
+  const formatUserHandle = (user: {
+    username: string
+    domain?: string | null
+  }): string => {
     return formatUsername(user.username, user.domain)
   }
 
@@ -42,7 +45,10 @@ export const useUsername = () => {
    * @param user - User object with username and domain fields
    * @returns URL path
    */
-  const getUserPathFromUser = (user: { username: string; domain?: string | null }): string => {
+  const getUserPathFromUser = (user: {
+    username: string
+    domain?: string | null
+  }): string => {
     return getUserPath(user.username, user.domain)
   }
 

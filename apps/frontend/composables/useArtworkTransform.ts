@@ -74,8 +74,10 @@ export function useArtworkTransform() {
         artwork.images?.length ||
         1,
       images: artwork.images || [],
-      visibility: (artwork.visibility as ArtworkCardData['visibility']) || 'PUBLIC',
-      ageRating: (artwork.ageRating as ArtworkCardData['ageRating']) || 'ALL_AGES',
+      visibility:
+        (artwork.visibility as ArtworkCardData['visibility']) || 'PUBLIC',
+      ageRating:
+        (artwork.ageRating as ArtworkCardData['ageRating']) || 'ALL_AGES',
       blurred: artwork.blurred || false,
       author: {
         username: artwork.author.username,
@@ -90,7 +92,9 @@ export function useArtworkTransform() {
   /**
    * Transform an array of artworks from API response to ArtworkCard format
    */
-  const transformArtworks = (artworks: ApiArtworkResponse[]): ArtworkCardData[] => {
+  const transformArtworks = (
+    artworks: ApiArtworkResponse[],
+  ): ArtworkCardData[] => {
     return artworks.map(transformArtwork)
   }
 

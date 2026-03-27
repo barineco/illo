@@ -2,9 +2,9 @@
   <div class="relative" data-dropdown-container>
     <!-- Bell Icon with Badge -->
     <button
-      @click="toggle"
       class="p-2 hover:bg-[var(--color-hover)] rounded-full transition-colors relative"
       :title="$t('nav.notifications')"
+      @click="toggle"
     >
       <Icon name="Bell" class="w-6 h-6" />
       <!-- Unread Count Badge -->
@@ -22,12 +22,16 @@
       class="absolute right-0 top-12 w-96 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg shadow-xl py-2 z-[60] max-h-[600px] overflow-hidden flex flex-col"
     >
       <!-- Header -->
-      <div class="px-4 py-3 border-b border-[var(--color-border)] flex items-center justify-between">
+      <div
+        class="px-4 py-3 border-b border-[var(--color-border)] flex items-center justify-between"
+      >
         <h3 class="font-semibold">{{ $t('notifications.title') }}</h3>
         <button
-          v-if="notifications.length > 0 && notifications.some(n => !n.isRead)"
-          @click="markAllAsRead"
+          v-if="
+            notifications.length > 0 && notifications.some((n) => !n.isRead)
+          "
           class="text-xs text-[var(--color-primary)] hover:underline"
+          @click="markAllAsRead"
         >
           {{ $t('notifications.markAllRead') }}
         </button>
@@ -35,13 +39,23 @@
 
       <!-- Loading State -->
       <div v-if="loading" class="flex items-center justify-center py-12">
-        <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[var(--color-border)] border-t-[var(--color-primary)]"></div>
+        <div
+          class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[var(--color-border)] border-t-[var(--color-primary)]"
+        />
       </div>
 
       <!-- Empty State -->
-      <div v-else-if="notifications.length === 0" class="flex flex-col items-center justify-center py-12">
-        <Icon name="BellSlash" class="w-12 h-12 text-[var(--color-text-muted)] mb-2" />
-        <p class="text-sm text-[var(--color-text-muted)]">{{ $t('notifications.empty') }}</p>
+      <div
+        v-else-if="notifications.length === 0"
+        class="flex flex-col items-center justify-center py-12"
+      >
+        <Icon
+          name="BellSlash"
+          class="w-12 h-12 text-[var(--color-text-muted)] mb-2"
+        />
+        <p class="text-sm text-[var(--color-text-muted)]">
+          {{ $t('notifications.empty') }}
+        </p>
       </div>
 
       <!-- Notifications List -->
@@ -50,14 +64,16 @@
           v-for="notification in notifications"
           :key="notification.id"
           class="block px-4 py-3 hover:bg-[var(--color-hover)] transition-colors border-b border-[var(--color-border)] last:border-b-0"
-          :class="{ 'bg-[var(--color-surface-secondary)]': !notification.isRead }"
+          :class="{
+            'bg-[var(--color-surface-secondary)]': !notification.isRead,
+          }"
         >
           <div class="flex items-start gap-3">
             <!-- Actor Avatar (clickable to user profile) -->
             <NuxtLink
               :to="getUserPathFromUser(notification.actor)"
-              @click="handleNotificationClick(notification)"
               class="w-10 h-10 rounded-full bg-[var(--color-surface-secondary)] overflow-hidden flex-shrink-0 flex items-center justify-center hover:ring-2 ring-[var(--color-primary)] transition-all"
+              @click="handleNotificationClick(notification)"
             >
               <img
                 v-if="notification.actor.avatarUrl"
@@ -65,20 +81,29 @@
                 :alt="notification.actor.username"
                 class="w-full h-full object-cover"
               />
-              <Icon v-else name="UserCircle" class="w-8 h-8 text-[var(--color-text-muted)]" />
+              <Icon
+                v-else
+                name="UserCircle"
+                class="w-8 h-8 text-[var(--color-text-muted)]"
+              />
             </NuxtLink>
 
             <!-- Notification Content (clickable to artwork/user) -->
             <NuxtLink
               :to="getNotificationLink(notification)"
-              @click="handleNotificationClick(notification)"
               class="flex-1 min-w-0"
+              @click="handleNotificationClick(notification)"
             >
               <p class="text-sm">
                 <span class="font-medium">
-                  {{ notification.actor.displayName || notification.actor.username }}
+                  {{
+                    notification.actor.displayName ||
+                    notification.actor.username
+                  }}
                 </span>
-                <span class="text-[var(--color-text-muted)]">{{ getNotificationText(notification) }}</span>
+                <span class="text-[var(--color-text-muted)]">{{
+                  getNotificationText(notification)
+                }}</span>
               </p>
 
               <!-- Artwork Thumbnail (for LIKE, COMMENT, COMMENT_REPLY) -->
@@ -86,7 +111,9 @@
                 v-if="notification.artwork"
                 class="mt-2 flex items-center gap-2"
               >
-                <div class="w-10 h-10 rounded bg-[var(--color-surface-tertiary)] overflow-hidden flex-shrink-0">
+                <div
+                  class="w-10 h-10 rounded bg-[var(--color-surface-tertiary)] overflow-hidden flex-shrink-0"
+                >
                   <img
                     v-if="notification.artwork.images?.[0]"
                     :src="getArtworkThumbnailUrl(notification)"
@@ -94,7 +121,9 @@
                     class="w-full h-full object-cover"
                   />
                 </div>
-                <span class="text-xs text-[var(--color-text-muted)] truncate">{{ notification.artwork.title }}</span>
+                <span class="text-xs text-[var(--color-text-muted)] truncate">{{
+                  notification.artwork.title
+                }}</span>
               </div>
 
               <!-- Timestamp -->
@@ -105,7 +134,7 @@
 
             <!-- Unread Indicator -->
             <div v-if="!notification.isRead" class="flex-shrink-0">
-              <div class="w-2 h-2 bg-[var(--color-primary)] rounded-full"></div>
+              <div class="w-2 h-2 bg-[var(--color-primary)] rounded-full" />
             </div>
           </div>
         </div>
@@ -115,8 +144,8 @@
       <div class="px-4 py-3 border-t border-[var(--color-border)]">
         <NuxtLink
           to="/dashboard?tab=notifications"
-          @click="close"
           class="block text-center text-sm text-[var(--color-primary)] hover:underline"
+          @click="close"
         >
           {{ $t('notifications.viewAll') }}
         </NuxtLink>
@@ -137,7 +166,13 @@ const loading = ref(false)
 const notifications = ref<any[]>([])
 
 // Use shared notification state
-const { unreadCount, formattedUnreadCount, fetchUnreadCount, resetUnreadCount, decrementUnreadCount } = useNotifications()
+const {
+  unreadCount,
+  formattedUnreadCount,
+  fetchUnreadCount,
+  resetUnreadCount,
+  decrementUnreadCount,
+} = useNotifications()
 
 // Cache for signed artwork thumbnail URLs
 const signedThumbnailUrls = ref<Map<string, string>>(new Map())
@@ -171,7 +206,10 @@ const fetchSignedUrls = async (notificationList: any[]) => {
 const getArtworkThumbnailUrl = (notification: any): string => {
   const imageId = notification.artwork?.images?.[0]?.id
   if (imageId) {
-    return signedThumbnailUrls.value.get(imageId) || notification.artwork.images[0].thumbnailUrl
+    return (
+      signedThumbnailUrls.value.get(imageId) ||
+      notification.artwork.images[0].thumbnailUrl
+    )
   }
   return ''
 }
@@ -180,7 +218,9 @@ const getArtworkThumbnailUrl = (notification: any): string => {
 const fetchNotifications = async () => {
   loading.value = true
   try {
-    const data = await api.get<{ notifications: any[] }>('/api/notifications?limit=5&page=1')
+    const data = await api.get<{ notifications: any[] }>(
+      '/api/notifications?limit=5&page=1',
+    )
     notifications.value = data.notifications
     // Fetch signed URLs for artwork thumbnails
     await fetchSignedUrls(data.notifications)

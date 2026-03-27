@@ -33,10 +33,14 @@ const shapeClasses = {
 }
 
 const variantClasses = {
-  ghost: 'bg-transparent hover:bg-[var(--color-button-ghost-hover)] text-[var(--color-text)]',
-  secondary: 'bg-[var(--color-button-secondary)] hover:bg-[var(--color-button-secondary-hover)] text-[var(--color-text)]',
-  danger: 'bg-[var(--color-button-danger)] hover:bg-[var(--color-button-danger-hover)] text-white',
-  primary: 'bg-[var(--color-button-primary)] hover:bg-[var(--color-button-primary-hover)] text-white',
+  ghost:
+    'bg-transparent hover:bg-[var(--color-button-ghost-hover)] text-[var(--color-text)]',
+  secondary:
+    'bg-[var(--color-button-secondary)] hover:bg-[var(--color-button-secondary-hover)] text-[var(--color-text)]',
+  danger:
+    'bg-[var(--color-button-danger)] hover:bg-[var(--color-button-danger-hover)] text-white',
+  primary:
+    'bg-[var(--color-button-primary)] hover:bg-[var(--color-button-primary-hover)] text-white',
 }
 
 const buttonClasses = computed(() => [

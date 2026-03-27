@@ -19,7 +19,7 @@ async function sha256(data: string): Promise<string> {
   const encoder = new TextEncoder()
   const buffer = await crypto.subtle.digest('SHA-256', encoder.encode(data))
   return Array.from(new Uint8Array(buffer))
-    .map(b => b.toString(16).padStart(2, '0'))
+    .map((b) => b.toString(16).padStart(2, '0'))
     .join('')
 }
 
@@ -49,8 +49,10 @@ function getCanvasFingerprint(): string {
 function getWebGLInfo(): { renderer: string; vendor: string } {
   try {
     const canvas = document.createElement('canvas')
-    const gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl')
-    if (!gl || !(gl instanceof WebGLRenderingContext)) return { renderer: '', vendor: '' }
+    const gl =
+      canvas.getContext('webgl') || canvas.getContext('experimental-webgl')
+    if (!gl || !(gl instanceof WebGLRenderingContext))
+      return { renderer: '', vendor: '' }
 
     const ext = gl.getExtension('WEBGL_debug_renderer_info')
     if (!ext) return { renderer: '', vendor: '' }
@@ -94,7 +96,7 @@ async function getOrCreateFingerprint(): Promise<string> {
   }
 
   if (!fingerprintPromise) {
-    fingerprintPromise = collectFingerprint().then(fp => {
+    fingerprintPromise = collectFingerprint().then((fp) => {
       cachedFingerprint = fp
       sessionStorage.setItem(STORAGE_KEY, fp)
       fingerprintPromise = null

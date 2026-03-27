@@ -18,7 +18,7 @@
         </NuxtLink>
       </div>
       <div v-else class="loading-state">
-        <div class="spinner"></div>
+        <div class="spinner" />
         <p class="loading-text">{{ $t('patreon.linking') }}</p>
       </div>
     </div>
@@ -26,7 +26,10 @@
 </template>
 
 <script setup lang="ts">
-import { ExclamationCircleIcon, CheckCircleIcon } from '@heroicons/vue/24/outline'
+import {
+  ExclamationCircleIcon,
+  CheckCircleIcon,
+} from '@heroicons/vue/24/outline'
 
 definePageMeta({
   layout: false,
@@ -46,7 +49,8 @@ onMounted(async () => {
   const errorParam = route.query.error as string
 
   if (errorParam) {
-    error.value = route.query.error_description as string || t('patreon.linkFailed')
+    error.value =
+      (route.query.error_description as string) || t('patreon.linkFailed')
     return
   }
 
@@ -58,13 +62,16 @@ onMounted(async () => {
   try {
     const token = getAccessToken()
 
-    const response = await fetch(`${api.baseURL}/api/patreon/callback?code=${encodeURIComponent(code)}`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    const response = await fetch(
+      `${api.baseURL}/api/patreon/callback?code=${encodeURIComponent(code)}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
       },
-    })
+    )
 
     if (!response.ok) {
       const data = await response.json().catch(() => ({}))
@@ -108,7 +115,7 @@ onMounted(async () => {
   width: 3rem;
   height: 3rem;
   border: 3px solid var(--color-border);
-  border-top-color: #FF424D;
+  border-top-color: #ff424d;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }

@@ -5,7 +5,13 @@ export default defineNuxtConfig({
   compatibilityDate: '2024-11-01',
   devtools: { enabled: false },
 
-  modules: ['@nuxtjs/tailwindcss', '@pinia/nuxt', '@nuxt/eslint', '@nuxtjs/color-mode', '@nuxtjs/i18n'],
+  modules: [
+    '@nuxtjs/tailwindcss',
+    '@pinia/nuxt',
+    '@nuxt/eslint',
+    '@nuxtjs/color-mode',
+    '@nuxtjs/i18n',
+  ],
 
   colorMode: {
     preference: 'system', // システム設定に従う
@@ -32,6 +38,9 @@ export default defineNuxtConfig({
     compilation: {
       strictMessage: false,
       escapeHtml: false,
+    },
+    bundle: {
+      optimizeTranslationDirective: false,
     },
   },
 
@@ -65,8 +74,14 @@ export default defineNuxtConfig({
         },
         { name: 'theme-color', content: '#31BAE8' },
         // AI crawler protection - prevent image training
-        { name: 'robots', content: 'max-image-preview:large, noimageai, noimageindex' },
-        { name: 'googlebot', content: 'max-image-preview:large, noimageai, noimageindex' },
+        {
+          name: 'robots',
+          content: 'max-image-preview:large, noimageai, noimageindex',
+        },
+        {
+          name: 'googlebot',
+          content: 'max-image-preview:large, noimageai, noimageindex',
+        },
         { name: 'googlebot-image', content: 'noindex' },
         // Extended AI bot blocking
         { name: 'CCBot', content: 'nofollow, noindex' },
@@ -75,7 +90,10 @@ export default defineNuxtConfig({
         { name: 'anthropic-ai', content: 'nofollow, noindex' },
         { name: 'Google-Extended', content: 'noindex' },
         // Open Graph default meta tags
-        { property: 'og:site_name', content: process.env.NUXT_PUBLIC_INSTANCE_NAME || 'illo' },
+        {
+          property: 'og:site_name',
+          content: process.env.NUXT_PUBLIC_INSTANCE_NAME || 'illo',
+        },
         { property: 'og:type', content: 'website' },
         { property: 'og:image', content: '/assets/logo/illo-card.png' },
         { property: 'og:image:width', content: '1600' },
@@ -84,27 +102,45 @@ export default defineNuxtConfig({
         { name: 'twitter:image', content: '/assets/logo/illo-card.png' },
       ],
       link: [
-        { rel: 'icon', type: 'image/svg+xml', href: '/assets/logo/illo-logo.svg' },
+        {
+          rel: 'icon',
+          type: 'image/svg+xml',
+          href: '/assets/logo/illo-logo.svg',
+        },
         { rel: 'preconnect', href: 'https://fonts.googleapis.com' },
-        { rel: 'preconnect', href: 'https://fonts.gstatic.com', crossorigin: '' },
-        { rel: 'stylesheet', href: 'https://fonts.googleapis.com/css2?family=MuseoModerno:wght@700;800;900&display=swap' },
+        {
+          rel: 'preconnect',
+          href: 'https://fonts.gstatic.com',
+          crossorigin: '',
+        },
+        {
+          rel: 'stylesheet',
+          href: 'https://fonts.googleapis.com/css2?family=MuseoModerno:wght@700;800;900&display=swap',
+        },
       ],
     },
   },
 
   runtimeConfig: {
     // Private runtime config (server-only)
-    apiBaseServer: process.env.API_BASE_SERVER || process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:11104',
+    apiBaseServer:
+      process.env.API_BASE_SERVER ||
+      process.env.NUXT_PUBLIC_API_BASE ||
+      'http://localhost:11104',
     // Public runtime config (client and server)
     public: {
       apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:11104',
       // Instance ID for cookie namespacing (prevents session collision across multiple instances)
-      instanceId: process.env.INSTANCE_ID || `port${process.env.FRONTEND_PORT || '11103'}`,
+      instanceId:
+        process.env.INSTANCE_ID ||
+        `port${process.env.FRONTEND_PORT || '11103'}`,
       // Instance branding
       instanceName: process.env.NUXT_PUBLIC_INSTANCE_NAME || 'illo',
       instanceTagline: process.env.NUXT_PUBLIC_INSTANCE_TAGLINE || '',
       // User interaction tracking secret (must match backend)
-      interactionSecret: process.env.HEADLESS_DETECTION_INTERACTION_SECRET || 'default-secret-change-me',
+      interactionSecret:
+        process.env.HEADLESS_DETECTION_INTERACTION_SECRET ||
+        'default-secret-change-me',
     },
   },
 

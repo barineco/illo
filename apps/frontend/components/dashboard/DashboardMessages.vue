@@ -1,9 +1,16 @@
 <template>
-  <div class="flex gap-4" style="height: calc(100vh - 320px); min-height: 400px;">
+  <div
+    class="flex gap-4"
+    style="height: calc(100vh - 320px); min-height: 400px"
+  >
     <!-- Conversations List -->
-    <div class="w-80 flex-shrink-0 bg-[var(--color-surface)] rounded-lg overflow-hidden flex flex-col">
+    <div
+      class="w-80 flex-shrink-0 bg-[var(--color-surface)] rounded-lg overflow-hidden flex flex-col"
+    >
       <!-- Header -->
-      <div class="p-4 border-b border-[var(--color-border)] flex items-center justify-between">
+      <div
+        class="p-4 border-b border-[var(--color-border)] flex items-center justify-between"
+      >
         <h3 class="font-semibold">{{ $t('messages.title') }}</h3>
         <IconButton
           variant="ghost"
@@ -18,14 +25,27 @@
       </div>
 
       <!-- Loading State -->
-      <div v-if="loadingConversations" class="flex-1 flex items-center justify-center">
-        <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[var(--color-border)] border-t-[var(--color-primary)]"></div>
+      <div
+        v-if="loadingConversations"
+        class="flex-1 flex items-center justify-center"
+      >
+        <div
+          class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[var(--color-border)] border-t-[var(--color-primary)]"
+        />
       </div>
 
       <!-- Empty State -->
-      <div v-else-if="conversations.length === 0" class="flex-1 flex flex-col items-center justify-center p-4">
-        <Icon name="ChatBubbleLeftRight" class="w-12 h-12 mb-2 text-[var(--color-text-muted)]" />
-        <p class="text-sm text-[var(--color-text-muted)] text-center">{{ $t('messages.empty') }}</p>
+      <div
+        v-else-if="conversations.length === 0"
+        class="flex-1 flex flex-col items-center justify-center p-4"
+      >
+        <Icon
+          name="ChatBubbleLeftRight"
+          class="w-12 h-12 mb-2 text-[var(--color-text-muted)]"
+        />
+        <p class="text-sm text-[var(--color-text-muted)] text-center">
+          {{ $t('messages.empty') }}
+        </p>
       </div>
 
       <!-- Conversations List -->
@@ -33,28 +53,42 @@
         <button
           v-for="conv in conversations"
           :key="conv.id"
-          @click="selectConversation(conv.id)"
           class="w-full p-3 flex items-center gap-3 hover:bg-[var(--color-hover)] transition-colors text-left border-b border-[var(--color-border)] last:border-b-0"
           :class="[
-            activeConversationId === conv.id ? 'bg-[var(--color-surface-secondary)]' : '',
-            conv.unreadCount > 0 ? 'bg-[var(--color-surface-secondary)]/50' : ''
+            activeConversationId === conv.id
+              ? 'bg-[var(--color-surface-secondary)]'
+              : '',
+            conv.unreadCount > 0
+              ? 'bg-[var(--color-surface-secondary)]/50'
+              : '',
           ]"
+          @click="selectConversation(conv.id)"
         >
-          <div class="w-10 h-10 rounded-full bg-[var(--color-surface-tertiary)] overflow-hidden flex-shrink-0 flex items-center justify-center">
+          <div
+            class="w-10 h-10 rounded-full bg-[var(--color-surface-tertiary)] overflow-hidden flex-shrink-0 flex items-center justify-center"
+          >
             <img
               v-if="conv.participant?.avatarUrl"
               :src="conv.participant.avatarUrl"
               :alt="conv.participant.username"
               class="w-full h-full object-cover"
             />
-            <Icon v-else name="UserCircle" class="w-6 h-6 text-[var(--color-text-muted)]" />
+            <Icon
+              v-else
+              name="UserCircle"
+              class="w-6 h-6 text-[var(--color-text-muted)]"
+            />
           </div>
           <div class="flex-1 min-w-0">
             <div class="flex items-center justify-between">
               <span class="font-medium truncate text-sm">
-                {{ conv.participant?.displayName || conv.participant?.username }}
+                {{
+                  conv.participant?.displayName || conv.participant?.username
+                }}
               </span>
-              <span class="text-[10px] text-[var(--color-text-muted)] flex-shrink-0 ml-2">
+              <span
+                class="text-[10px] text-[var(--color-text-muted)] flex-shrink-0 ml-2"
+              >
                 {{ formatRelativeTime(conv.lastMessageAt) }}
               </span>
             </div>
@@ -63,7 +97,9 @@
             </p>
           </div>
           <div v-if="conv.unreadCount > 0" class="flex-shrink-0">
-            <span class="min-w-[18px] h-[18px] bg-[var(--color-primary)] text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1">
+            <span
+              class="min-w-[18px] h-[18px] bg-[var(--color-primary)] text-white text-[10px] font-bold rounded-full flex items-center justify-center px-1"
+            >
               {{ conv.unreadCount > 99 ? '99+' : conv.unreadCount }}
             </span>
           </div>
@@ -72,9 +108,14 @@
     </div>
 
     <!-- Chat Area -->
-    <div class="flex-1 bg-[var(--color-surface)] rounded-lg overflow-hidden flex flex-col">
+    <div
+      class="flex-1 bg-[var(--color-surface)] rounded-lg overflow-hidden flex flex-col"
+    >
       <!-- No Conversation Selected -->
-      <div v-if="!activeConversationId" class="flex-1 flex flex-col items-center justify-center text-[var(--color-text-muted)]">
+      <div
+        v-if="!activeConversationId"
+        class="flex-1 flex flex-col items-center justify-center text-[var(--color-text-muted)]"
+      >
         <Icon name="ChatBubbleLeftRight" class="w-16 h-16 mb-4" />
         <p>{{ $t('dashboard.messages.selectConversation') }}</p>
       </div>
@@ -82,35 +123,56 @@
       <!-- Active Conversation -->
       <template v-else>
         <!-- Header -->
-        <div class="p-4 border-b border-[var(--color-border)] flex items-center gap-3">
+        <div
+          class="p-4 border-b border-[var(--color-border)] flex items-center gap-3"
+        >
           <NuxtLink
             v-if="activeConversation?.participant"
             :to="`/users/${activeConversation.participant.username}${activeConversation.participant.domain ? `@${activeConversation.participant.domain}` : ''}`"
             class="flex items-center gap-3 hover:opacity-80 transition-opacity"
           >
-            <div class="w-10 h-10 rounded-full bg-[var(--color-surface-tertiary)] overflow-hidden flex items-center justify-center">
+            <div
+              class="w-10 h-10 rounded-full bg-[var(--color-surface-tertiary)] overflow-hidden flex items-center justify-center"
+            >
               <img
                 v-if="activeConversation.participant.avatarUrl"
                 :src="activeConversation.participant.avatarUrl"
                 :alt="activeConversation.participant.username"
                 class="w-full h-full object-cover"
               />
-              <Icon v-else name="UserCircle" class="w-6 h-6 text-[var(--color-text-muted)]" />
+              <Icon
+                v-else
+                name="UserCircle"
+                class="w-6 h-6 text-[var(--color-text-muted)]"
+              />
             </div>
             <div>
               <div class="font-medium">
-                {{ activeConversation.participant.displayName || activeConversation.participant.username }}
+                {{
+                  activeConversation.participant.displayName ||
+                  activeConversation.participant.username
+                }}
               </div>
               <div class="text-xs text-[var(--color-text-muted)]">
-                @{{ activeConversation.participant.username }}{{ activeConversation.participant.domain ? `@${activeConversation.participant.domain}` : '' }}
+                @{{ activeConversation.participant.username
+                }}{{
+                  activeConversation.participant.domain
+                    ? `@${activeConversation.participant.domain}`
+                    : ''
+                }}
               </div>
             </div>
           </NuxtLink>
         </div>
 
         <!-- Loading Messages -->
-        <div v-if="loadingMessages" class="flex-1 flex items-center justify-center">
-          <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[var(--color-border)] border-t-[var(--color-primary)]"></div>
+        <div
+          v-if="loadingMessages"
+          class="flex-1 flex items-center justify-center"
+        >
+          <div
+            class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[var(--color-border)] border-t-[var(--color-primary)]"
+          />
         </div>
 
         <!-- Messages -->
@@ -122,11 +184,15 @@
           <!-- Load More Button -->
           <div v-if="hasMoreMessages" class="text-center">
             <button
-              @click="loadMoreMessages"
               :disabled="loadingMoreMessages"
               class="px-4 py-2 text-sm text-[var(--color-primary)] hover:underline disabled:opacity-50"
+              @click="loadMoreMessages"
             >
-              {{ loadingMoreMessages ? $t('common.loading') : $t('messages.loadMore') }}
+              {{
+                loadingMoreMessages
+                  ? $t('common.loading')
+                  : $t('messages.loadMore')
+              }}
             </button>
           </div>
 
@@ -135,20 +201,30 @@
             v-for="message in chatMessages"
             :key="message.id"
             class="flex"
-            :class="message.senderId === currentUserId ? 'justify-end' : 'justify-start'"
+            :class="
+              message.senderId === currentUserId
+                ? 'justify-end'
+                : 'justify-start'
+            "
           >
             <div
               class="max-w-[70%] rounded-2xl px-4 py-2"
-              :class="message.senderId === currentUserId
-                ? 'bg-[var(--color-primary)] text-[var(--color-primary-text)]'
-                : 'bg-[var(--color-surface-secondary)]'"
+              :class="
+                message.senderId === currentUserId
+                  ? 'bg-[var(--color-primary)] text-[var(--color-primary-text)]'
+                  : 'bg-[var(--color-surface-secondary)]'
+              "
             >
-              <p class="whitespace-pre-wrap break-words text-sm">{{ message.content }}</p>
+              <p class="whitespace-pre-wrap break-words text-sm">
+                {{ message.content }}
+              </p>
               <p
                 class="text-[10px] mt-1"
-                :class="message.senderId === currentUserId
-                  ? 'text-[var(--color-primary-text)]/70'
-                  : 'text-[var(--color-text-muted)]'"
+                :class="
+                  message.senderId === currentUserId
+                    ? 'text-[var(--color-primary-text)]/70'
+                    : 'text-[var(--color-text-muted)]'
+                "
               >
                 {{ formatMessageTime(message.createdAt) }}
               </p>
@@ -158,7 +234,7 @@
 
         <!-- Message Input -->
         <div class="p-4 border-t border-[var(--color-border)]">
-          <form @submit.prevent="sendMessage" class="flex gap-2">
+          <form class="flex gap-2" @submit.prevent="sendMessage">
             <input
               v-model="newChatMessage"
               type="text"
@@ -187,12 +263,18 @@
       class="fixed inset-0 bg-[var(--color-overlay-light)] flex items-center justify-center z-50"
       @click.self="showNewConversation = false"
     >
-      <div class="bg-[var(--color-surface)] rounded-lg p-6 w-full max-w-md mx-4">
-        <h2 class="text-xl font-bold mb-4">{{ $t('messages.newConversation') }}</h2>
+      <div
+        class="bg-[var(--color-surface)] rounded-lg p-6 w-full max-w-md mx-4"
+      >
+        <h2 class="text-xl font-bold mb-4">
+          {{ $t('messages.newConversation') }}
+        </h2>
 
         <!-- User Search -->
         <div class="mb-4">
-          <label class="block text-sm font-medium mb-2">{{ $t('messages.recipient') }}</label>
+          <label class="block text-sm font-medium mb-2">{{
+            $t('messages.recipient')
+          }}</label>
           <input
             v-model="searchQuery"
             type="text"
@@ -202,25 +284,40 @@
           />
 
           <!-- Search Results -->
-          <div v-if="searchResults.length > 0" class="mt-2 border border-[var(--color-border)] rounded-lg overflow-hidden max-h-60 overflow-y-auto">
+          <div
+            v-if="searchResults.length > 0"
+            class="mt-2 border border-[var(--color-border)] rounded-lg overflow-hidden max-h-60 overflow-y-auto"
+          >
             <button
               v-for="user in searchResults"
               :key="user.id"
-              @click="selectRecipient(user)"
               class="w-full flex items-center gap-3 p-3 hover:bg-[var(--color-hover)] transition-colors text-left"
-              :class="selectedRecipient?.id === user.id ? 'bg-[var(--color-surface-secondary)]' : ''"
+              :class="
+                selectedRecipient?.id === user.id
+                  ? 'bg-[var(--color-surface-secondary)]'
+                  : ''
+              "
+              @click="selectRecipient(user)"
             >
-              <div class="w-10 h-10 rounded-full bg-[var(--color-surface-tertiary)] overflow-hidden flex-shrink-0 flex items-center justify-center">
+              <div
+                class="w-10 h-10 rounded-full bg-[var(--color-surface-tertiary)] overflow-hidden flex-shrink-0 flex items-center justify-center"
+              >
                 <img
                   v-if="user.avatarUrl"
                   :src="user.avatarUrl"
                   :alt="user.username"
                   class="w-full h-full object-cover"
                 />
-                <Icon v-else name="UserCircle" class="w-6 h-6 text-[var(--color-text-muted)]" />
+                <Icon
+                  v-else
+                  name="UserCircle"
+                  class="w-6 h-6 text-[var(--color-text-muted)]"
+                />
               </div>
               <div class="min-w-0 flex-1">
-                <div class="font-medium truncate">{{ user.displayName || user.username }}</div>
+                <div class="font-medium truncate">
+                  {{ user.displayName || user.username }}
+                </div>
                 <div class="text-sm text-[var(--color-text-muted)] truncate">
                   @{{ user.username }}{{ user.domain ? `@${user.domain}` : '' }}
                 </div>
@@ -230,26 +327,42 @@
         </div>
 
         <!-- Selected Recipient -->
-        <div v-if="selectedRecipient" class="mb-4 p-3 bg-[var(--color-surface-secondary)] rounded-lg">
+        <div
+          v-if="selectedRecipient"
+          class="mb-4 p-3 bg-[var(--color-surface-secondary)] rounded-lg"
+        >
           <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-[var(--color-surface-tertiary)] overflow-hidden flex-shrink-0 flex items-center justify-center">
+            <div
+              class="w-10 h-10 rounded-full bg-[var(--color-surface-tertiary)] overflow-hidden flex-shrink-0 flex items-center justify-center"
+            >
               <img
                 v-if="selectedRecipient.avatarUrl"
                 :src="selectedRecipient.avatarUrl"
                 :alt="selectedRecipient.username"
                 class="w-full h-full object-cover"
               />
-              <Icon v-else name="UserCircle" class="w-6 h-6 text-[var(--color-text-muted)]" />
+              <Icon
+                v-else
+                name="UserCircle"
+                class="w-6 h-6 text-[var(--color-text-muted)]"
+              />
             </div>
             <div class="flex-1 min-w-0">
-              <div class="font-medium truncate">{{ selectedRecipient.displayName || selectedRecipient.username }}</div>
+              <div class="font-medium truncate">
+                {{
+                  selectedRecipient.displayName || selectedRecipient.username
+                }}
+              </div>
               <div class="text-sm text-[var(--color-text-muted)] truncate">
-                @{{ selectedRecipient.username }}{{ selectedRecipient.domain ? `@${selectedRecipient.domain}` : '' }}
+                @{{ selectedRecipient.username
+                }}{{
+                  selectedRecipient.domain ? `@${selectedRecipient.domain}` : ''
+                }}
               </div>
             </div>
             <button
-              @click="selectedRecipient = null"
               class="p-1 hover:bg-[var(--color-hover)] rounded flex-shrink-0"
+              @click="selectedRecipient = null"
             >
               <Icon name="XMark" class="w-5 h-5" />
             </button>
@@ -258,18 +371,25 @@
 
         <!-- Message -->
         <div class="mb-4">
-          <label class="block text-sm font-medium mb-2">{{ $t('messages.message') }}</label>
+          <label class="block text-sm font-medium mb-2">{{
+            $t('messages.message')
+          }}</label>
           <textarea
             v-model="newConversationMessage"
             :placeholder="$t('messages.writeMessage')"
             rows="4"
             class="w-full px-4 py-2 bg-[var(--color-surface-secondary)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] resize-none"
-          ></textarea>
+          />
         </div>
 
         <!-- Error Message -->
-        <div v-if="createConversationError" class="mb-4 p-3 bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] rounded-lg">
-          <p class="text-sm text-[var(--color-danger-text)]">{{ createConversationError }}</p>
+        <div
+          v-if="createConversationError"
+          class="mb-4 p-3 bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] rounded-lg"
+        >
+          <p class="text-sm text-[var(--color-danger-text)]">
+            {{ createConversationError }}
+          </p>
         </div>
 
         <!-- Actions -->
@@ -286,10 +406,18 @@
             variant="primary"
             size="md"
             shape="rounded"
-            :disabled="!selectedRecipient || !newConversationMessage.trim() || creatingConversation"
+            :disabled="
+              !selectedRecipient ||
+              !newConversationMessage.trim() ||
+              creatingConversation
+            "
             @click="createConversation"
           >
-            {{ creatingConversation ? $t('messages.sending') : $t('messages.send') }}
+            {{
+              creatingConversation
+                ? $t('messages.sending')
+                : $t('messages.send')
+            }}
           </BaseButton>
         </div>
       </div>
@@ -397,7 +525,9 @@ const formatMessageTime = (dateString: string) => {
 const fetchConversations = async () => {
   loadingConversations.value = true
   try {
-    const data = await api.get<{ conversations: Conversation[] }>('/api/messages/conversations?limit=50')
+    const data = await api.get<{ conversations: Conversation[] }>(
+      '/api/messages/conversations?limit=50',
+    )
     conversations.value = data.conversations
   } catch (error) {
     console.error('Failed to fetch conversations:', error)
@@ -434,7 +564,7 @@ const fetchChatMessages = async (conversationId: string) => {
     fetchMessageUnreadCount()
 
     // Update conversation unread count in list
-    const conv = conversations.value.find(c => c.id === conversationId)
+    const conv = conversations.value.find((c) => c.id === conversationId)
     if (conv) {
       conv.unreadCount = 0
     }
@@ -452,7 +582,12 @@ const fetchChatMessages = async (conversationId: string) => {
 
 // Load more messages
 const loadMoreMessages = async () => {
-  if (loadingMoreMessages.value || !hasMoreMessages.value || !activeConversationId.value) return
+  if (
+    loadingMoreMessages.value ||
+    !hasMoreMessages.value ||
+    !activeConversationId.value
+  )
+    return
 
   loadingMoreMessages.value = true
   try {
@@ -474,7 +609,12 @@ const loadMoreMessages = async () => {
 
 // Send message
 const sendMessage = async () => {
-  if (!newChatMessage.value.trim() || sendingMessage.value || !activeConversationId.value) return
+  if (
+    !newChatMessage.value.trim() ||
+    sendingMessage.value ||
+    !activeConversationId.value
+  )
+    return
 
   sendingMessage.value = true
   const content = newChatMessage.value.trim()
@@ -490,7 +630,9 @@ const sendMessage = async () => {
     totalChatMessages.value++
 
     // Update conversation in list
-    const conv = conversations.value.find(c => c.id === activeConversationId.value)
+    const conv = conversations.value.find(
+      (c) => c.id === activeConversationId.value,
+    )
     if (conv) {
       conv.lastMessage = message
       conv.lastMessageAt = message.createdAt
@@ -549,7 +691,10 @@ const createConversation = async () => {
   creatingConversation.value = true
   createConversationError.value = ''
   try {
-    const data = await api.post<{ conversation: Conversation; message: Message }>('/api/messages/conversations', {
+    const data = await api.post<{
+      conversation: Conversation
+      message: Message
+    }>('/api/messages/conversations', {
       recipientId: selectedRecipient.value.id,
       initialMessage: newConversationMessage.value.trim(),
     })
@@ -564,7 +709,8 @@ const createConversation = async () => {
     selectConversation(data.conversation.id)
   } catch (error: any) {
     console.error('Failed to create conversation:', error)
-    createConversationError.value = error?.data?.message || error?.message || t('messages.createError')
+    createConversationError.value =
+      error?.data?.message || error?.message || t('messages.createError')
   } finally {
     creatingConversation.value = false
   }
@@ -592,13 +738,16 @@ const pollNewMessages = async () => {
         totalChatMessages.value = data.totalMessages
 
         // Mark as read
-        await api.patch(`/api/messages/conversations/${activeConversationId.value}/read`)
+        await api.patch(
+          `/api/messages/conversations/${activeConversationId.value}/read`,
+        )
         fetchMessageUnreadCount()
 
         // Scroll to bottom if near bottom
         nextTick(() => {
           if (messagesContainer.value) {
-            const { scrollTop, scrollHeight, clientHeight } = messagesContainer.value
+            const { scrollTop, scrollHeight, clientHeight } =
+              messagesContainer.value
             if (scrollHeight - scrollTop - clientHeight < 100) {
               scrollToBottom()
             }

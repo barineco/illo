@@ -10,7 +10,7 @@
         </NuxtLink>
       </div>
       <div v-else class="loading-state">
-        <div class="spinner"></div>
+        <div class="spinner" />
         <p class="loading-text">{{ $t('auth.bluesky.completing') }}</p>
       </div>
     </div>

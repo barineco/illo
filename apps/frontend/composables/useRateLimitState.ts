@@ -36,10 +36,14 @@ export function useRateLimitState() {
    * - images with degraded: true
    * We detect this and show the toast
    */
-  function processArtworkResponse(artwork: { images?: Array<{ degraded?: boolean }> }) {
+  function processArtworkResponse(artwork: {
+    images?: Array<{ degraded?: boolean }>
+  }) {
     if (!artwork.images) return
 
-    const hasDegradedImages = artwork.images.some((img) => img.degraded === true)
+    const hasDegradedImages = artwork.images.some(
+      (img) => img.degraded === true,
+    )
 
     if (hasDegradedImages && !isLimited.value) {
       // We're being rate limited

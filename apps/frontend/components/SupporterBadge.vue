@@ -26,7 +26,7 @@ const props = withDefaults(
     tier: 'NONE',
     showLabel: false,
     size: 'md',
-  }
+  },
 )
 
 const { t } = useI18n()
@@ -41,8 +41,10 @@ const tierClass = computed(() => {
   const tierColors: Record<SupporterTier, string> = {
     NONE: '',
     TIER_1: 'bg-pink-100 text-pink-600 dark:bg-pink-900/30 dark:text-pink-400',
-    TIER_2: 'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400',
-    TIER_3: 'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400',
+    TIER_2:
+      'bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400',
+    TIER_3:
+      'bg-amber-100 text-amber-600 dark:bg-amber-900/30 dark:text-amber-400',
   }
 
   return [
@@ -88,7 +90,8 @@ const tierTitle = computed(() => {
 }
 
 @keyframes supporter-glow {
-  0%, 100% {
+  0%,
+  100% {
     opacity: 1;
   }
   50% {

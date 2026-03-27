@@ -1,9 +1,10 @@
 export default defineNuxtPlugin(async () => {
   const { fetchCurrentUser } = useAuth()
-  const { refreshAccessToken, hasAccessToken, hasRefreshToken } = useTokenRefresh()
+  const { refreshAccessToken, hasAccessToken, hasRefreshToken } =
+    useTokenRefresh()
 
   // Restore user session on app initialization
-  if (process.client) {
+  if (import.meta.client) {
     try {
       // Case 1: Access token exists - fetch user directly
       if (hasAccessToken()) {

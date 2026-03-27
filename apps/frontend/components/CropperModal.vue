@@ -7,13 +7,17 @@
       @mouseup.self="handleBackdropMouseUp"
     >
       <!-- Modal -->
-      <div class="bg-[var(--color-surface)] rounded-lg w-full max-w-2xl mx-4 max-h-[90vh] flex flex-col">
+      <div
+        class="bg-[var(--color-surface)] rounded-lg w-full max-w-2xl mx-4 max-h-[90vh] flex flex-col"
+      >
         <!-- Header -->
-        <div class="flex items-center justify-between p-4 border-b border-[var(--color-border)]">
+        <div
+          class="flex items-center justify-between p-4 border-b border-[var(--color-border)]"
+        >
           <h2 class="text-lg font-bold">{{ title || $t('cropper.title') }}</h2>
           <button
-            @click="close"
             class="p-1 hover:bg-[var(--color-hover)] rounded transition-colors"
+            @click="close"
           >
             <Icon name="XMark" class="h-5 w-5" />
           </button>
@@ -23,7 +27,9 @@
         <div class="p-4 flex-1 overflow-hidden">
           <!-- Loading -->
           <div v-if="isLoading" class="flex items-center justify-center h-64">
-            <div class="inline-block animate-spin rounded-full h-8 w-8 border-2 border-[var(--color-border)] border-t-[var(--color-primary)]"></div>
+            <div
+              class="inline-block animate-spin rounded-full h-8 w-8 border-2 border-[var(--color-border)] border-t-[var(--color-primary)]"
+            />
           </div>
 
           <!-- Cropper -->
@@ -48,23 +54,25 @@
         </div>
 
         <!-- Footer -->
-        <div class="flex items-center justify-between p-4 border-t border-[var(--color-border)]">
+        <div
+          class="flex items-center justify-between p-4 border-t border-[var(--color-border)]"
+        >
           <button
-            @click="reset"
             class="px-4 py-2 text-sm hover:bg-[var(--color-hover)] rounded transition-colors"
+            @click="reset"
           >
             {{ $t('cropper.reset') }}
           </button>
           <div class="flex gap-2">
             <button
-              @click="close"
               class="px-4 py-2 bg-[var(--color-button-secondary)] hover:bg-[var(--color-button-secondary-hover)] rounded transition-colors text-sm"
+              @click="close"
             >
               {{ $t('common.cancel') }}
             </button>
             <button
-              @click="confirm"
               class="px-4 py-2 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] rounded transition-colors text-sm"
+              @click="confirm"
             >
               {{ $t('cropper.apply') }}
             </button>
@@ -279,7 +287,13 @@ function onCropperChange(result: any) {
 
 function restoreInitialCrop() {
   const cropper = cropperRef.value
-  if (!cropper || !props.initialCrop || !props.originalWidth || !props.originalHeight) return
+  if (
+    !cropper ||
+    !props.initialCrop ||
+    !props.originalWidth ||
+    !props.originalHeight
+  )
+    return
 
   const scaleX = displayedImageWidth.value / props.originalWidth
   const scaleY = displayedImageHeight.value / props.originalHeight
@@ -331,7 +345,12 @@ function confirm() {
   // If original dimensions are provided, convert displayed coordinates to original
   let finalCoordinates: CropCoordinates
 
-  if (props.originalWidth && props.originalHeight && imageWidth && imageHeight) {
+  if (
+    props.originalWidth &&
+    props.originalHeight &&
+    imageWidth &&
+    imageHeight
+  ) {
     const scaleX = props.originalWidth / imageWidth
     const scaleY = props.originalHeight / imageHeight
 

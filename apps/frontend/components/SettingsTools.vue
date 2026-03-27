@@ -2,8 +2,12 @@
   <div>
     <!-- Loading State -->
     <div v-if="loading" class="text-center py-12">
-      <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[var(--color-border)] border-t-[var(--color-primary)]"></div>
-      <p class="mt-4 text-[var(--color-text-muted)]">{{ $t('common.loading') }}</p>
+      <div
+        class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[var(--color-border)] border-t-[var(--color-primary)]"
+      />
+      <p class="mt-4 text-[var(--color-text-muted)]">
+        {{ $t('common.loading') }}
+      </p>
     </div>
 
     <!-- Error State -->
@@ -23,7 +27,9 @@
     <div v-else class="space-y-6">
       <!-- Description -->
       <div class="bg-[var(--color-surface)] rounded-lg p-6">
-        <h3 class="text-lg font-medium mb-2">{{ $t('settings.tools.title') }}</h3>
+        <h3 class="text-lg font-medium mb-2">
+          {{ $t('settings.tools.title') }}
+        </h3>
         <p class="text-[var(--color-text-muted)] text-sm">
           {{ $t('settings.tools.description') }}
         </p>
@@ -32,9 +38,14 @@
       <!-- Current Tools -->
       <div class="bg-[var(--color-surface)] rounded-lg p-6">
         <div class="flex items-center justify-between mb-4">
-          <h3 class="text-lg font-medium">{{ $t('settings.tools.myTools') }}</h3>
+          <h3 class="text-lg font-medium">
+            {{ $t('settings.tools.myTools') }}
+          </h3>
           <div class="flex items-center gap-2">
-            <span v-if="isSaving" class="text-xs text-[var(--color-text-muted)]">
+            <span
+              v-if="isSaving"
+              class="text-xs text-[var(--color-text-muted)]"
+            >
               {{ $t('common.saving') }}
             </span>
             <span class="text-sm text-[var(--color-text-muted)]">
@@ -57,7 +68,10 @@
               :title="$t('common.delete')"
               @click="removeTool(index)"
             >
-              <Icon name="XMark" class="w-3.5 h-3.5 text-[var(--color-text-muted)] group-hover:text-[var(--color-danger-text)]" />
+              <Icon
+                name="XMark"
+                class="w-3.5 h-3.5 text-[var(--color-text-muted)] group-hover:text-[var(--color-danger-text)]"
+              />
             </button>
           </div>
         </div>
@@ -70,7 +84,9 @@
 
       <!-- Default Settings -->
       <div class="bg-[var(--color-surface)] rounded-lg p-6">
-        <h3 class="text-lg font-medium mb-4">{{ $t('settings.tools.defaultSettings') }}</h3>
+        <h3 class="text-lg font-medium mb-4">
+          {{ $t('settings.tools.defaultSettings') }}
+        </h3>
         <label class="flex items-start gap-3 cursor-pointer">
           <input
             v-model="useProfileToolsAsDefault"
@@ -79,7 +95,9 @@
             @change="autoSave"
           />
           <div>
-            <span class="text-[var(--color-text)]">{{ $t('settings.tools.useAsDefault') }}</span>
+            <span class="text-[var(--color-text)]">{{
+              $t('settings.tools.useAsDefault')
+            }}</span>
             <p class="text-sm text-[var(--color-text-muted)] mt-1">
               {{ $t('settings.tools.useAsDefaultDesc') }}
             </p>
@@ -89,12 +107,17 @@
 
       <!-- Add Tools -->
       <div class="bg-[var(--color-surface)] rounded-lg p-6">
-        <h3 class="text-lg font-medium mb-4">{{ $t('settings.tools.presets') }}</h3>
+        <h3 class="text-lg font-medium mb-4">
+          {{ $t('settings.tools.presets') }}
+        </h3>
 
         <!-- Search -->
         <div class="mb-4">
           <div class="relative">
-            <Icon name="MagnifyingGlass" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted)]" />
+            <Icon
+              name="MagnifyingGlass"
+              class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[var(--color-text-muted)]"
+            />
             <input
               v-model="searchQuery"
               type="text"
@@ -120,7 +143,7 @@
                   'px-3 py-1.5 text-sm rounded-full border transition-colors',
                   tools.includes(tool)
                     ? 'bg-[var(--color-primary)] text-white border-[var(--color-primary)]'
-                    : 'bg-[var(--color-background)] border-[var(--color-border)] hover:border-[var(--color-primary)]'
+                    : 'bg-[var(--color-background)] border-[var(--color-border)] hover:border-[var(--color-primary)]',
                 ]"
                 @click="toggleTool(tool)"
               >
@@ -143,7 +166,7 @@
                   'px-3 py-1.5 text-sm rounded-full border transition-colors',
                   tools.includes(tool)
                     ? 'bg-[var(--color-primary)] text-white border-[var(--color-primary)]'
-                    : 'bg-[var(--color-background)] border-[var(--color-border)] hover:border-[var(--color-primary)]'
+                    : 'bg-[var(--color-background)] border-[var(--color-border)] hover:border-[var(--color-primary)]',
                 ]"
                 @click="toggleTool(tool)"
               >
@@ -166,7 +189,7 @@
                   'px-3 py-1.5 text-sm rounded-full border transition-colors',
                   tools.includes(tool)
                     ? 'bg-[var(--color-primary)] text-white border-[var(--color-primary)]'
-                    : 'bg-[var(--color-background)] border-[var(--color-border)] hover:border-[var(--color-primary)]'
+                    : 'bg-[var(--color-background)] border-[var(--color-border)] hover:border-[var(--color-primary)]',
                 ]"
                 @click="toggleTool(tool)"
               >
@@ -189,7 +212,7 @@
                   'px-3 py-1.5 text-sm rounded-full border transition-colors',
                   tools.includes(tool)
                     ? 'bg-[var(--color-primary)] text-white border-[var(--color-primary)]'
-                    : 'bg-[var(--color-background)] border-[var(--color-border)] hover:border-[var(--color-primary)]'
+                    : 'bg-[var(--color-background)] border-[var(--color-border)] hover:border-[var(--color-primary)]',
                 ]"
                 @click="toggleTool(tool)"
               >
@@ -199,7 +222,10 @@
           </div>
 
           <!-- No results -->
-          <div v-if="searchQuery && !hasFilteredResults" class="text-center py-4 text-[var(--color-text-muted)]">
+          <div
+            v-if="searchQuery && !hasFilteredResults"
+            class="text-center py-4 text-[var(--color-text-muted)]"
+          >
             <p class="text-sm">{{ $t('settings.tools.noSearchResults') }}</p>
           </div>
         </div>
@@ -267,19 +293,9 @@ const presetToolsDigital = [
   'Affinity Photo',
 ]
 
-const presetTools3D = [
-  'Blender',
-  'ZBrush',
-  'Maya',
-  'Cinema 4D',
-  '3ds Max',
-]
+const presetTools3D = ['Blender', 'ZBrush', 'Maya', 'Cinema 4D', '3ds Max']
 
-const presetToolsVector = [
-  'Illustrator',
-  'Affinity Designer',
-  'Inkscape',
-]
+const presetToolsVector = ['Illustrator', 'Affinity Designer', 'Inkscape']
 
 const presetToolsAnimation = [
   'After Effects',
@@ -292,26 +308,33 @@ const presetToolsAnimation = [
 const filterTools = (toolList: string[]) => {
   if (!searchQuery.value.trim()) return toolList
   const query = searchQuery.value.toLowerCase()
-  return toolList.filter(tool => tool.toLowerCase().includes(query))
+  return toolList.filter((tool) => tool.toLowerCase().includes(query))
 }
 
 // Filtered preset lists
-const filteredPresetToolsDigital = computed(() => filterTools(presetToolsDigital))
+const filteredPresetToolsDigital = computed(() =>
+  filterTools(presetToolsDigital),
+)
 const filteredPresetTools3D = computed(() => filterTools(presetTools3D))
 const filteredPresetToolsVector = computed(() => filterTools(presetToolsVector))
-const filteredPresetToolsAnimation = computed(() => filterTools(presetToolsAnimation))
+const filteredPresetToolsAnimation = computed(() =>
+  filterTools(presetToolsAnimation),
+)
 
 // Check if there are any filtered results
 const hasFilteredResults = computed(() => {
-  return filteredPresetToolsDigital.value.length > 0 ||
+  return (
+    filteredPresetToolsDigital.value.length > 0 ||
     filteredPresetTools3D.value.length > 0 ||
     filteredPresetToolsVector.value.length > 0 ||
     filteredPresetToolsAnimation.value.length > 0
+  )
 })
 
 // Check if there are unsaved changes
 const hasChanges = computed(() => {
-  if (useProfileToolsAsDefault.value !== originalUseProfileToolsAsDefault.value) return true
+  if (useProfileToolsAsDefault.value !== originalUseProfileToolsAsDefault.value)
+    return true
   if (tools.value.length !== originalTools.value.length) return true
   return tools.value.some((tool, i) => tool !== originalTools.value[i])
 })
@@ -337,7 +360,10 @@ const fetchTools = async () => {
     loading.value = true
     error.value = null
 
-    const data = await api.get<{ tools: string[]; useProfileToolsAsDefault: boolean }>('/api/users/me/tools')
+    const data = await api.get<{
+      tools: string[]
+      useProfileToolsAsDefault: boolean
+    }>('/api/users/me/tools')
     tools.value = data.tools || []
     originalTools.value = [...tools.value]
     useProfileToolsAsDefault.value = data.useProfileToolsAsDefault ?? true
@@ -373,7 +399,7 @@ const addCustomTool = () => {
   if (!tool) return
 
   // Check if already exists (case-insensitive)
-  const exists = tools.value.some(t => t.toLowerCase() === tool.toLowerCase())
+  const exists = tools.value.some((t) => t.toLowerCase() === tool.toLowerCase())
   if (exists) {
     toast.warning(t('settings.tools.alreadyExists'))
     return

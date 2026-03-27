@@ -6,13 +6,17 @@
       @click.self="close"
     >
       <!-- Modal -->
-      <div class="bg-[var(--color-surface)] rounded-lg w-full max-w-md mx-4 max-h-[80vh] flex flex-col">
+      <div
+        class="bg-[var(--color-surface)] rounded-lg w-full max-w-md mx-4 max-h-[80vh] flex flex-col"
+      >
         <!-- Header -->
-        <div class="flex items-center justify-between p-4 border-b border-[var(--color-border)]">
+        <div
+          class="flex items-center justify-between p-4 border-b border-[var(--color-border)]"
+        >
           <h2 class="text-lg font-bold">{{ $t('artwork.addToCollection') }}</h2>
           <button
-            @click="close"
             class="p-1 hover:bg-[var(--color-hover)] rounded transition-colors"
+            @click="close"
           >
             ✕
           </button>
@@ -22,8 +26,12 @@
         <div class="p-4 overflow-y-auto flex-1">
           <!-- Loading -->
           <div v-if="isLoading" class="text-center py-8">
-            <div class="inline-block animate-spin rounded-full h-8 w-8 border-2 border-[var(--color-border)] border-t-[var(--color-primary)]"></div>
-            <p class="mt-2 text-[var(--color-text-muted)] text-sm">{{ $t('common.loading') }}</p>
+            <div
+              class="inline-block animate-spin rounded-full h-8 w-8 border-2 border-[var(--color-border)] border-t-[var(--color-primary)]"
+            />
+            <p class="mt-2 text-[var(--color-text-muted)] text-sm">
+              {{ $t('common.loading') }}
+            </p>
           </div>
 
           <!-- Content -->
@@ -32,15 +40,18 @@
             <div class="mb-4">
               <button
                 v-if="!showCreateForm"
-                @click="showCreateForm = true"
                 class="w-full p-3 border border-dashed border-[var(--color-border)] rounded-lg text-[var(--color-text-muted)] hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] transition-colors flex items-center justify-center gap-2"
+                @click="showCreateForm = true"
               >
                 <span>＋</span>
                 <span>{{ $t('collection.createNew') }}</span>
               </button>
 
               <!-- Create form -->
-              <div v-else class="border border-[var(--color-border)] rounded-lg p-3">
+              <div
+                v-else
+                class="border border-[var(--color-border)] rounded-lg p-3"
+              >
                 <input
                   v-model="newCollectionTitle"
                   type="text"
@@ -54,20 +65,24 @@
                   rows="2"
                   class="w-full px-3 py-2 bg-[var(--color-background)] rounded border border-[var(--color-border)] focus:border-[var(--color-primary)] focus:outline-none mb-2 resize-none"
                   maxlength="2000"
-                ></textarea>
+                />
                 <div class="flex gap-2">
                   <button
-                    @click="showCreateForm = false; newCollectionTitle = ''; newCollectionDescription = ''"
                     class="flex-1 px-3 py-2 bg-[var(--color-button-secondary)] hover:bg-[var(--color-button-secondary-hover)] rounded transition-colors text-sm"
+                    @click="cancelCreate"
                   >
                     {{ $t('common.cancel') }}
                   </button>
                   <button
-                    @click="createAndAdd"
                     :disabled="!newCollectionTitle.trim() || isCreating"
                     class="flex-1 px-3 py-2 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] rounded transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                    @click="createAndAdd"
                   >
-                    {{ isCreating ? $t('collection.creating') : $t('collection.createAndAdd') }}
+                    {{
+                      isCreating
+                        ? $t('collection.creating')
+                        : $t('collection.createAndAdd')
+                    }}
                   </button>
                 </div>
               </div>
@@ -75,23 +90,42 @@
 
             <!-- Existing collections -->
             <div v-if="collections.length > 0" class="space-y-2">
-              <p class="text-sm text-[var(--color-text-muted)] mb-2">{{ $t('collection.existingCollections') }}</p>
+              <p class="text-sm text-[var(--color-text-muted)] mb-2">
+                {{ $t('collection.existingCollections') }}
+              </p>
               <button
                 v-for="collection in collections"
                 :key="collection.id"
-                @click="toggleCollection(collection)"
                 class="w-full p-3 rounded-lg text-left transition-colors flex items-center justify-between"
-                :class="isInCollection(collection.id) ? 'bg-[var(--color-primary)]/20 border border-[var(--color-primary)]' : 'bg-[var(--color-button-secondary)] hover:bg-[var(--color-button-secondary-hover)]'"
+                :class="
+                  isInCollection(collection.id)
+                    ? 'bg-[var(--color-primary)]/20 border border-[var(--color-primary)]'
+                    : 'bg-[var(--color-button-secondary)] hover:bg-[var(--color-button-secondary-hover)]'
+                "
+                @click="toggleCollection(collection)"
               >
                 <div>
                   <div class="font-medium">{{ collection.title }}</div>
-                  <div class="text-sm text-[var(--color-text-muted)]">{{ $t('collection.artworkCount', { count: collection.artworkCount }) }}</div>
+                  <div class="text-sm text-[var(--color-text-muted)]">
+                    {{
+                      $t('collection.artworkCount', {
+                        count: collection.artworkCount,
+                      })
+                    }}
+                  </div>
                 </div>
-                <span v-if="isInCollection(collection.id)" class="text-[var(--color-primary)]">✓</span>
+                <span
+                  v-if="isInCollection(collection.id)"
+                  class="text-[var(--color-primary)]"
+                  >✓</span
+                >
               </button>
             </div>
 
-            <div v-else-if="!showCreateForm" class="text-center py-8 text-[var(--color-text-muted)]">
+            <div
+              v-else-if="!showCreateForm"
+              class="text-center py-8 text-[var(--color-text-muted)]"
+            >
               <p>{{ $t('collection.noCollectionsYet') }}</p>
               <p class="text-sm mt-1">{{ $t('collection.createFromAbove') }}</p>
             </div>
@@ -131,6 +165,12 @@ const showCreateForm = ref(false)
 const newCollectionTitle = ref('')
 const newCollectionDescription = ref('')
 const isCreating = ref(false)
+
+const cancelCreate = () => {
+  showCreateForm.value = false
+  newCollectionTitle.value = ''
+  newCollectionDescription.value = ''
+}
 
 const close = () => {
   showCreateForm.value = false
@@ -197,8 +237,12 @@ const toggleCollection = async (collection: Collection) => {
 
   try {
     if (inCollection) {
-      await api.delete(`/api/collections/${collection.id}/artworks/${props.artworkId}`)
-      collection.artworkIds = collection.artworkIds.filter((id) => id !== props.artworkId)
+      await api.delete(
+        `/api/collections/${collection.id}/artworks/${props.artworkId}`,
+      )
+      collection.artworkIds = collection.artworkIds.filter(
+        (id) => id !== props.artworkId,
+      )
       collection.artworkCount--
       emit('removed', collection.id)
     } else {

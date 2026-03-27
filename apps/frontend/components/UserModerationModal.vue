@@ -12,7 +12,9 @@
 
         <!-- Reason input (for reject/suspend) -->
         <div v-if="requiresReason" class="mb-4">
-          <label class="block text-sm font-medium mb-2">{{ $t('admin.reason') }}</label>
+          <label class="block text-sm font-medium mb-2">{{
+            $t('admin.reason')
+          }}</label>
           <textarea
             v-model="reason"
             class="w-full px-3 py-2 bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
@@ -24,7 +26,9 @@
 
         <!-- Admin password confirmation -->
         <div class="mb-4">
-          <label class="block text-sm font-medium mb-2">{{ $t('admin.adminPassword') }}</label>
+          <label class="block text-sm font-medium mb-2">{{
+            $t('admin.adminPassword')
+          }}</label>
           <input
             v-model="password"
             type="password"
@@ -36,7 +40,9 @@
         </div>
 
         <!-- Error message -->
-        <p v-if="error" class="text-[var(--color-danger-text)] text-sm mb-4">{{ error }}</p>
+        <p v-if="error" class="text-[var(--color-danger-text)] text-sm mb-4">
+          {{ error }}
+        </p>
 
         <!-- Actions -->
         <div class="flex gap-3">
@@ -89,8 +95,8 @@ const reason = ref('')
 const error = ref('')
 const loading = ref(false)
 
-const requiresReason = computed(() =>
-  props.action === 'reject' || props.action === 'suspend'
+const requiresReason = computed(
+  () => props.action === 'reject' || props.action === 'suspend',
 )
 
 const title = computed(() => {
@@ -148,12 +154,15 @@ const close = () => {
 }
 
 // Watch for external loading state changes
-watch(() => props.show, (newShow) => {
-  if (!newShow) {
-    password.value = ''
-    reason.value = ''
-    error.value = ''
-    loading.value = false
-  }
-})
+watch(
+  () => props.show,
+  (newShow) => {
+    if (!newShow) {
+      password.value = ''
+      reason.value = ''
+      error.value = ''
+      loading.value = false
+    }
+  },
+)
 </script>

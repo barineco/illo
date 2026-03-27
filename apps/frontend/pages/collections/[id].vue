@@ -46,9 +46,17 @@ const artworks = computed(() => {
     return {
       id: artwork.id,
       title: artwork.title,
-      thumbnailUrl: artwork.thumbnailUrl || artwork.images?.[0]?.thumbnailUrl || artwork.images?.[0]?.url || '',
+      thumbnailUrl:
+        artwork.thumbnailUrl ||
+        artwork.images?.[0]?.thumbnailUrl ||
+        artwork.images?.[0]?.url ||
+        '',
       likeCount: artwork._count?.likes || 0,
-      imageCount: artwork.imageCount || artwork._count?.images || artwork.images?.length || 1,
+      imageCount:
+        artwork.imageCount ||
+        artwork._count?.images ||
+        artwork.images?.length ||
+        1,
       images: artwork.images || [],
       author: artwork.author || {},
     }
@@ -129,11 +137,13 @@ const deleteCollection = async () => {
 // Remove artwork from collection
 const removeArtwork = async (artworkId: string) => {
   try {
-    await api.delete(`/api/collections/${collectionId.value}/artworks/${artworkId}`)
+    await api.delete(
+      `/api/collections/${collectionId.value}/artworks/${artworkId}`,
+    )
     // Update local state without full refresh
     if (collection.value) {
       collection.value.artworks = collection.value.artworks.filter(
-        (ca: any) => ca.artwork.id !== artworkId
+        (ca: any) => ca.artwork.id !== artworkId,
       )
       collection.value.artworkCount = collection.value.artworks.length
     }
@@ -160,11 +170,16 @@ onMounted(() => {
   <div class="min-h-screen">
     <!-- Loading -->
     <div v-if="isLoading" class="flex items-center justify-center py-32">
-      <div class="text-[var(--color-text-muted)]">{{ $t('common.loading') }}</div>
+      <div class="text-[var(--color-text-muted)]">
+        {{ $t('common.loading') }}
+      </div>
     </div>
 
     <!-- Error -->
-    <div v-else-if="error" class="flex flex-col items-center justify-center py-32">
+    <div
+      v-else-if="error"
+      class="flex flex-col items-center justify-center py-32"
+    >
       <p class="text-[var(--color-text-muted)] text-lg mb-4">{{ error }}</p>
       <NuxtLink to="/" class="text-[var(--color-primary)] hover:underline">
         {{ $t('common.backToHome') }}
@@ -186,7 +201,9 @@ onMounted(() => {
               v-if="collection.user.avatarUrl && !avatarLoaded"
               class="absolute inset-0 flex items-center justify-center rounded-full bg-[var(--color-surface-secondary)]"
             >
-              <div class="w-5 h-5 border-2 border-[var(--color-border)] border-t-[var(--color-primary)] rounded-full animate-spin" />
+              <div
+                class="w-5 h-5 border-2 border-[var(--color-border)] border-t-[var(--color-primary)] rounded-full animate-spin"
+              />
             </div>
             <img
               v-if="collection.user.avatarUrl"
@@ -201,12 +218,20 @@ onMounted(() => {
               v-else
               class="w-10 h-10 rounded-full bg-[var(--color-surface-secondary)] flex items-center justify-center text-[var(--color-text-muted)]"
             >
-              {{ (collection.user.displayName || collection.user.username).charAt(0).toUpperCase() }}
+              {{
+                (collection.user.displayName || collection.user.username)
+                  .charAt(0)
+                  .toUpperCase()
+              }}
             </div>
           </div>
           <div>
-            <p class="font-medium">{{ collection.user.displayName || collection.user.username }}</p>
-            <p class="text-sm text-[var(--color-text-muted)]">@{{ getUserHandle(collection.user) }}</p>
+            <p class="font-medium">
+              {{ collection.user.displayName || collection.user.username }}
+            </p>
+            <p class="text-sm text-[var(--color-text-muted)]">
+              @{{ getUserHandle(collection.user) }}
+            </p>
           </div>
         </NuxtLink>
 
@@ -215,19 +240,26 @@ onMounted(() => {
           <div class="flex items-start justify-between gap-4">
             <div>
               <h1 class="text-2xl font-bold mb-2">{{ collection.title }}</h1>
-              <p v-if="collection.description" class="text-[var(--color-text-muted)] mb-4">
+              <p
+                v-if="collection.description"
+                class="text-[var(--color-text-muted)] mb-4"
+              >
                 {{ collection.description }}
               </p>
               <p class="text-sm text-[var(--color-text-muted)]">
-                {{ $t('collection.artworkCount', { count: collection.artworkCount }) }}
+                {{
+                  $t('collection.artworkCount', {
+                    count: collection.artworkCount,
+                  })
+                }}
               </p>
             </div>
 
             <!-- Owner Actions -->
             <div v-if="isOwner" class="flex gap-2 flex-shrink-0">
               <button
-                @click="startEdit"
                 class="px-4 py-2 bg-[var(--color-surface)] hover:bg-[var(--color-hover)] rounded-lg transition-colors"
+                @click="startEdit"
               >
                 {{ $t('common.edit') }}
               </button>
@@ -237,11 +269,16 @@ onMounted(() => {
 
         <!-- Edit Form -->
         <div v-else class="bg-[var(--color-surface)] rounded-lg p-6">
-          <h2 class="text-lg font-bold mb-4">{{ $t('collection.editTitle') }}</h2>
+          <h2 class="text-lg font-bold mb-4">
+            {{ $t('collection.editTitle') }}
+          </h2>
 
           <div class="space-y-4">
             <div>
-              <label class="block text-sm text-[var(--color-text-muted)] mb-1">{{ $t('collection.title') }}</label>
+              <label
+                class="block text-sm text-[var(--color-text-muted)] mb-1"
+                >{{ $t('collection.title') }}</label
+              >
               <input
                 v-model="editTitle"
                 type="text"
@@ -252,36 +289,39 @@ onMounted(() => {
             </div>
 
             <div>
-              <label class="block text-sm text-[var(--color-text-muted)] mb-1">{{ $t('collection.descriptionOptional') }}</label>
+              <label
+                class="block text-sm text-[var(--color-text-muted)] mb-1"
+                >{{ $t('collection.descriptionOptional') }}</label
+              >
               <textarea
                 v-model="editDescription"
                 rows="3"
                 maxlength="2000"
                 class="w-full px-4 py-2 bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:border-[var(--color-primary)] resize-none"
                 :placeholder="$t('collection.descriptionPlaceholder')"
-              ></textarea>
+              />
             </div>
 
             <div class="flex gap-2 justify-between">
               <button
-                @click="deleteCollection"
                 class="px-4 py-2 bg-[var(--color-danger-bg)] text-[var(--color-danger-text)] hover:bg-[var(--color-danger-hover-bg)] hover:text-[var(--color-danger-hover-text)] rounded-lg transition-colors"
                 :disabled="isSaving"
+                @click="deleteCollection"
               >
                 {{ $t('collection.delete') }}
               </button>
               <div class="flex gap-2">
                 <button
-                  @click="cancelEdit"
                   class="px-4 py-2 bg-[var(--color-surface-secondary)] hover:bg-[var(--color-hover)] rounded-lg transition-colors"
                   :disabled="isSaving"
+                  @click="cancelEdit"
                 >
                   {{ $t('common.cancel') }}
                 </button>
                 <button
-                  @click="saveChanges"
                   class="px-4 py-2 bg-[var(--color-primary)] text-[var(--color-primary-text)] hover:bg-[var(--color-primary-hover)] rounded-lg transition-colors disabled:opacity-50"
                   :disabled="isSaving || !editTitle.trim()"
+                  @click="saveChanges"
                 >
                   {{ isSaving ? $t('common.saving') : $t('common.save') }}
                 </button>
@@ -297,23 +337,28 @@ onMounted(() => {
         <div
           class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-4"
         >
-          <div
-            v-for="artwork in artworks"
-            :key="artwork.id"
-            class="relative"
-          >
+          <div v-for="artwork in artworks" :key="artwork.id" class="relative">
             <ArtworkCard :artwork="artwork" />
 
             <!-- Delete overlay button (shown in edit mode) -->
             <button
               v-if="isOwner && isEditing"
-              @click.prevent="removeArtwork(artwork.id)"
               class="absolute top-2 left-2 z-20 w-8 h-8 bg-[var(--color-danger)] hover:bg-[var(--color-danger-hover-bg)] rounded-full flex items-center justify-center text-white shadow-lg transition-colors"
               :title="$t('collection.removeFromCollection')"
+              @click.prevent="removeArtwork(artwork.id)"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                class="w-4 h-4"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
               </svg>
             </button>
           </div>
@@ -322,7 +367,9 @@ onMounted(() => {
 
       <!-- Empty State -->
       <div v-else class="text-center py-16">
-        <p class="text-[var(--color-text-muted)] text-lg mb-4">{{ $t('collection.empty') }}</p>
+        <p class="text-[var(--color-text-muted)] text-lg mb-4">
+          {{ $t('collection.empty') }}
+        </p>
         <NuxtLink
           v-if="isOwner"
           to="/"

@@ -4,11 +4,15 @@ import {
   NotFoundException,
   ConflictException,
   ForbiddenException,
+  BadRequestException,
   Inject,
   forwardRef,
 } from '@nestjs/common'
+import * as crypto from 'crypto'
+import * as bcrypt from 'bcrypt'
 import { PrismaService } from '../prisma/prisma.service'
 import { StorageService } from '../storage/storage.service'
+import { MailService } from '../mail/mail.service'
 import { ActivityDeliveryService } from '../federation/services/activity-delivery.service'
 import { FederationSearchService } from '../federation/services/federation-search.service'
 import { UserRole, BirthdayDisplay, Prisma } from '@prisma/client'
@@ -75,6 +79,9 @@ export interface UserProfileResponse {
   isActive: boolean
   isVerified: boolean
   supporterTier: string // SupporterTier enum from Prisma
+  pendingEmail?: string | null
+  hasSetPassword?: boolean
+  isEmailVerified?: boolean
   // Patreon OAuth fields (only for own profile)
   patreonId?: string | null
   patreonLastSyncAt?: Date | null
@@ -100,6 +107,7 @@ export class UsersService {
   constructor(
     private prisma: PrismaService,
     private storageService: StorageService,
+    private readonly mailService: MailService,
     @Inject(forwardRef(() => ActivityDeliveryService))
     private activityDeliveryService: ActivityDeliveryService,
     @Inject(forwardRef(() => FederationSearchService))
@@ -276,6 +284,9 @@ export class UsersService {
 
     if (includeEmail) {
       profile.email = user.email
+      profile.pendingEmail = user.pendingEmail
+      profile.hasSetPassword = user.hasSetPassword
+      profile.isEmailVerified = user.isEmailVerified
       profile.patreonId = user.patreonId
       profile.patreonLastSyncAt = user.patreonLastSyncAt
     }
@@ -359,6 +370,99 @@ export class UsersService {
       updatedAt: updatedUser.updatedAt,
       _count: updatedUser._count,
     }
+  }
+
+  async requestEmailChange(
+    userId: string,
+    newEmail: string,
+    password?: string,
+  ): Promise<{ message: string }> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    })
+
+    if (!user) {
+      throw new NotFoundException('User not found')
+    }
+
+    if (user.email && user.email.toLowerCase() === newEmail.toLowerCase()) {
+      throw new BadRequestException('New email is the same as current email')
+    }
+
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: newEmail },
+    })
+    if (existingUser && existingUser.id !== userId) {
+      throw new ConflictException('Email is already in use')
+    }
+
+    if (user.hasSetPassword) {
+      if (!password) {
+        throw new BadRequestException('Password confirmation is required')
+      }
+      const isPasswordValid = await bcrypt.compare(password, user.passwordHash)
+      if (!isPasswordValid) {
+        throw new BadRequestException('Password is incorrect')
+      }
+    }
+
+    const emailChangeToken = crypto.randomBytes(32).toString('hex')
+    const emailChangeExpires = new Date()
+    emailChangeExpires.setHours(emailChangeExpires.getHours() + 24)
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        pendingEmail: newEmail,
+        emailChangeToken,
+        emailChangeExpires,
+      },
+    })
+
+    try {
+      await this.mailService.sendEmailChangeVerification(
+        newEmail,
+        user.username,
+        emailChangeToken,
+      )
+    } catch (error) {
+      this.logger.error('Failed to send email change verification:', error)
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          pendingEmail: null,
+          emailChangeToken: null,
+          emailChangeExpires: null,
+        },
+      })
+      throw new BadRequestException('Failed to send verification email')
+    }
+
+    if (user.email) {
+      try {
+        await this.mailService.sendEmailChangeNotification(
+          user.email,
+          user.username,
+        )
+      } catch (error) {
+        this.logger.error('Failed to send email change notification:', error)
+      }
+    }
+
+    return { message: 'Verification email sent to new address' }
+  }
+
+  async cancelEmailChange(userId: string): Promise<{ message: string }> {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        pendingEmail: null,
+        emailChangeToken: null,
+        emailChangeExpires: null,
+      },
+    })
+
+    return { message: 'Email change cancelled' }
   }
 
   /**

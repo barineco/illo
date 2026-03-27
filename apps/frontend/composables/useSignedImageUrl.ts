@@ -6,7 +6,10 @@
  *
  * When signed URLs are disabled on the backend, falls back to regular image URLs.
  */
-export const useSignedImageUrl = (imageId: Ref<string> | string, thumbnail: boolean = false) => {
+export const useSignedImageUrl = (
+  imageId: Ref<string> | string,
+  thumbnail: boolean = false,
+) => {
   const api = useApi()
   const config = useRuntimeConfig()
 
@@ -37,7 +40,7 @@ export const useSignedImageUrl = (imageId: Ref<string> | string, thumbnail: bool
     try {
       const params = thumbnail ? '?thumb=true' : ''
       const result = await api.get<{ url: string; expiresAt: number }>(
-        `/api/images/${id}/signed-url${params}`
+        `/api/images/${id}/signed-url${params}`,
       )
 
       signedUrl.value = result.url
@@ -147,7 +150,11 @@ export const useSignedImageUrlOnce = () => {
    * @param thumbnail - Whether to get thumbnail (320px)
    * @param original - Whether to get original full-size image (for viewer)
    */
-  async function getSignedUrl(imageId: string, thumbnail: boolean = false, original: boolean = false): Promise<string> {
+  async function getSignedUrl(
+    imageId: string,
+    thumbnail: boolean = false,
+    original: boolean = false,
+  ): Promise<string> {
     try {
       const params = new URLSearchParams()
       if (thumbnail) params.append('thumb', 'true')

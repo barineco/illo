@@ -55,9 +55,7 @@ async function generatePlaceholder(config: PlaceholderConfig): Promise<void> {
 
   const outputPath = path.join(ASSETS_DIR, config.filename)
 
-  await sharp(Buffer.from(svg))
-    .jpeg({ quality: 85 })
-    .toFile(outputPath)
+  await sharp(Buffer.from(svg)).jpeg({ quality: 85 }).toFile(outputPath)
 
   console.log(`Generated: ${outputPath}`)
 }

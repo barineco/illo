@@ -8,11 +8,14 @@ export const useSearch = () => {
   /**
    * Navigate to search page with query parameters
    */
-  const search = (query: string, filters?: {
-    type?: 'ILLUSTRATION' | 'MANGA'
-    tags?: string[]
-    sort?: 'latest' | 'popular' | 'views'
-  }) => {
+  const search = (
+    query: string,
+    filters?: {
+      type?: 'ILLUSTRATION' | 'MANGA'
+      tags?: string[]
+      sort?: 'latest' | 'popular' | 'views'
+    },
+  ) => {
     const searchParams: any = { q: query }
 
     if (filters?.type) {
@@ -37,7 +40,7 @@ export const useSearch = () => {
    * Get current search query from route
    */
   const getCurrentQuery = () => {
-    return route.query.q as string || ''
+    return (route.query.q as string) || ''
   }
 
   /**

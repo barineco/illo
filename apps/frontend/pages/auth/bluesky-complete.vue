@@ -16,18 +16,24 @@
         <div class="bluesky-badge">
           <BlueskyIcon class="bluesky-icon" />
         </div>
-        <h1 class="form-title">{{ $t('auth.bluesky.completeRegistration') }}</h1>
+        <h1 class="form-title">
+          {{ $t('auth.bluesky.completeRegistration') }}
+        </h1>
         <p class="form-description">{{ $t('auth.bluesky.chooseUsername') }}</p>
 
         <!-- Bluesky Handle Display -->
         <div v-if="blueskyHandle" class="bluesky-handle">
-          <span class="handle-label">{{ $t('auth.bluesky.linkedAccount') }}</span>
+          <span class="handle-label">{{
+            $t('auth.bluesky.linkedAccount')
+          }}</span>
           <span class="handle-value">@{{ blueskyHandle }}</span>
         </div>
 
-        <form @submit.prevent="handleSubmit" class="username-form">
+        <form class="username-form" @submit.prevent="handleSubmit">
           <div class="form-group">
-            <label for="username" class="form-label">{{ $t('auth.username') }}</label>
+            <label for="username" class="form-label">{{
+              $t('auth.username')
+            }}</label>
             <input
               id="username"
               v-model="username"
@@ -52,7 +58,7 @@
             class="submit-btn"
             :disabled="isSubmitting || !!usernameError || !username"
           >
-            <span v-if="isSubmitting" class="spinner-small"></span>
+            <span v-if="isSubmitting" class="spinner-small" />
             <span v-else>{{ $t('auth.bluesky.createAccount') }}</span>
           </button>
         </form>
@@ -213,12 +219,16 @@ const submitRegistration = async () => {
       router.replace('/auth/pending-approval?via=bluesky')
     } else if (response.accessToken) {
       // User is active - save tokens and fetch user with explicit token
-      setTokens({ accessToken: response.accessToken, refreshToken: response.refreshToken })
+      setTokens({
+        accessToken: response.accessToken,
+        refreshToken: response.refreshToken,
+      })
       await fetchUserWithToken(response.accessToken)
       router.replace('/?welcome=true')
     }
   } catch (err: any) {
-    const errorMessage = err.data?.message || err.message || t('auth.bluesky.registrationFailed')
+    const errorMessage =
+      err.data?.message || err.message || t('auth.bluesky.registrationFailed')
     error.value = errorMessage
   } finally {
     isSubmitting.value = false

@@ -23,6 +23,7 @@ import {
   ResetPasswordDto,
   ResendVerificationDto,
   ChangePasswordDto,
+  SetPasswordDto,
 } from './dto'
 
 interface LoginDto {
@@ -85,6 +86,15 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async verifyEmail(@Query() query: VerifyEmailDto) {
     return this.authService.verifyEmail(query.token)
+  }
+
+  @Public()
+  @Get('verify-email-change')
+  async verifyEmailChange(@Query('token') token: string) {
+    if (!token || token.length < 32) {
+      throw new UnauthorizedException('Invalid verification token')
+    }
+    return this.authService.verifyEmailChange(token)
   }
 
   @Public()
@@ -251,5 +261,11 @@ export class AuthController {
     )
 
     return result
+  }
+
+  @Post('set-password')
+  @UseGuards(JwtAuthGuard)
+  async setPassword(@CurrentUser() user: any, @Body() dto: SetPasswordDto) {
+    return this.authService.setPassword(user.id, dto.newPassword)
   }
 }

@@ -1,5 +1,7 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-[var(--color-background)] px-4">
+  <div
+    class="min-h-screen flex items-center justify-center bg-[var(--color-background)] px-4"
+  >
     <div class="max-w-md w-full">
       <!-- Card -->
       <div class="bg-[var(--color-surface)] rounded-lg p-8 shadow-xl">
@@ -17,10 +19,12 @@
                 stroke-linejoin="round"
                 stroke-width="2"
                 d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-              ></path>
+              />
             </svg>
           </div>
-          <h1 class="text-2xl font-bold text-[var(--color-text)] mb-4">{{ $t('auth.passwordResetComplete') }}</h1>
+          <h1 class="text-2xl font-bold text-[var(--color-text)] mb-4">
+            {{ $t('auth.passwordResetComplete') }}
+          </h1>
           <p class="text-[var(--color-text-muted)] mb-6">
             {{ $t('auth.passwordResetCompleteDesc') }}
           </p>
@@ -35,14 +39,21 @@
         <!-- Form State -->
         <div v-else>
           <div class="text-center mb-8">
-            <h1 class="text-2xl font-bold text-[var(--color-text)] mb-2">{{ $t('auth.newPasswordTitle') }}</h1>
-            <p class="text-[var(--color-text-muted)] text-sm">{{ $t('auth.newPasswordDesc') }}</p>
+            <h1 class="text-2xl font-bold text-[var(--color-text)] mb-2">
+              {{ $t('auth.newPasswordTitle') }}
+            </h1>
+            <p class="text-[var(--color-text-muted)] text-sm">
+              {{ $t('auth.newPasswordDesc') }}
+            </p>
           </div>
 
-          <form @submit.prevent="handleSubmit" class="space-y-4">
+          <form class="space-y-4" @submit.prevent="handleSubmit">
             <!-- New Password Input -->
             <div>
-              <label for="password" class="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
+              <label
+                for="password"
+                class="block text-sm font-medium text-[var(--color-text-secondary)] mb-2"
+              >
                 {{ $t('auth.newPassword') }}
               </label>
               <div class="relative">
@@ -60,9 +71,9 @@
                 />
                 <button
                   type="button"
-                  @click="showPassword = !showPassword"
                   class="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
                   tabindex="-1"
+                  @click="showPassword = !showPassword"
                 >
                   <EyeSlashIcon v-if="showPassword" class="w-5 h-5" />
                   <EyeIcon v-else class="w-5 h-5" />
@@ -93,19 +104,25 @@
                 />
                 <button
                   type="button"
-                  @click="showPasswordConfirm = !showPasswordConfirm"
                   class="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
                   tabindex="-1"
+                  @click="showPasswordConfirm = !showPasswordConfirm"
                 >
                   <EyeSlashIcon v-if="showPasswordConfirm" class="w-5 h-5" />
                   <EyeIcon v-else class="w-5 h-5" />
                 </button>
               </div>
-              <div v-if="isCapsLockOn" class="flex items-center gap-1.5 text-[var(--color-warning-text)] text-xs mt-1">
+              <div
+                v-if="isCapsLockOn"
+                class="flex items-center gap-1.5 text-[var(--color-warning-text)] text-xs mt-1"
+              >
                 <ExclamationTriangleIcon class="w-4 h-4 flex-shrink-0" />
                 {{ $t('auth.capsLockWarning') }}
               </div>
-              <div v-if="confirmPassword && password !== confirmPassword" class="flex items-center gap-1.5 text-[var(--color-danger-text)] text-xs mt-1">
+              <div
+                v-if="confirmPassword && password !== confirmPassword"
+                class="flex items-center gap-1.5 text-[var(--color-danger-text)] text-xs mt-1"
+              >
                 <ExclamationTriangleIcon class="w-4 h-4 flex-shrink-0" />
                 {{ $t('auth.passwordMismatch') }}
               </div>

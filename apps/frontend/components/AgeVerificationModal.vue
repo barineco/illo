@@ -13,17 +13,28 @@
         class="fixed inset-0 z-50 flex items-center justify-center bg-[var(--color-overlay)]"
       >
         <!-- Modal -->
-        <div class="bg-[var(--color-surface)] rounded-lg w-full max-w-md mx-4 p-6 text-center shadow-xl">
+        <div
+          class="bg-[var(--color-surface)] rounded-lg w-full max-w-md mx-4 p-6 text-center shadow-xl"
+        >
           <!-- Warning Icon -->
-          <div class="w-20 h-20 mx-auto mb-4 rounded-full bg-[var(--color-warning-bg)] flex items-center justify-center">
-            <Icon name="ExclamationTriangle" class="w-10 h-10 text-[var(--color-warning-text)]" />
+          <div
+            class="w-20 h-20 mx-auto mb-4 rounded-full bg-[var(--color-warning-bg)] flex items-center justify-center"
+          >
+            <Icon
+              name="ExclamationTriangle"
+              class="w-10 h-10 text-[var(--color-warning-text)]"
+            />
           </div>
 
           <!-- Title -->
-          <h2 class="text-xl font-bold mb-2">{{ $t('ageVerification.title') }}</h2>
+          <h2 class="text-xl font-bold mb-2">
+            {{ $t('ageVerification.title') }}
+          </h2>
 
           <!-- Rating Badge -->
-          <div class="inline-flex items-center gap-1 px-3 py-1 mb-4 rounded-full text-sm font-medium bg-[var(--color-danger-bg)] text-[var(--color-danger-text)]">
+          <div
+            class="inline-flex items-center gap-1 px-3 py-1 mb-4 rounded-full text-sm font-medium bg-[var(--color-danger-bg)] text-[var(--color-danger-text)]"
+          >
             {{ ratingLabel }}
           </div>
 

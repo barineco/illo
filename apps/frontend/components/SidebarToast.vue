@@ -16,15 +16,18 @@
         ]"
       >
         <!-- Icon -->
-        <Icon :name="toastIcons[toast.type]" class="w-4 h-4 flex-shrink-0 mt-0.5" />
+        <Icon
+          :name="toastIcons[toast.type]"
+          class="w-4 h-4 flex-shrink-0 mt-0.5"
+        />
 
         <!-- Message -->
         <span class="flex-1 break-words">{{ toast.message }}</span>
 
         <!-- Close button -->
         <button
-          @click="removeToast(toast.id)"
           class="flex-shrink-0 opacity-60 hover:opacity-100 transition-opacity"
+          @click="removeToast(toast.id)"
         >
           <Icon name="XMark" class="w-4 h-4" />
         </button>
@@ -37,10 +40,13 @@
 const { toasts, remove: removeToast } = useToast()
 
 const toastClasses: Record<string, string> = {
-  success: 'bg-[var(--color-success-bg)] border-[var(--color-success-border)] text-[var(--color-success-text)]',
-  error: 'bg-[var(--color-danger-bg)] border-[var(--color-danger-border)] text-[var(--color-danger-text)]',
+  success:
+    'bg-[var(--color-success-bg)] border-[var(--color-success-border)] text-[var(--color-success-text)]',
+  error:
+    'bg-[var(--color-danger-bg)] border-[var(--color-danger-border)] text-[var(--color-danger-text)]',
   info: 'bg-[var(--color-info-bg)] border-[var(--color-info-border)] text-[var(--color-info-text)]',
-  warning: 'bg-[var(--color-warning-bg)] border-[var(--color-warning-text)] text-[var(--color-warning-text)]',
+  warning:
+    'bg-[var(--color-warning-bg)] border-[var(--color-warning-text)] text-[var(--color-warning-text)]',
 }
 
 const toastIcons: Record<string, string> = {
@@ -104,7 +110,9 @@ function onBeforeLeave(el: Element) {
 
 /* Enter animation - slide up from below */
 .toast-enter-active {
-  transition: opacity 0.3s ease-out, transform 0.3s ease-out;
+  transition:
+    opacity 0.3s ease-out,
+    transform 0.3s ease-out;
 }
 
 .toast-enter-from {

@@ -14,15 +14,15 @@ illo (hereinafter "the Service") respects user privacy and handles personal info
 
 We collect the following information when you create an account:
 
-| Information | Required/Optional | Purpose |
-|-------------|-------------------|---------|
-| Username | Required | Account identification, profile URL |
-| Email address | Required | Account verification, password reset, important notifications |
-| Password | Required | Stored securely hashed |
-| Display name | Optional | Profile display |
-| Bio | Optional | Profile display |
-| Avatar/Cover image | Optional | Profile display |
-| Date of birth | Optional | Age verification (for viewing adult content) |
+| Information        | Required/Optional | Purpose                                                       |
+| ------------------ | ----------------- | ------------------------------------------------------------- |
+| Username           | Required          | Account identification, profile URL                           |
+| Email address      | Required          | Account verification, password reset, important notifications |
+| Password           | Required          | Stored securely hashed                                        |
+| Display name       | Optional          | Profile display                                               |
+| Bio                | Optional          | Profile display                                               |
+| Avatar/Cover image | Optional          | Profile display                                               |
+| Date of birth      | Optional          | Age verification (for viewing adult content)                  |
 
 ### Posted Content
 
@@ -35,11 +35,11 @@ We collect the following information when you create an account:
 
 #### For Security and Service Protection
 
-| Information | Purpose | Retention Period |
-|-------------|---------|------------------|
-| IP address | Rate limiting, fraud prevention | Limited (Note 1) |
-| User agent | Session management, fraud detection | Until session ends |
-| Access time | Rate limit calculation | Individual data deleted after statistical aggregation |
+| Information | Purpose                             | Retention Period                                      |
+| ----------- | ----------------------------------- | ----------------------------------------------------- |
+| IP address  | Rate limiting, fraud prevention     | Limited (Note 1)                                      |
+| User agent  | Session management, fraud detection | Until session ends                                    |
+| Access time | Rate limit calculation              | Individual data deleted after statistical aggregation |
 
 **Note 1**: IP addresses are temporarily recorded for fraud detection, but are not stored long-term. They are only retained for a certain period if rate limit violations occur.
 
@@ -55,12 +55,12 @@ Sessions typically expire after 1 hour. If "Remember me" is selected, they are v
 
 The Service uses cookies for the following purposes:
 
-| Cookie | Purpose | Duration |
-|--------|---------|----------|
-| Auth token | Login state maintenance | 1 hour to 30 days |
-| Language setting | Remember display language | 1 year |
-| Color mode | Remember dark/light mode | 1 year |
-| Consent status | Record of terms agreement | 1 year |
+| Cookie           | Purpose                   | Duration          |
+| ---------------- | ------------------------- | ----------------- |
+| Auth token       | Login state maintenance   | 1 hour to 30 days |
+| Language setting | Remember display language | 1 year            |
+| Color mode       | Remember dark/light mode  | 1 year            |
+| Consent status   | Record of terms agreement | 1 year            |
 
 ---
 
@@ -108,9 +108,9 @@ When using federation features, the following information is shared with other i
 
 #### External Service Integration
 
-| Service | Information Shared | Purpose |
-|---------|-------------------|---------|
-| Bluesky (OAuth) | DID, handle | Account authentication |
+| Service            | Information Shared       | Purpose                        |
+| ------------------ | ------------------------ | ------------------------------ |
+| Bluesky (OAuth)    | DID, handle              | Account authentication         |
 | Patreon (optional) | User ID, membership info | Supporter benefits application |
 
 These service integrations are optional, and data sharing stops when integration is disconnected.
@@ -125,13 +125,13 @@ Information may be disclosed only when required by law or in response to valid l
 
 ### Retention Periods
 
-| Data Type | Retention Period |
-|-----------|------------------|
-| Account information | Until account deletion |
-| Posted content | Until deletion action |
-| Sessions | 1 hour to 30 days (depending on settings) |
-| Rate limit logs | Deleted after statistical aggregation |
-| Audit logs (admin actions) | Long-term retention for security reasons |
+| Data Type                  | Retention Period                          |
+| -------------------------- | ----------------------------------------- |
+| Account information        | Until account deletion                    |
+| Posted content             | Until deletion action                     |
+| Sessions                   | 1 hour to 30 days (depending on settings) |
+| Rate limit logs            | Deleted after statistical aggregation     |
+| Audit logs (admin actions) | Long-term retention for security reasons  |
 
 ### Account Deletion
 

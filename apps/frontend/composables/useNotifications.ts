@@ -6,7 +6,9 @@ export function useNotifications() {
 
   const fetchUnreadCount = async () => {
     try {
-      const data = await api.get<{ count: number }>('/api/notifications/unread-count')
+      const data = await api.get<{ count: number }>(
+        '/api/notifications/unread-count',
+      )
       unreadCount.value = data.count
     } catch (error) {
       console.error('Failed to fetch unread count:', error)

@@ -3,7 +3,7 @@
     <div class="login-container">
       <h1 class="login-title">{{ $t('auth.loginTitle') }}</h1>
 
-      <form @submit.prevent="handleLogin" class="login-form">
+      <form class="login-form" @submit.prevent="handleLogin">
         <div class="form-group">
           <label for="email">{{ $t('auth.email') }}</label>
           <input
@@ -32,9 +32,9 @@
             />
             <button
               type="button"
-              @click="showPassword = !showPassword"
               class="password-toggle"
               tabindex="-1"
+              @click="showPassword = !showPassword"
             >
               <EyeSlashIcon v-if="showPassword" class="toggle-icon" />
               <EyeIcon v-else class="toggle-icon" />
@@ -60,17 +60,17 @@
         <div v-if="error" class="error-message">
           {{ error }}
           <div v-if="showResendLink" class="resend-link">
-            <button @click="resendVerification" type="button" class="link-button">
+            <button
+              type="button"
+              class="link-button"
+              @click="resendVerification"
+            >
               {{ $t('auth.resendVerification') }}
             </button>
           </div>
         </div>
 
-        <button
-          type="submit"
-          class="btn-login"
-          :disabled="isLoading"
-        >
+        <button type="submit" class="btn-login" :disabled="isLoading">
           {{ isLoading ? $t('auth.loggingIn') : $t('auth.loginButton') }}
         </button>
       </form>
@@ -95,7 +95,11 @@
           @click="handlePasskeyLogin"
         >
           <FingerPrintIcon class="passkey-icon" />
-          {{ passkeyLoading ? $t('auth.authenticating') : $t('auth.loginWithPasskey') }}
+          {{
+            passkeyLoading
+              ? $t('auth.authenticating')
+              : $t('auth.loginWithPasskey')
+          }}
         </button>
 
         <div v-if="passkeyError" class="error-message passkey-error">
@@ -125,7 +129,11 @@
               @click="handleBlueskyLogin"
             >
               <BlueskyIcon class="bluesky-icon" />
-              {{ blueskyLoading ? $t('auth.loggingIn') : $t('auth.bluesky.loginWithBluesky') }}
+              {{
+                blueskyLoading
+                  ? $t('auth.loggingIn')
+                  : $t('auth.bluesky.loginWithBluesky')
+              }}
             </button>
           </div>
           <div v-if="blueskyError" class="error-message bluesky-error">
@@ -147,7 +155,11 @@
 
 <script setup lang="ts">
 import { ExclamationTriangleIcon } from '@heroicons/vue/20/solid'
-import { EyeIcon, EyeSlashIcon, FingerPrintIcon } from '@heroicons/vue/24/outline'
+import {
+  EyeIcon,
+  EyeSlashIcon,
+  FingerPrintIcon,
+} from '@heroicons/vue/24/outline'
 
 const { t } = useI18n()
 
@@ -209,7 +221,8 @@ const handlePasskeyLogin = async () => {
     } else if (err.name === 'NotSupportedError') {
       passkeyError.value = t('passkey.notSupported')
     } else {
-      passkeyError.value = err.data?.message || err.message || t('passkey.authFailed')
+      passkeyError.value =
+        err.data?.message || err.message || t('passkey.authFailed')
     }
   } finally {
     passkeyLoading.value = false
@@ -231,7 +244,10 @@ const handleBlueskyLogin = async () => {
     // Redirect to Bluesky authorization
     window.location.href = response.url
   } catch (err: any) {
-    blueskyError.value = err.response?.data?.message || err.data?.message || t('auth.bluesky.authFailed')
+    blueskyError.value =
+      err.response?.data?.message ||
+      err.data?.message ||
+      t('auth.bluesky.authFailed')
   } finally {
     blueskyLoading.value = false
   }
@@ -248,14 +264,17 @@ const handleLogin = async () => {
     // Check if 2FA is required
     if ('requiresTwoFactor' in result && result.requiresTwoFactor) {
       // Pass rememberMe to 2FA page via query param
-      router.push(`/verify-2fa?userId=${result.userId}&rememberMe=${rememberMe.value}`)
+      router.push(
+        `/verify-2fa?userId=${result.userId}&rememberMe=${rememberMe.value}`,
+      )
       return
     }
 
     // Normal login success
     navigateTo('/')
   } catch (err: any) {
-    const errorMessage = err.response?.data?.message || err.data?.message || t('auth.loginFailed')
+    const errorMessage =
+      err.response?.data?.message || err.data?.message || t('auth.loginFailed')
     error.value = errorMessage
 
     // Check if error is due to unverified email
@@ -600,7 +619,9 @@ const resendVerification = async () => {
   font-size: 1rem;
   font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s, border-color 0.2s;
+  transition:
+    background 0.2s,
+    border-color 0.2s;
 }
 
 .btn-passkey:hover:not(:disabled) {

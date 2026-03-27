@@ -41,18 +41,22 @@
           <div class="flex gap-2 mb-4">
             <button
               class="px-4 py-2 text-sm font-medium rounded-lg transition-colors"
-              :class="activeTab === 'tos'
-                ? 'bg-[var(--color-primary)] text-white'
-                : 'bg-[var(--color-surface-hover)] text-[var(--color-text-muted)] hover:text-[var(--color-text)]'"
+              :class="
+                activeTab === 'tos'
+                  ? 'bg-[var(--color-primary)] text-white'
+                  : 'bg-[var(--color-surface-hover)] text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
+              "
               @click="activeTab = 'tos'"
             >
               {{ $t('tos.viewTerms') }}
             </button>
             <button
               class="px-4 py-2 text-sm font-medium rounded-lg transition-colors"
-              :class="activeTab === 'privacy'
-                ? 'bg-[var(--color-primary)] text-white'
-                : 'bg-[var(--color-surface-hover)] text-[var(--color-text-muted)] hover:text-[var(--color-text)]'"
+              :class="
+                activeTab === 'privacy'
+                  ? 'bg-[var(--color-primary)] text-white'
+                  : 'bg-[var(--color-surface-hover)] text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
+              "
               @click="activeTab = 'privacy'"
             >
               {{ $t('tos.viewPrivacy') }}
@@ -67,13 +71,15 @@
           >
             <!-- Loading state -->
             <div v-if="loading" class="flex items-center justify-center py-8">
-              <div class="animate-spin w-6 h-6 border-2 border-[var(--color-primary)] border-t-transparent rounded-full"></div>
+              <div
+                class="animate-spin w-6 h-6 border-2 border-[var(--color-primary)] border-t-transparent rounded-full"
+              />
             </div>
 
             <!-- Content (pre-built HTML at build time) -->
             <div v-else-if="currentHtmlContent" class="tos-content">
               <!-- eslint-disable-next-line vue/no-v-html -->
-              <div v-html="currentHtmlContent"></div>
+              <div v-html="currentHtmlContent" />
             </div>
 
             <!-- No content configured -->
@@ -84,22 +90,37 @@
 
           <!-- Scroll progress indicator -->
           <div v-if="currentHtmlContent" class="mb-4">
-            <div class="flex items-center gap-2 text-sm text-[var(--color-text-muted)]">
+            <div
+              class="flex items-center gap-2 text-sm text-[var(--color-text-muted)]"
+            >
               <Icon
                 :name="currentTabScrolled ? 'CheckCircle' : 'ArrowDown'"
                 class="w-4 h-4"
-                :class="{ 'animate-bounce': !currentTabScrolled, 'text-green-500': currentTabScrolled }"
+                :class="{
+                  'animate-bounce': !currentTabScrolled,
+                  'text-green-500': currentTabScrolled,
+                }"
               />
               <span :class="{ 'text-green-500': currentTabScrolled }">
-                {{ currentTabScrolled ? $t('tos.scrollComplete') : $t('tos.mustScrollToAgree') }}
+                {{
+                  currentTabScrolled
+                    ? $t('tos.scrollComplete')
+                    : $t('tos.mustScrollToAgree')
+                }}
               </span>
             </div>
-            <div class="mt-2 h-1 bg-[var(--color-border)] rounded-full overflow-hidden">
+            <div
+              class="mt-2 h-1 bg-[var(--color-border)] rounded-full overflow-hidden"
+            >
               <div
                 class="h-full transition-all duration-100 ease-out"
-                :class="currentTabScrolled ? 'bg-green-500' : 'bg-[var(--color-primary)]'"
+                :class="
+                  currentTabScrolled
+                    ? 'bg-green-500'
+                    : 'bg-[var(--color-primary)]'
+                "
                 :style="{ width: `${scrollProgress}%` }"
-              ></div>
+              />
             </div>
           </div>
 
@@ -183,7 +204,9 @@ const privacyHtmlContent = computed(() => {
 
 // Current content based on active tab
 const currentHtmlContent = computed(() => {
-  return activeTab.value === 'tos' ? tosHtmlContent.value : privacyHtmlContent.value
+  return activeTab.value === 'tos'
+    ? tosHtmlContent.value
+    : privacyHtmlContent.value
 })
 
 // State
@@ -195,8 +218,12 @@ const hasScrolledPrivacy = ref(false)
 const scrollProgress = ref(0)
 const tosContentRef = ref<HTMLElement | null>(null)
 
-const hasScrolledToBottom = computed(() => hasScrolledTos.value && hasScrolledPrivacy.value)
-const currentTabScrolled = computed(() => activeTab.value === 'tos' ? hasScrolledTos.value : hasScrolledPrivacy.value)
+const hasScrolledToBottom = computed(
+  () => hasScrolledTos.value && hasScrolledPrivacy.value,
+)
+const currentTabScrolled = computed(() =>
+  activeTab.value === 'tos' ? hasScrolledTos.value : hasScrolledPrivacy.value,
+)
 
 const canAgree = computed(() => hasScrolledToBottom.value)
 
@@ -206,7 +233,10 @@ const handleScroll = (event: Event) => {
 
   const scrollHeight = target.scrollHeight - target.clientHeight
   if (scrollHeight > 0) {
-    scrollProgress.value = Math.min(100, (target.scrollTop / scrollHeight) * 100)
+    scrollProgress.value = Math.min(
+      100,
+      (target.scrollTop / scrollHeight) * 100,
+    )
 
     if (target.scrollTop >= scrollHeight - 10) {
       if (activeTab.value === 'tos') hasScrolledTos.value = true
@@ -259,7 +289,8 @@ watch(activeTab, (tab) => {
   if (tosContentRef.value) {
     tosContentRef.value.scrollTop = 0
   }
-  const alreadyScrolled = tab === 'tos' ? hasScrolledTos.value : hasScrolledPrivacy.value
+  const alreadyScrolled =
+    tab === 'tos' ? hasScrolledTos.value : hasScrolledPrivacy.value
   scrollProgress.value = alreadyScrolled ? 100 : 0
   nextTick(() => {
     if (tosContentRef.value) {
@@ -273,38 +304,41 @@ watch(activeTab, (tab) => {
   })
 })
 
-watch(() => props.isOpen, async (isOpen) => {
-  if (isOpen) {
-    lockBodyScroll()
-    loading.value = true
-    agreed.value = false
-    hasScrolledTos.value = false
-    hasScrolledPrivacy.value = false
-    scrollProgress.value = 0
-    activeTab.value = 'tos'
+watch(
+  () => props.isOpen,
+  async (isOpen) => {
+    if (isOpen) {
+      lockBodyScroll()
+      loading.value = true
+      agreed.value = false
+      hasScrolledTos.value = false
+      hasScrolledPrivacy.value = false
+      scrollProgress.value = 0
+      activeTab.value = 'tos'
 
-    try {
-      const settings = await getTosSettings()
-      tosVersion.value = settings.tosVersion
-    } catch (error) {
-      console.error('Failed to fetch ToS settings:', error)
-    } finally {
-      loading.value = false
-    }
-
-    nextTick(() => {
-      if (tosContentRef.value) {
-        const { scrollHeight, clientHeight } = tosContentRef.value
-        if (scrollHeight <= clientHeight) {
-          hasScrolledTos.value = true
-          scrollProgress.value = 100
-        }
+      try {
+        const settings = await getTosSettings()
+        tosVersion.value = settings.tosVersion
+      } catch (error) {
+        console.error('Failed to fetch ToS settings:', error)
+      } finally {
+        loading.value = false
       }
-    })
-  } else {
-    unlockBodyScroll()
-  }
-})
+
+      nextTick(() => {
+        if (tosContentRef.value) {
+          const { scrollHeight, clientHeight } = tosContentRef.value
+          if (scrollHeight <= clientHeight) {
+            hasScrolledTos.value = true
+            scrollProgress.value = 100
+          }
+        }
+      })
+    } else {
+      unlockBodyScroll()
+    }
+  },
+)
 
 // Cleanup on unmount
 onUnmounted(() => {

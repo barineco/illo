@@ -5,7 +5,9 @@
       class="fixed inset-0 z-50 flex items-center justify-center bg-[var(--color-overlay)]"
       @click.self="close"
     >
-      <div class="bg-[var(--color-surface)] rounded-xl p-8 max-w-3xl w-full mx-4 max-h-[85vh] flex flex-col relative">
+      <div
+        class="bg-[var(--color-surface)] rounded-xl p-8 max-w-3xl w-full mx-4 max-h-[85vh] flex flex-col relative"
+      >
         <h2 class="text-2xl font-bold mb-6">{{ $t('licenses.title') }}</h2>
 
         <!-- Scrollable Content -->
@@ -15,12 +17,16 @@
             <h3 class="text-lg font-semibold mb-3 text-[var(--color-primary)]">
               {{ $t('licenses.projectLicense') }}
             </h3>
-            <div class="bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg p-4">
+            <div
+              class="bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg p-4"
+            >
               <p class="font-medium mb-2">illo</p>
               <p class="text-sm text-[var(--color-text-muted)] mb-2">
                 {{ $t('licenses.projectDescription') }}
               </p>
-              <span class="text-sm text-[var(--color-primary)] inline-flex items-center gap-1">
+              <span
+                class="text-sm text-[var(--color-primary)] inline-flex items-center gap-1"
+              >
                 illo Platform License v1.0.0
               </span>
             </div>

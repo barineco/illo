@@ -1,5 +1,6 @@
 export default defineNuxtRouteMiddleware(async (to, from) => {
-  const { isAuthenticated, fetchCurrentUser, user, refreshAccessToken } = useAuth()
+  const { isAuthenticated, fetchCurrentUser, user, refreshAccessToken } =
+    useAuth()
   const runtimeConfig = useRuntimeConfig()
   const instanceId = runtimeConfig.public.instanceId || 'default'
   const accessToken = useCookie(`${instanceId}_accessToken`)

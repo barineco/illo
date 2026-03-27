@@ -4,13 +4,19 @@
 
     <!-- Loading State -->
     <div v-if="isLoading" class="text-center py-16">
-      <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[var(--color-border)] border-t-[var(--color-primary)]"></div>
-      <p class="mt-4 text-[var(--color-text-muted)]">{{ $t('common.loading') }}</p>
+      <div
+        class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[var(--color-border)] border-t-[var(--color-primary)]"
+      />
+      <p class="mt-4 text-[var(--color-text-muted)]">
+        {{ $t('common.loading') }}
+      </p>
     </div>
 
     <!-- Empty State -->
     <div v-else-if="artworks.length === 0" class="text-center py-16">
-      <p class="text-[var(--color-text-muted)] text-lg mb-4">{{ $t('home.noFollowingYet') }}</p>
+      <p class="text-[var(--color-text-muted)] text-lg mb-4">
+        {{ $t('home.noFollowingYet') }}
+      </p>
       <NuxtLink
         to="/"
         class="inline-block px-6 py-3 bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] rounded-full font-medium transition-colors"
@@ -23,7 +29,10 @@
     <ArtworkGrid v-else :artworks="artworks" />
 
     <!-- Load More Button -->
-    <div v-if="!isLoading && artworks.length > 0 && hasMore" class="text-center mt-8 mb-4">
+    <div
+      v-if="!isLoading && artworks.length > 0 && hasMore"
+      class="text-center mt-8 mb-4"
+    >
       <BaseButton
         variant="primary"
         size="lg"
@@ -38,7 +47,10 @@
 </template>
 
 <script setup lang="ts">
-import type { ArtworkCardData, ApiArtworkResponse } from '~/composables/useArtworkTransform'
+import type {
+  ArtworkCardData,
+  ApiArtworkResponse,
+} from '~/composables/useArtworkTransform'
 
 definePageMeta({
   middleware: 'auth', // Require authentication
@@ -68,12 +80,15 @@ const fetchFollowingArtworks = async (append = false) => {
       hasMore.value = true
     }
 
-    const response = await api.get<FollowingArtworksResponse>('/api/artworks/following', {
-      params: {
-        page: currentPage.value,
-        limit,
+    const response = await api.get<FollowingArtworksResponse>(
+      '/api/artworks/following',
+      {
+        params: {
+          page: currentPage.value,
+          limit,
+        },
       },
-    })
+    )
 
     // Transform API response using composable
     const newArtworks = transformArtworks(response.artworks)

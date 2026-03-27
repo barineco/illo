@@ -12,7 +12,9 @@
         v-if="showBanner"
         class="fixed bottom-0 left-0 right-0 z-[60] p-4 bg-[var(--color-surface)] border-t border-[var(--color-border)] shadow-lg"
       >
-        <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div
+          class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4"
+        >
           <div class="flex-1 text-sm text-[var(--color-text-muted)]">
             <p>
               {{ $t('tos.guestBannerDescription') }}

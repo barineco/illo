@@ -2,21 +2,175 @@
   <div class="space-y-8">
     <!-- Loading State -->
     <div v-if="loading" class="flex justify-center py-8">
-      <div class="animate-spin h-8 w-8 border-2 border-[var(--color-primary)] border-t-transparent rounded-full"></div>
+      <div
+        class="animate-spin h-8 w-8 border-2 border-[var(--color-primary)] border-t-transparent rounded-full"
+      />
     </div>
 
     <!-- Error State -->
-    <div v-else-if="error" class="p-4 bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] rounded-lg text-[var(--color-danger-text)]">
+    <div
+      v-else-if="error"
+      class="p-4 bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] rounded-lg text-[var(--color-danger-text)]"
+    >
       {{ error }}
     </div>
 
     <template v-else>
       <!-- Security Section (integrated from SettingsSecurity) -->
-      <SettingsSecuritySection />
+      <SettingsSecuritySection
+        :has-set-password="currentProfile?.hasSetPassword ?? true"
+      />
+
+      <!-- Email Address Section -->
+      <section
+        class="bg-[var(--color-surface)] rounded-xl p-6 border border-[var(--color-border)]"
+      >
+        <h2 class="text-lg font-semibold mb-2">
+          {{ $t('settings.emailSection') }}
+        </h2>
+        <p class="text-sm text-[var(--color-text-muted)] mb-6">
+          {{ $t('settings.emailSectionDescription') }}
+        </p>
+
+        <!-- No email set (OAuth users) -->
+        <div v-if="!currentProfile?.email && !currentProfile?.pendingEmail">
+          <div
+            class="flex items-center gap-2 p-3 mb-4 bg-[var(--color-warning-bg)] border border-[var(--color-warning-border)] rounded-lg"
+          >
+            <Icon
+              name="ExclamationTriangle"
+              class="w-5 h-5 text-[var(--color-warning-text)] flex-shrink-0"
+            />
+            <p class="text-sm text-[var(--color-warning-text)]">
+              {{ $t('settings.emailNotSetWarning') }}
+            </p>
+          </div>
+          <div class="flex gap-3">
+            <input
+              v-model="newEmailInput"
+              type="email"
+              class="flex-1 px-4 py-2 bg-[var(--color-background)] rounded-lg border border-[var(--color-border)] focus:border-[var(--color-primary)] focus:outline-none transition-colors"
+              :placeholder="$t('settings.emailPlaceholder')"
+              @keydown.enter.prevent="handleRequestEmailChange"
+            />
+            <BaseButton
+              variant="primary"
+              size="md"
+              shape="rounded"
+              :disabled="emailChanging || !newEmailInput"
+              :loading="emailChanging"
+              @click="handleRequestEmailChange"
+            >
+              {{ $t('settings.setEmail') }}
+            </BaseButton>
+          </div>
+          <p
+            v-if="emailChangeError"
+            class="mt-2 text-sm text-[var(--color-danger-text)]"
+          >
+            {{ emailChangeError }}
+          </p>
+        </div>
+
+        <!-- Pending email change -->
+        <div v-else-if="currentProfile?.pendingEmail">
+          <div
+            class="flex items-center gap-2 p-3 mb-4 bg-[var(--color-info-bg)] border border-[var(--color-info-border)] rounded-lg"
+          >
+            <Icon
+              name="EnvelopeOpen"
+              class="w-5 h-5 text-[var(--color-info-text)] flex-shrink-0"
+            />
+            <p class="text-sm text-[var(--color-info-text)]">
+              {{ $t('settings.emailChangePending') }}
+            </p>
+          </div>
+          <BaseButton
+            variant="outline"
+            size="md"
+            shape="rounded"
+            :disabled="emailCancelling"
+            :loading="emailCancelling"
+            @click="handleCancelEmailChange"
+          >
+            {{ $t('settings.cancelEmailChange') }}
+          </BaseButton>
+        </div>
+
+        <!-- Email set -->
+        <div v-else>
+          <div
+            class="flex items-center gap-3 p-3 bg-[var(--color-background)] rounded-lg border border-[var(--color-border)] mb-4"
+          >
+            <div class="flex-1">
+              <p class="text-sm">{{ maskEmail(currentProfile.email) }}</p>
+              <span
+                v-if="currentProfile.isEmailVerified"
+                class="text-xs px-2 py-0.5 bg-[var(--color-success-bg)] text-[var(--color-success-text)] rounded-full"
+              >
+                {{ $t('settings.emailVerified') }}
+              </span>
+              <span
+                v-else
+                class="text-xs px-2 py-0.5 bg-[var(--color-warning-bg)] text-[var(--color-warning-text)] rounded-full"
+              >
+                {{ $t('settings.emailNotVerified') }}
+              </span>
+            </div>
+            <BaseButton
+              variant="outline"
+              size="sm"
+              shape="rounded"
+              @click="showEmailChangeForm = !showEmailChangeForm"
+            >
+              {{ $t('settings.changeEmail') }}
+            </BaseButton>
+          </div>
+
+          <div v-if="showEmailChangeForm" class="space-y-3">
+            <input
+              v-model="newEmailInput"
+              type="email"
+              class="w-full px-4 py-2 bg-[var(--color-background)] rounded-lg border border-[var(--color-border)] focus:border-[var(--color-primary)] focus:outline-none transition-colors"
+              :placeholder="$t('settings.emailPlaceholder')"
+            />
+            <input
+              v-if="currentProfile?.hasSetPassword"
+              v-model="emailChangePassword"
+              type="password"
+              class="w-full px-4 py-2 bg-[var(--color-background)] rounded-lg border border-[var(--color-border)] focus:border-[var(--color-primary)] focus:outline-none transition-colors"
+              :placeholder="$t('security.currentPassword')"
+            />
+            <p
+              v-if="emailChangeError"
+              class="text-sm text-[var(--color-danger-text)]"
+            >
+              {{ emailChangeError }}
+            </p>
+            <BaseButton
+              variant="primary"
+              size="md"
+              shape="rounded"
+              :disabled="emailChanging || !newEmailInput"
+              :loading="emailChanging"
+              @click="handleRequestEmailChange"
+            >
+              {{ $t('settings.submitEmailChange') }}
+            </BaseButton>
+          </div>
+        </div>
+      </section>
+
       <!-- Account Linking Section -->
-      <section class="bg-[var(--color-surface)] rounded-xl p-6 border border-[var(--color-border)]">
-        <h2 class="text-lg font-semibold mb-2">{{ $t('settings.accountLinking') }}</h2>
-        <p class="text-sm text-[var(--color-text-muted)] mb-6">{{ $t('settings.accountLinkingDescription') }}</p>
+      <section
+        class="bg-[var(--color-surface)] rounded-xl p-6 border border-[var(--color-border)]"
+      >
+        <h2 class="text-lg font-semibold mb-2">
+          {{ $t('settings.accountLinking') }}
+        </h2>
+        <p class="text-sm text-[var(--color-text-muted)] mb-6">
+          {{ $t('settings.accountLinkingDescription') }}
+        </p>
 
         <div class="space-y-6">
           <!-- Bluesky OAuth -->
@@ -28,26 +182,49 @@
 
             <!-- OAuth Linked State -->
             <div v-if="currentProfile?.blueskyDid" class="space-y-3">
-              <div class="flex items-center gap-3 p-3 bg-[var(--color-background)] rounded-lg border border-[var(--color-border)]">
+              <div
+                class="flex items-center gap-3 p-3 bg-[var(--color-background)] rounded-lg border border-[var(--color-border)]"
+              >
                 <div class="flex-1">
                   <div class="flex items-center gap-2">
-                    <span class="text-xs px-2 py-0.5 bg-[var(--color-success-bg)] text-[var(--color-success-text)] rounded-full">
+                    <span
+                      class="text-xs px-2 py-0.5 bg-[var(--color-success-bg)] text-[var(--color-success-text)] rounded-full"
+                    >
                       {{ $t('patreon.linked') }}
                     </span>
-                    <Icon v-if="currentProfile.blueskyVerified" name="CheckBadge" class="w-4 h-4 text-[var(--color-bluesky)]" :title="$t('user.blueskyVerified')" />
+                    <Icon
+                      v-if="currentProfile.blueskyVerified"
+                      name="CheckBadge"
+                      class="w-4 h-4 text-[var(--color-bluesky)]"
+                      :title="$t('user.blueskyVerified')"
+                    />
                   </div>
-                  <p class="text-sm mt-1">@{{ currentProfile.blueskyHandle }}</p>
+                  <p class="text-sm mt-1">
+                    @{{ currentProfile.blueskyHandle }}
+                  </p>
                 </div>
                 <button
                   type="button"
                   class="flex items-center justify-center w-9 h-9 bg-[var(--color-danger-bg)] hover:bg-[var(--color-danger-hover-bg)] border border-[var(--color-danger-border)] text-[var(--color-danger-text)] hover:text-[var(--color-danger-hover-text)] rounded-lg transition-colors disabled:opacity-50"
-                  :disabled="blueskyUnlinking"
+                  :disabled="
+                    blueskyUnlinking ||
+                    !currentProfile?.email ||
+                    !currentProfile?.isEmailVerified
+                  "
                   :title="$t('auth.bluesky.unlinkBluesky')"
                   @click="handleUnlinkBluesky"
                 >
                   <Icon name="XMark" class="w-4 h-4" />
                 </button>
               </div>
+              <p
+                v-if="
+                  !currentProfile?.email || !currentProfile?.isEmailVerified
+                "
+                class="text-xs text-[var(--color-warning-text)] mt-1"
+              >
+                {{ $t('settings.unlinkRequiresEmail') }}
+              </p>
             </div>
 
             <!-- OAuth Link Button (when not linked) -->
@@ -67,10 +244,17 @@
                   @click="handleLinkBluesky"
                 >
                   <BlueskyIcon class="w-4 h-4" />
-                  {{ blueskyLinking ? $t('common.loading') : $t('auth.bluesky.linkBluesky') }}
+                  {{
+                    blueskyLinking
+                      ? $t('common.loading')
+                      : $t('auth.bluesky.linkBluesky')
+                  }}
                 </button>
               </div>
-              <div v-if="blueskyLinkError" class="mt-2 text-sm text-[var(--color-danger-text)]">
+              <div
+                v-if="blueskyLinkError"
+                class="mt-2 text-sm text-[var(--color-danger-text)]"
+              >
                 {{ blueskyLinkError }}
               </div>
             </div>
@@ -89,22 +273,40 @@
             </label>
 
             <!-- Patreon not configured -->
-            <div v-if="!patreonEnabled" class="text-sm text-[var(--color-text-muted)]">
+            <div
+              v-if="!patreonEnabled"
+              class="text-sm text-[var(--color-text-muted)]"
+            >
               {{ $t('patreon.notConfigured') }}
             </div>
 
             <!-- Patreon linked -->
             <div v-else-if="currentProfile?.patreonId" class="space-y-3">
-              <div class="flex items-center gap-3 p-3 bg-[var(--color-background)] rounded-lg border border-[var(--color-border)]">
+              <div
+                class="flex items-center gap-3 p-3 bg-[var(--color-background)] rounded-lg border border-[var(--color-border)]"
+              >
                 <div class="flex-1">
                   <div class="flex items-center gap-2">
-                    <span class="text-xs px-2 py-0.5 bg-[var(--color-success-bg)] text-[var(--color-success-text)] rounded-full">
+                    <span
+                      class="text-xs px-2 py-0.5 bg-[var(--color-success-bg)] text-[var(--color-success-text)] rounded-full"
+                    >
                       {{ $t('patreon.linked') }}
                     </span>
-                    <SupporterBadge v-if="currentProfile.supporterTier && currentProfile.supporterTier !== 'NONE'" :tier="currentProfile.supporterTier" :show-label="true" />
+                    <SupporterBadge
+                      v-if="
+                        currentProfile.supporterTier &&
+                        currentProfile.supporterTier !== 'NONE'
+                      "
+                      :tier="currentProfile.supporterTier"
+                      :show-label="true"
+                    />
                   </div>
-                  <p v-if="currentProfile.patreonLastSyncAt" class="text-xs text-[var(--color-text-muted)] mt-1">
-                    {{ $t('patreon.lastSynced') }}: {{ formatDate(currentProfile.patreonLastSyncAt) }}
+                  <p
+                    v-if="currentProfile.patreonLastSyncAt"
+                    class="text-xs text-[var(--color-text-muted)] mt-1"
+                  >
+                    {{ $t('patreon.lastSynced') }}:
+                    {{ formatDate(currentProfile.patreonLastSyncAt) }}
                   </p>
                 </div>
                 <div class="flex gap-2">
@@ -114,7 +316,11 @@
                     :disabled="patreonSyncing"
                     @click="handleSyncPatreon"
                   >
-                    {{ patreonSyncing ? $t('patreon.syncing') : $t('patreon.sync') }}
+                    {{
+                      patreonSyncing
+                        ? $t('patreon.syncing')
+                        : $t('patreon.sync')
+                    }}
                   </button>
                   <button
                     type="button"
@@ -141,7 +347,11 @@
                 @click="handleLinkPatreon"
               >
                 <PatreonIcon class="w-4 h-4" />
-                {{ patreonLinking ? $t('patreon.linking') : $t('patreon.linkPatreon') }}
+                {{
+                  patreonLinking
+                    ? $t('patreon.linking')
+                    : $t('patreon.linkPatreon')
+                }}
               </button>
               <p class="text-xs text-[var(--color-text-muted)]">
                 {{ $t('patreon.description') }}
@@ -152,24 +362,38 @@
       </section>
 
       <!-- Instance Information Section -->
-      <section class="bg-[var(--color-surface)] rounded-xl p-6 border border-[var(--color-border)]">
-        <h2 class="text-lg font-semibold mb-2">{{ $t('settings.instanceInfo') }}</h2>
-        <p class="text-sm text-[var(--color-text-muted)] mb-6">{{ $t('settings.instanceInfoDescription') }}</p>
+      <section
+        class="bg-[var(--color-surface)] rounded-xl p-6 border border-[var(--color-border)]"
+      >
+        <h2 class="text-lg font-semibold mb-2">
+          {{ $t('settings.instanceInfo') }}
+        </h2>
+        <p class="text-sm text-[var(--color-text-muted)] mb-6">
+          {{ $t('settings.instanceInfoDescription') }}
+        </p>
 
         <div class="space-y-4">
           <!-- Contact Information -->
-          <div v-if="instanceContact.contactInfo || instanceContact.adminUsername">
+          <div
+            v-if="instanceContact.contactInfo || instanceContact.adminUsername"
+          >
             <!-- Contact Text -->
             <div v-if="instanceContact.contactInfo" class="mb-4">
-              <h3 class="text-sm font-medium mb-2">{{ $t('settings.instanceContact') }}</h3>
-              <div class="p-3 bg-[var(--color-background)] rounded-lg border border-[var(--color-border)] text-sm whitespace-pre-wrap">
+              <h3 class="text-sm font-medium mb-2">
+                {{ $t('settings.instanceContact') }}
+              </h3>
+              <div
+                class="p-3 bg-[var(--color-background)] rounded-lg border border-[var(--color-border)] text-sm whitespace-pre-wrap"
+              >
                 {{ instanceContact.contactInfo }}
               </div>
             </div>
 
             <!-- Admin Link -->
             <div v-if="instanceContact.adminUsername">
-              <h3 class="text-sm font-medium mb-2">{{ $t('settings.instanceAdmin') }}</h3>
+              <h3 class="text-sm font-medium mb-2">
+                {{ $t('settings.instanceAdmin') }}
+              </h3>
               <NuxtLink
                 :to="`/users/${instanceContact.adminUsername}`"
                 class="inline-flex items-center gap-2 px-3 py-2 bg-[var(--color-background)] hover:bg-[var(--color-hover)] rounded-lg border border-[var(--color-border)] transition-colors"
@@ -228,6 +452,71 @@ const showLicensesModal = ref(false)
 // Profile data
 const currentProfile = ref<any>(null)
 
+// Email change
+const newEmailInput = ref('')
+const emailChangePassword = ref('')
+const emailChanging = ref(false)
+const emailCancelling = ref(false)
+const emailChangeError = ref('')
+const showEmailChangeForm = ref(false)
+
+const maskEmail = (email: string | null) => {
+  if (!email) return ''
+  const [local, domain] = email.split('@')
+  if (local.length <= 2) return `${local[0]}***@${domain}`
+  return `${local[0]}${local[1]}***@${domain}`
+}
+
+const handleRequestEmailChange = async () => {
+  if (!newEmailInput.value) return
+
+  emailChanging.value = true
+  emailChangeError.value = ''
+
+  try {
+    await api.post('/api/users/me/email', {
+      email: newEmailInput.value,
+      ...(emailChangePassword.value
+        ? { password: emailChangePassword.value }
+        : {}),
+    })
+
+    if (currentProfile.value) {
+      currentProfile.value.pendingEmail = newEmailInput.value
+    }
+
+    newEmailInput.value = ''
+    emailChangePassword.value = ''
+    showEmailChangeForm.value = false
+    toast.success(t('settings.emailChangeRequested'))
+  } catch (err: any) {
+    emailChangeError.value =
+      err.response?.data?.message || err.data?.message || t('common.error')
+  } finally {
+    emailChanging.value = false
+  }
+}
+
+const handleCancelEmailChange = async () => {
+  emailCancelling.value = true
+
+  try {
+    await api.delete('/api/users/me/email/pending')
+
+    if (currentProfile.value) {
+      currentProfile.value.pendingEmail = null
+    }
+
+    toast.success(t('common.success'))
+  } catch (err: any) {
+    toast.error(
+      err.response?.data?.message || err.data?.message || t('common.error'),
+    )
+  } finally {
+    emailCancelling.value = false
+  }
+}
+
 // Bluesky OAuth
 const blueskyEnabled = ref(false)
 const blueskyLinkHandle = ref('')
@@ -261,7 +550,7 @@ const fetchProfile = async () => {
     loading.value = true
     error.value = null
 
-    const profile = await api.get<any>(`/users/${user.value.username}`)
+    const profile = await api.get<any>(`/api/users/${user.value.username}/me`)
     currentProfile.value = profile
   } catch (e: any) {
     console.error('Failed to load profile:', e)
@@ -273,7 +562,10 @@ const fetchProfile = async () => {
 
 const fetchInstanceContact = async () => {
   try {
-    const contact = await api.get<{ contactInfo: string | null; adminUsername: string | null }>('/api/instance/contact')
+    const contact = await api.get<{
+      contactInfo: string | null
+      adminUsername: string | null
+    }>('/api/instance/contact')
     instanceContact.value = contact
   } catch {
     // Silently fail - contact info is optional
@@ -334,7 +626,12 @@ const handleSyncPatreon = async () => {
 }
 
 const handleUnlinkPatreon = async () => {
-  if (!confirm(t('patreon.unlinkConfirm') + '\n\n' + t('patreon.unlinkConfirmMessage'))) return
+  if (
+    !confirm(
+      t('patreon.unlinkConfirm') + '\n\n' + t('patreon.unlinkConfirmMessage'),
+    )
+  )
+    return
 
   patreonUnlinking.value = true
 
@@ -393,7 +690,14 @@ const handleLinkBluesky = async () => {
 }
 
 const handleUnlinkBluesky = async () => {
-  if (!confirm(t('auth.bluesky.unlinkConfirm') + '\n\n' + t('auth.bluesky.unlinkConfirmMessage'))) return
+  if (
+    !confirm(
+      t('auth.bluesky.unlinkConfirm') +
+        '\n\n' +
+        t('auth.bluesky.unlinkConfirmMessage'),
+    )
+  )
+    return
 
   blueskyUnlinking.value = true
 
@@ -408,7 +712,9 @@ const handleUnlinkBluesky = async () => {
 
     toast.success(t('auth.bluesky.unlinkSuccess'))
   } catch (err: any) {
-    toast.error(err.response?.data?.message || err.data?.message || t('common.error'))
+    toast.error(
+      err.response?.data?.message || err.data?.message || t('common.error'),
+    )
   } finally {
     blueskyUnlinking.value = false
   }
@@ -429,9 +735,6 @@ onMounted(async () => {
     patreonEnabled.value = false
   }
 
-  await Promise.all([
-    fetchProfile(),
-    fetchInstanceContact(),
-  ])
+  await Promise.all([fetchProfile(), fetchInstanceContact()])
 })
 </script>

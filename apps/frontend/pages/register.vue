@@ -5,20 +5,26 @@
         <!-- Registration Success State -->
         <div v-if="registrationSuccess" class="text-center">
           <div class="mb-6">
-            <EnvelopeIcon class="w-16 h-16 text-[var(--color-success-icon)] mx-auto" />
+            <EnvelopeIcon
+              class="w-16 h-16 text-[var(--color-success-icon)] mx-auto"
+            />
           </div>
-          <h1 class="text-2xl font-bold mb-4">{{ $t('auth.registrationSuccess') }}</h1>
+          <h1 class="text-2xl font-bold mb-4">
+            {{ $t('auth.registrationSuccess') }}
+          </h1>
           <p class="text-[var(--color-text-muted)] mb-6">
             {{ $t('auth.verificationSent') }}<br />
             {{ $t('auth.verificationInstruction') }}
           </p>
           <div class="space-y-3">
             <button
-              @click="resendVerification"
               :disabled="resending"
               class="w-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-[var(--color-primary-text)] font-medium py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              @click="resendVerification"
             >
-              {{ resending ? $t('common.sending') : $t('auth.resendVerification') }}
+              {{
+                resending ? $t('common.sending') : $t('auth.resendVerification')
+              }}
             </button>
             <NuxtLink
               to="/login"
@@ -31,157 +37,186 @@
 
         <!-- Registration Form -->
         <div v-else>
-          <h1 class="text-2xl font-bold mb-6 text-center">{{ $t('auth.registerTitle') }}</h1>
+          <h1 class="text-2xl font-bold mb-6 text-center">
+            {{ $t('auth.registerTitle') }}
+          </h1>
 
-          <form @submit.prevent="handleRegister" class="space-y-4">
-          <!-- Username -->
-          <div>
-            <label for="username" class="block text-sm font-medium mb-2">
-              {{ $t('auth.username') }} <span class="text-[var(--color-danger-text)]">*</span>
-            </label>
-            <input
-              id="username"
-              v-model="username"
-              type="text"
-              required
-              :disabled="loading"
-              placeholder="username"
-              class="w-full px-4 py-2 bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:border-[var(--color-primary)] disabled:opacity-50"
-            />
-            <p class="text-xs text-[var(--color-text-muted)] mt-1">{{ $t('auth.usernameHint') }}</p>
-          </div>
-
-          <!-- Display Name -->
-          <div>
-            <label for="displayName" class="block text-sm font-medium mb-2">
-              {{ $t('auth.displayName') }}
-            </label>
-            <input
-              id="displayName"
-              v-model="displayName"
-              type="text"
-              :disabled="loading"
-              :placeholder="$t('auth.displayNameOptional')"
-              class="w-full px-4 py-2 bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:border-[var(--color-primary)] disabled:opacity-50"
-            />
-          </div>
-
-          <!-- Email -->
-          <div>
-            <label for="email" class="block text-sm font-medium mb-2">
-              {{ $t('auth.email') }} <span class="text-[var(--color-danger-text)]">*</span>
-            </label>
-            <input
-              id="email"
-              v-model="email"
-              type="email"
-              required
-              :disabled="loading"
-              placeholder="email@example.com"
-              class="w-full px-4 py-2 bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:border-[var(--color-primary)] disabled:opacity-50"
-            />
-          </div>
-
-          <!-- Password -->
-          <div>
-            <label for="password" class="block text-sm font-medium mb-2">
-              {{ $t('auth.password') }} <span class="text-[var(--color-danger-text)]">*</span>
-            </label>
-            <div class="relative">
+          <form class="space-y-4" @submit.prevent="handleRegister">
+            <!-- Username -->
+            <div>
+              <label for="username" class="block text-sm font-medium mb-2">
+                {{ $t('auth.username') }}
+                <span class="text-[var(--color-danger-text)]">*</span>
+              </label>
               <input
-                id="password"
-                v-model="password"
-                :type="showPassword ? 'text' : 'password'"
+                id="username"
+                v-model="username"
+                type="text"
                 required
                 :disabled="loading"
-                :placeholder="$t('auth.passwordHint')"
-                class="w-full px-4 py-2 pr-10 bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:border-[var(--color-primary)] disabled:opacity-50"
-                @keydown="handleKeyEvent"
-                @keyup="handleKeyEvent"
-                @blur="resetCapsLock"
+                placeholder="username"
+                class="w-full px-4 py-2 bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:border-[var(--color-primary)] disabled:opacity-50"
               />
-              <button
-                type="button"
-                @click="showPassword = !showPassword"
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-                tabindex="-1"
-              >
-                <EyeSlashIcon v-if="showPassword" class="w-5 h-5" />
-                <EyeIcon v-else class="w-5 h-5" />
-              </button>
+              <p class="text-xs text-[var(--color-text-muted)] mt-1">
+                {{ $t('auth.usernameHint') }}
+              </p>
             </div>
-            <p class="text-xs text-[var(--color-text-muted)] mt-1">{{ $t('auth.passwordHint') }}</p>
-          </div>
 
-          <!-- Password Confirm -->
-          <div>
-            <label for="passwordConfirm" class="block text-sm font-medium mb-2">
-              {{ $t('auth.passwordConfirm') }} <span class="text-[var(--color-danger-text)]">*</span>
-            </label>
-            <div class="relative">
+            <!-- Display Name -->
+            <div>
+              <label for="displayName" class="block text-sm font-medium mb-2">
+                {{ $t('auth.displayName') }}
+              </label>
               <input
-                id="passwordConfirm"
-                v-model="passwordConfirm"
-                :type="showPasswordConfirm ? 'text' : 'password'"
+                id="displayName"
+                v-model="displayName"
+                type="text"
+                :disabled="loading"
+                :placeholder="$t('auth.displayNameOptional')"
+                class="w-full px-4 py-2 bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:border-[var(--color-primary)] disabled:opacity-50"
+              />
+            </div>
+
+            <!-- Email -->
+            <div>
+              <label for="email" class="block text-sm font-medium mb-2">
+                {{ $t('auth.email') }}
+                <span class="text-[var(--color-danger-text)]">*</span>
+              </label>
+              <input
+                id="email"
+                v-model="email"
+                type="email"
                 required
                 :disabled="loading"
-                :placeholder="$t('auth.passwordConfirmPlaceholder')"
-                class="w-full px-4 py-2 pr-10 bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:border-[var(--color-primary)] disabled:opacity-50"
-                @keydown="handleKeyEvent"
-                @keyup="handleKeyEvent"
-                @blur="resetCapsLock"
+                placeholder="email@example.com"
+                class="w-full px-4 py-2 bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:border-[var(--color-primary)] disabled:opacity-50"
               />
-              <button
-                type="button"
-                @click="showPasswordConfirm = !showPasswordConfirm"
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
-                tabindex="-1"
+            </div>
+
+            <!-- Password -->
+            <div>
+              <label for="password" class="block text-sm font-medium mb-2">
+                {{ $t('auth.password') }}
+                <span class="text-[var(--color-danger-text)]">*</span>
+              </label>
+              <div class="relative">
+                <input
+                  id="password"
+                  v-model="password"
+                  :type="showPassword ? 'text' : 'password'"
+                  required
+                  :disabled="loading"
+                  :placeholder="$t('auth.passwordHint')"
+                  class="w-full px-4 py-2 pr-10 bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:border-[var(--color-primary)] disabled:opacity-50"
+                  @keydown="handleKeyEvent"
+                  @keyup="handleKeyEvent"
+                  @blur="resetCapsLock"
+                />
+                <button
+                  type="button"
+                  class="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+                  tabindex="-1"
+                  @click="showPassword = !showPassword"
+                >
+                  <EyeSlashIcon v-if="showPassword" class="w-5 h-5" />
+                  <EyeIcon v-else class="w-5 h-5" />
+                </button>
+              </div>
+              <p class="text-xs text-[var(--color-text-muted)] mt-1">
+                {{ $t('auth.passwordHint') }}
+              </p>
+            </div>
+
+            <!-- Password Confirm -->
+            <div>
+              <label
+                for="passwordConfirm"
+                class="block text-sm font-medium mb-2"
               >
-                <EyeSlashIcon v-if="showPasswordConfirm" class="w-5 h-5" />
-                <EyeIcon v-else class="w-5 h-5" />
-              </button>
+                {{ $t('auth.passwordConfirm') }}
+                <span class="text-[var(--color-danger-text)]">*</span>
+              </label>
+              <div class="relative">
+                <input
+                  id="passwordConfirm"
+                  v-model="passwordConfirm"
+                  :type="showPasswordConfirm ? 'text' : 'password'"
+                  required
+                  :disabled="loading"
+                  :placeholder="$t('auth.passwordConfirmPlaceholder')"
+                  class="w-full px-4 py-2 pr-10 bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:border-[var(--color-primary)] disabled:opacity-50"
+                  @keydown="handleKeyEvent"
+                  @keyup="handleKeyEvent"
+                  @blur="resetCapsLock"
+                />
+                <button
+                  type="button"
+                  class="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+                  tabindex="-1"
+                  @click="showPasswordConfirm = !showPasswordConfirm"
+                >
+                  <EyeSlashIcon v-if="showPasswordConfirm" class="w-5 h-5" />
+                  <EyeIcon v-else class="w-5 h-5" />
+                </button>
+              </div>
+              <div
+                v-if="isCapsLockOn"
+                class="flex items-center gap-1.5 text-[var(--color-warning-text)] text-xs mt-1"
+              >
+                <ExclamationTriangleIcon class="w-4 h-4 flex-shrink-0" />
+                {{ $t('auth.capsLockWarning') }}
+              </div>
+              <div
+                v-if="passwordConfirm && password !== passwordConfirm"
+                class="flex items-center gap-1.5 text-[var(--color-danger-text)] text-xs mt-1"
+              >
+                <ExclamationTriangleIcon class="w-4 h-4 flex-shrink-0" />
+                {{ $t('auth.passwordMismatch') }}
+              </div>
             </div>
-            <div v-if="isCapsLockOn" class="flex items-center gap-1.5 text-[var(--color-warning-text)] text-xs mt-1">
-              <ExclamationTriangleIcon class="w-4 h-4 flex-shrink-0" />
-              {{ $t('auth.capsLockWarning') }}
+
+            <!-- Terms of Service Status -->
+            <div
+              v-if="tosAgreed"
+              class="flex items-center gap-2 text-sm text-[var(--color-success-icon)]"
+            >
+              <CheckCircleIcon class="w-5 h-5" />
+              {{ $t('auth.tosAccepted') }}
             </div>
-            <div v-if="passwordConfirm && password !== passwordConfirm" class="flex items-center gap-1.5 text-[var(--color-danger-text)] text-xs mt-1">
-              <ExclamationTriangleIcon class="w-4 h-4 flex-shrink-0" />
-              {{ $t('auth.passwordMismatch') }}
+
+            <!-- Error Message -->
+            <div
+              v-if="error"
+              class="bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] rounded-lg p-3"
+            >
+              <p class="text-[var(--color-danger-text)] text-sm">{{ error }}</p>
             </div>
-          </div>
 
-          <!-- Terms of Service Status -->
-          <div v-if="tosAgreed" class="flex items-center gap-2 text-sm text-[var(--color-success-icon)]">
-            <CheckCircleIcon class="w-5 h-5" />
-            {{ $t('auth.tosAccepted') }}
-          </div>
-
-          <!-- Error Message -->
-          <div v-if="error" class="bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] rounded-lg p-3">
-            <p class="text-[var(--color-danger-text)] text-sm">{{ error }}</p>
-          </div>
-
-          <!-- Submit Button -->
-          <button
-            type="submit"
-            :disabled="loading || !isFormFieldsValid"
-            class="w-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-[var(--color-primary-text)] font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <span v-if="loading">{{ $t('auth.registering') }}</span>
-            <span v-else>{{ $t('auth.registerButton') }}</span>
-          </button>
+            <!-- Submit Button -->
+            <button
+              type="submit"
+              :disabled="loading || !isFormFieldsValid"
+              class="w-full bg-[var(--color-primary)] hover:bg-[var(--color-primary-hover)] text-[var(--color-primary-text)] font-medium py-2 px-4 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <span v-if="loading">{{ $t('auth.registering') }}</span>
+              <span v-else>{{ $t('auth.registerButton') }}</span>
+            </button>
           </form>
 
           <!-- Bluesky OAuth Registration -->
           <div v-if="blueskyEnabled" class="mt-6">
             <div class="flex items-center gap-4 mb-4">
-              <div class="flex-1 h-px bg-[var(--color-border)]"></div>
-              <span class="text-sm text-[var(--color-text-muted)]">{{ $t('auth.bluesky.orDivider') }}</span>
-              <div class="flex-1 h-px bg-[var(--color-border)]"></div>
+              <div class="flex-1 h-px bg-[var(--color-border)]" />
+              <span class="text-sm text-[var(--color-text-muted)]">{{
+                $t('auth.bluesky.orDivider')
+              }}</span>
+              <div class="flex-1 h-px bg-[var(--color-border)]" />
             </div>
 
-            <div class="mb-3 text-sm text-[var(--color-text-muted)] text-center">
+            <div
+              class="mb-3 text-sm text-[var(--color-text-muted)] text-center"
+            >
               {{ $t('auth.bluesky.quickRegisterHint') }}
             </div>
 
@@ -200,18 +235,30 @@
                 @click="handleBlueskyRegister"
               >
                 <BlueskyIcon class="w-5 h-5 text-white" />
-                {{ blueskyLoading ? $t('auth.registering') : $t('auth.bluesky.registerWithBluesky') }}
+                {{
+                  blueskyLoading
+                    ? $t('auth.registering')
+                    : $t('auth.bluesky.registerWithBluesky')
+                }}
               </button>
             </div>
-            <div v-if="blueskyError" class="mt-2 bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] rounded-lg p-3">
-              <p class="text-[var(--color-danger-text)] text-sm">{{ blueskyError }}</p>
+            <div
+              v-if="blueskyError"
+              class="mt-2 bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] rounded-lg p-3"
+            >
+              <p class="text-[var(--color-danger-text)] text-sm">
+                {{ blueskyError }}
+              </p>
             </div>
           </div>
 
           <!-- Login Link -->
           <div class="mt-6 text-center text-sm text-[var(--color-text-muted)]">
             {{ $t('auth.hasAccount') }}
-            <NuxtLink to="/login" class="text-[var(--color-primary)] hover:underline">
+            <NuxtLink
+              to="/login"
+              class="text-[var(--color-primary)] hover:underline"
+            >
               {{ $t('auth.loginButton') }}
             </NuxtLink>
           </div>
@@ -230,7 +277,10 @@
 </template>
 
 <script setup lang="ts">
-import { CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/vue/20/solid'
+import {
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+} from '@heroicons/vue/20/solid'
 import { EnvelopeIcon, EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outline'
 
 const { t } = useI18n()
@@ -288,7 +338,10 @@ const handleBlueskyRegister = async () => {
     // Redirect to Bluesky authorization
     window.location.href = response.url
   } catch (err: any) {
-    blueskyError.value = err.response?.data?.message || err.data?.message || t('auth.bluesky.authFailed')
+    blueskyError.value =
+      err.response?.data?.message ||
+      err.data?.message ||
+      t('auth.bluesky.authFailed')
   } finally {
     blueskyLoading.value = false
   }
@@ -296,10 +349,12 @@ const handleBlueskyRegister = async () => {
 
 // Check if form fields are valid (excluding ToS)
 const isFormFieldsValid = computed(() => {
-  return username.value.length >= 3 &&
+  return (
+    username.value.length >= 3 &&
     email.value.length > 0 &&
     password.value.length >= 8 &&
     password.value === passwordConfirm.value
+  )
 })
 
 // Check if entire form is valid (including ToS)

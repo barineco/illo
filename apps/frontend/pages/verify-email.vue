@@ -1,5 +1,7 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-[var(--color-background)] px-4">
+  <div
+    class="min-h-screen flex items-center justify-center bg-[var(--color-background)] px-4"
+  >
     <div class="max-w-md w-full">
       <!-- Card -->
       <div class="bg-[var(--color-surface)] rounded-lg p-8 shadow-xl">
@@ -17,10 +19,12 @@
                 stroke-linejoin="round"
                 stroke-width="2"
                 d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
-              ></path>
+              />
             </svg>
           </div>
-          <h1 class="text-2xl font-bold text-[var(--color-text)] mb-4">{{ $t('auth.emailVerified') }}</h1>
+          <h1 class="text-2xl font-bold text-[var(--color-text)] mb-4">
+            {{ $t('auth.emailVerified') }}
+          </h1>
           <p class="text-[var(--color-text-muted)] mb-6">
             {{ $t('auth.emailVerifiedDesc') }}
           </p>
@@ -46,10 +50,12 @@
                 stroke-linejoin="round"
                 stroke-width="2"
                 d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-              ></path>
+              />
             </svg>
           </div>
-          <h1 class="text-2xl font-bold text-[var(--color-text)] mb-4">{{ $t('auth.verificationFailed') }}</h1>
+          <h1 class="text-2xl font-bold text-[var(--color-text)] mb-4">
+            {{ $t('auth.verificationFailed') }}
+          </h1>
           <p class="text-[var(--color-text-muted)] mb-6">
             {{ errorMessage }}
           </p>
@@ -61,11 +67,13 @@
               {{ $t('auth.goToLogin') }}
             </NuxtLink>
             <button
-              @click="resendEmail"
               :disabled="resending"
               class="w-full bg-[var(--color-button-secondary)] hover:bg-[var(--color-button-secondary-hover)] text-[var(--color-text)] font-medium py-3 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              @click="resendEmail"
             >
-              {{ resending ? $t('common.sending') : $t('auth.resendVerification') }}
+              {{
+                resending ? $t('common.sending') : $t('auth.resendVerification')
+              }}
             </button>
           </div>
         </div>
@@ -86,16 +94,20 @@
                 r="10"
                 stroke="currentColor"
                 stroke-width="4"
-              ></circle>
+              />
               <path
                 class="opacity-75"
                 fill="currentColor"
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-              ></path>
+              />
             </svg>
           </div>
-          <h1 class="text-2xl font-bold text-[var(--color-text)] mb-4">{{ $t('auth.verifyingEmail') }}</h1>
-          <p class="text-[var(--color-text-muted)]">{{ $t('auth.pleaseWait') }}</p>
+          <h1 class="text-2xl font-bold text-[var(--color-text)] mb-4">
+            {{ $t('auth.verifyingEmail') }}
+          </h1>
+          <p class="text-[var(--color-text-muted)]">
+            {{ $t('auth.pleaseWait') }}
+          </p>
         </div>
       </div>
     </div>
@@ -136,7 +148,8 @@ onMounted(async () => {
     if (error.response?.status === 401) {
       errorMessage.value = t('auth.tokenExpired')
     } else {
-      errorMessage.value = error.response?.data?.message || t('auth.emailVerificationFailed')
+      errorMessage.value =
+        error.response?.data?.message || t('auth.emailVerificationFailed')
     }
   }
 })

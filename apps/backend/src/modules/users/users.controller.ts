@@ -3,6 +3,7 @@ import {
   Get,
   Put,
   Post,
+  Delete,
   Param,
   Body,
   Query,
@@ -25,6 +26,7 @@ import {
   UpdateBirthdayDto,
   UpdateContentFiltersDto,
 } from './users.service'
+import { RequestEmailChangeDto } from './dto/request-email-change.dto'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { CurrentUser } from '../auth/decorators/current-user.decorator'
 import { Public } from '../auth/decorators/public.decorator'
@@ -277,6 +279,25 @@ export class UsersController {
   @UseGuards(JwtAuthGuard)
   async getMyArtworks(@CurrentUser() currentUser: any) {
     return this.usersService.getMyArtworks(currentUser.id)
+  }
+
+  @Post('me/email')
+  @UseGuards(JwtAuthGuard)
+  async requestEmailChange(
+    @CurrentUser() currentUser: any,
+    @Body() dto: RequestEmailChangeDto,
+  ) {
+    return this.usersService.requestEmailChange(
+      currentUser.id,
+      dto.email,
+      dto.password,
+    )
+  }
+
+  @Delete('me/email/pending')
+  @UseGuards(JwtAuthGuard)
+  async cancelEmailChange(@CurrentUser() currentUser: any) {
+    return this.usersService.cancelEmailChange(currentUser.id)
   }
 
   // ========================================

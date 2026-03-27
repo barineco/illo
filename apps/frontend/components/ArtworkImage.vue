@@ -6,7 +6,9 @@
       class="absolute inset-0 flex items-center justify-center bg-[var(--color-surface-secondary)]"
       :class="loadingClass"
     >
-      <div class="w-8 h-8 border-2 border-[var(--color-border)] border-t-[var(--color-primary)] rounded-full animate-spin" />
+      <div
+        class="w-8 h-8 border-2 border-[var(--color-border)] border-t-[var(--color-primary)] rounded-full animate-spin"
+      />
     </div>
 
     <!-- Error state -->
@@ -15,7 +17,10 @@
       class="absolute inset-0 flex items-center justify-center bg-[var(--color-surface-secondary)]"
       :class="errorClass"
     >
-      <Icon name="PhotoIcon" class="w-12 h-12 text-[var(--color-text-muted)] opacity-50" />
+      <Icon
+        name="PhotoIcon"
+        class="w-12 h-12 text-[var(--color-text-muted)] opacity-50"
+      />
     </div>
 
     <!-- Image -->
@@ -93,12 +98,10 @@ const hasError = ref(false)
 // Use signed URL if imageId is provided, otherwise use direct src
 const resolvedImageId = computed(() => props.imageId || '')
 
-const {
-  signedUrl,
-  isLoading,
-  error,
-  refresh,
-} = useSignedImageUrl(resolvedImageId, props.thumbnail)
+const { signedUrl, isLoading, error, refresh } = useSignedImageUrl(
+  resolvedImageId,
+  props.thumbnail,
+)
 
 // Final image URL: prefer signed URL, fall back to direct src
 const imageUrl = computed(() => {
@@ -109,12 +112,15 @@ const imageUrl = computed(() => {
 })
 
 // Watch for src changes to reset loading state
-watch(() => imageUrl.value, () => {
-  if (imageUrl.value) {
-    isImageLoading.value = true
-    hasError.value = false
-  }
-})
+watch(
+  () => imageUrl.value,
+  () => {
+    if (imageUrl.value) {
+      isImageLoading.value = true
+      hasError.value = false
+    }
+  },
+)
 
 function onImageLoad() {
   isImageLoading.value = false

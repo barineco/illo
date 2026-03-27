@@ -9,29 +9,35 @@
       >
         <!-- Close Button -->
         <button
-          @click="close"
           class="absolute top-4 right-4 w-12 h-12 flex items-center justify-center bg-[var(--color-viewer-button)] hover:bg-[var(--color-viewer-button-hover)] rounded-full transition-colors z-10 text-white"
           :title="$t('viewer.closeKey')"
+          @click="close"
         >
           <Icon name="XMark" class="w-6 h-6" />
         </button>
 
         <!-- Image Info -->
-        <div class="absolute top-4 left-4 bg-[var(--color-viewer-controls)] px-4 py-2 rounded-lg z-10">
+        <div
+          class="absolute top-4 left-4 bg-[var(--color-viewer-controls)] px-4 py-2 rounded-lg z-10"
+        >
           <p class="text-sm text-[var(--color-text-secondary)]">
             {{ currentIndex + 1 }} / {{ images.length }}
           </p>
-          <p v-if="actualImageDimensions.width && actualImageDimensions.height" class="text-xs text-[var(--color-text-muted)] mt-1">
-            {{ actualImageDimensions.width }} × {{ actualImageDimensions.height }}
+          <p
+            v-if="actualImageDimensions.width && actualImageDimensions.height"
+            class="text-xs text-[var(--color-text-muted)] mt-1"
+          >
+            {{ actualImageDimensions.width }} ×
+            {{ actualImageDimensions.height }}
           </p>
         </div>
 
         <!-- Download Button (hidden when right-click is disabled) -->
         <button
           v-if="currentImage && !disableRightClick"
-          @click="downloadImage"
           class="absolute top-4 right-20 w-12 h-12 flex items-center justify-center bg-[var(--color-viewer-button)] hover:bg-[var(--color-viewer-button-hover)] rounded-full transition-colors z-10 text-white"
           :title="$t('viewer.download')"
+          @click="downloadImage"
         >
           <Icon name="ArrowDownTray" class="w-6 h-6" />
         </button>
@@ -39,9 +45,9 @@
         <!-- Previous Button -->
         <button
           v-if="images.length > 1"
-          @click="previous"
           class="absolute left-4 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center bg-[var(--color-viewer-button)] hover:bg-[var(--color-viewer-button-hover)] rounded-full transition-colors text-white"
           :title="$t('viewer.previousKey')"
+          @click="previous"
         >
           <Icon name="ChevronLeft" class="w-6 h-6" />
         </button>
@@ -49,9 +55,9 @@
         <!-- Next Button -->
         <button
           v-if="images.length > 1"
-          @click="next"
           class="absolute right-4 top-1/2 -translate-y-1/2 w-12 h-12 flex items-center justify-center bg-[var(--color-viewer-button)] hover:bg-[var(--color-viewer-button-hover)] rounded-full transition-colors text-white"
           :title="$t('viewer.nextKey')"
+          @click="next"
         >
           <Icon name="ChevronRight" class="w-6 h-6" />
         </button>
@@ -90,33 +96,34 @@
           class="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-[var(--color-viewer-controls)] px-4 py-2 rounded-lg text-white"
         >
           <button
-            @click="zoomOut"
             :disabled="zoom <= minZoom"
             class="w-8 h-8 flex items-center justify-center hover:bg-[var(--color-viewer-button-hover)] rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
             :title="$t('viewer.zoomOut')"
+            @click="zoomOut"
           >
             <Icon name="MinusCircle" class="w-5 h-5" />
           </button>
 
-          <span class="text-sm text-[var(--color-text-secondary)] min-w-[4rem] text-center">{{
-            Math.round(zoom * 100)
-          }}%</span>
+          <span
+            class="text-sm text-[var(--color-text-secondary)] min-w-[4rem] text-center"
+            >{{ Math.round(zoom * 100) }}%</span
+          >
 
           <button
-            @click="zoomIn"
             :disabled="zoom >= maxZoom"
             class="w-8 h-8 flex items-center justify-center hover:bg-[var(--color-viewer-button-hover)] rounded transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
             :title="$t('viewer.zoomIn')"
+            @click="zoomIn"
           >
             <Icon name="PlusCircle" class="w-5 h-5" />
           </button>
 
-          <div class="w-px h-6 bg-[var(--color-border)] mx-2"></div>
+          <div class="w-px h-6 bg-[var(--color-border)] mx-2" />
 
           <button
-            @click="resetZoom"
             class="px-3 py-1 hover:bg-[var(--color-viewer-button-hover)] rounded text-sm transition-colors"
             :title="$t('viewer.reset')"
+            @click="resetZoom"
           >
             {{ $t('viewer.reset') }}
           </button>
@@ -130,13 +137,13 @@
           <button
             v-for="(image, index) in images"
             :key="image.id"
-            @click="goToImage(index)"
             class="flex-shrink-0 w-16 h-16 rounded overflow-hidden border-2 transition-all"
             :class="
               currentIndex === index
                 ? 'border-[var(--color-primary)]'
                 : 'border-transparent hover:border-[var(--color-border)]'
             "
+            @click="goToImage(index)"
           >
             <img
               :src="image.thumbnailUrl || image.url"

@@ -19,8 +19,8 @@
     >
       <!-- Copy URL -->
       <button
-        @click.stop="copyUrl"
         class="w-full px-4 py-3 text-left text-sm hover:bg-[var(--color-hover)] transition-colors flex items-center gap-3"
+        @click.stop="copyUrl"
       >
         <Icon name="Link" class="w-4 h-4" />
         {{ $t('artwork.shareUrl') }}
@@ -28,8 +28,8 @@
 
       <!-- Share to Bluesky -->
       <button
-        @click.stop="shareToBluesky"
         class="w-full px-4 py-3 text-left text-sm hover:bg-[var(--color-hover)] transition-colors flex items-center gap-3"
+        @click.stop="shareToBluesky"
       >
         <BlueskyIcon class="w-4 h-4" />
         {{ $t('artwork.shareToBluesky') }}

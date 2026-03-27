@@ -1,12 +1,12 @@
 import { describe, it, expect, vi } from 'vitest'
 
+import { useLinkify } from './useLinkify'
+
 vi.mock('dompurify', () => ({
   default: {
     sanitize: (html: string) => html,
   },
 }))
-
-import { useLinkify } from './useLinkify'
 
 describe('useLinkify', () => {
   const { linkify } = useLinkify()

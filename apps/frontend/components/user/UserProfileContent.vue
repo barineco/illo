@@ -50,11 +50,17 @@
       </div>
 
       <div v-if="isLoadingSortedArtworks" class="text-center py-16">
-        <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[var(--color-border)] border-t-[var(--color-primary)]"></div>
-        <p class="mt-4 text-[var(--color-text-muted)]">{{ $t('common.loading') }}</p>
+        <div
+          class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[var(--color-border)] border-t-[var(--color-primary)]"
+        />
+        <p class="mt-4 text-[var(--color-text-muted)]">
+          {{ $t('common.loading') }}
+        </p>
       </div>
       <div v-else-if="displayedArtworks.length === 0" class="text-center py-16">
-        <p class="text-[var(--color-text-muted)] text-lg mb-4">{{ $t('user.noWorksYet') }}</p>
+        <p class="text-[var(--color-text-muted)] text-lg mb-4">
+          {{ $t('user.noWorksYet') }}
+        </p>
         <BaseButton
           v-if="isOwnProfile"
           variant="primary"
@@ -68,7 +74,14 @@
       <ArtworkGrid v-else :artworks="displayedArtworks" />
 
       <!-- Load More Button for Artworks -->
-      <div v-if="!isLoadingSortedArtworks && displayedArtworks.length > 0 && hasMoreArtworks" class="text-center mt-8 mb-4">
+      <div
+        v-if="
+          !isLoadingSortedArtworks &&
+          displayedArtworks.length > 0 &&
+          hasMoreArtworks
+        "
+        class="text-center mt-8 mb-4"
+      >
         <BaseButton
           variant="primary"
           size="lg"
@@ -87,7 +100,9 @@
         <p class="text-[var(--color-text-muted)]">{{ $t('common.loading') }}</p>
       </div>
       <div v-else-if="collections.length === 0" class="text-center py-16">
-        <p class="text-[var(--color-text-muted)] text-lg mb-4">{{ $t('user.noCollectionsYet') }}</p>
+        <p class="text-[var(--color-text-muted)] text-lg mb-4">
+          {{ $t('user.noCollectionsYet') }}
+        </p>
         <BaseButton
           v-if="isOwnProfile"
           variant="primary"
@@ -111,12 +126,24 @@
               :to="`/collections/${collection.id}`"
               class="flex items-center gap-3 hover:opacity-80 transition-opacity"
             >
-              <div class="w-8 h-8 bg-[var(--color-surface-secondary)] rounded flex items-center justify-center text-[var(--color-text-muted)]">
+              <div
+                class="w-8 h-8 bg-[var(--color-surface-secondary)] rounded flex items-center justify-center text-[var(--color-text-muted)]"
+              >
                 <Icon name="FolderOpen" class="w-5 h-5" />
               </div>
               <div>
-                <h3 class="font-bold hover:text-[var(--color-primary)] transition-colors">{{ collection.title }}</h3>
-                <p class="text-sm text-[var(--color-text-muted)]">{{ $t('user.collectionCount', { count: collection.artworkCount }) }}</p>
+                <h3
+                  class="font-bold hover:text-[var(--color-primary)] transition-colors"
+                >
+                  {{ collection.title }}
+                </h3>
+                <p class="text-sm text-[var(--color-text-muted)]">
+                  {{
+                    $t('user.collectionCount', {
+                      count: collection.artworkCount,
+                    })
+                  }}
+                </p>
               </div>
             </NuxtLink>
             <NuxtLink
@@ -128,12 +155,18 @@
           </div>
 
           <!-- Description if exists -->
-          <p v-if="collection.description" class="text-sm text-[var(--color-text-muted)] mb-4 line-clamp-2">
+          <p
+            v-if="collection.description"
+            class="text-sm text-[var(--color-text-muted)] mb-4 line-clamp-2"
+          >
             {{ collection.description }}
           </p>
 
           <!-- Artwork Preview Row -->
-          <div v-if="collection.artworks && collection.artworks.length > 0" class="flex gap-2 overflow-x-auto p-1 -m-1">
+          <div
+            v-if="collection.artworks && collection.artworks.length > 0"
+            class="flex gap-2 overflow-x-auto p-1 -m-1"
+          >
             <NuxtLink
               v-for="ca in collection.artworks.slice(0, 6)"
               :key="ca.artwork.id"
@@ -142,11 +175,22 @@
             >
               <img
                 v-if="ca.artwork.images && ca.artwork.images[0]"
-                :src="getCollectionArtworkUrl(ca.artwork.id, ca.artwork.images[0].id, ca.artwork.images[0].thumbnailUrl || ca.artwork.images[0].url || '')"
+                :src="
+                  getCollectionArtworkUrl(
+                    ca.artwork.id,
+                    ca.artwork.images[0].id,
+                    ca.artwork.images[0].thumbnailUrl ||
+                      ca.artwork.images[0].url ||
+                      '',
+                  )
+                "
                 :alt="ca.artwork.title"
                 class="w-full h-full object-cover"
               />
-              <div v-else class="w-full h-full flex items-center justify-center text-[var(--color-text-muted)]">
+              <div
+                v-else
+                class="w-full h-full flex items-center justify-center text-[var(--color-text-muted)]"
+              >
                 <Icon name="Photo" class="w-8 h-8" />
               </div>
             </NuxtLink>
@@ -156,7 +200,9 @@
               :to="`/collections/${collection.id}`"
               class="flex-shrink-0 w-32 aspect-square rounded-lg bg-[var(--color-surface-secondary)] flex items-center justify-center hover:bg-[var(--color-surface-secondary)] transition-colors"
             >
-              <span class="text-[var(--color-text-muted)]">+{{ collection.artworkCount - 6 }}</span>
+              <span class="text-[var(--color-text-muted)]"
+                >+{{ collection.artworkCount - 6 }}</span
+              >
             </NuxtLink>
           </div>
 
@@ -174,12 +220,17 @@
         <p class="text-[var(--color-text-muted)]">{{ $t('common.loading') }}</p>
       </div>
       <div v-else-if="likedArtworks.length === 0" class="text-center py-16">
-        <p class="text-[var(--color-text-muted)] text-lg">{{ $t('user.noLikesYet') }}</p>
+        <p class="text-[var(--color-text-muted)] text-lg">
+          {{ $t('user.noLikesYet') }}
+        </p>
       </div>
       <ArtworkGrid v-else :artworks="likedArtworks" />
 
       <!-- Load More Button for Likes -->
-      <div v-if="!isLoadingLikes && likedArtworks.length > 0 && hasMoreLikes" class="text-center mt-8 mb-4">
+      <div
+        v-if="!isLoadingLikes && likedArtworks.length > 0 && hasMoreLikes"
+        class="text-center mt-8 mb-4"
+      >
         <BaseButton
           variant="primary"
           size="lg"
@@ -197,8 +248,13 @@
       <div v-if="isLoadingBookmarks" class="text-center py-16">
         <p class="text-[var(--color-text-muted)]">{{ $t('common.loading') }}</p>
       </div>
-      <div v-else-if="bookmarkedArtworks.length === 0" class="text-center py-16">
-        <p class="text-[var(--color-text-muted)] text-lg mb-4">{{ $t('user.noBookmarksYet') }}</p>
+      <div
+        v-else-if="bookmarkedArtworks.length === 0"
+        class="text-center py-16"
+      >
+        <p class="text-[var(--color-text-muted)] text-lg mb-4">
+          {{ $t('user.noBookmarksYet') }}
+        </p>
         <BaseButton
           variant="primary"
           size="lg"
@@ -211,7 +267,14 @@
       <ArtworkGrid v-else :artworks="bookmarkedArtworks" />
 
       <!-- Load More Button for Bookmarks -->
-      <div v-if="!isLoadingBookmarks && bookmarkedArtworks.length > 0 && hasMoreBookmarks" class="text-center mt-8 mb-4">
+      <div
+        v-if="
+          !isLoadingBookmarks &&
+          bookmarkedArtworks.length > 0 &&
+          hasMoreBookmarks
+        "
+        class="text-center mt-8 mb-4"
+      >
         <BaseButton
           variant="primary"
           size="lg"
@@ -219,7 +282,9 @@
           :disabled="loadingMoreBookmarks"
           @click="loadMoreBookmarks"
         >
-          {{ loadingMoreBookmarks ? $t('common.loading') : $t('home.loadMore') }}
+          {{
+            loadingMoreBookmarks ? $t('common.loading') : $t('home.loadMore')
+          }}
         </BaseButton>
       </div>
     </div>
@@ -229,9 +294,9 @@
       <UserList
         :users="followers"
         :loading="isLoadingFollowers"
-        :emptyMessage="$t('user.noFollowersYet')"
-        :showFollowButton="true"
-        @followToggle="handleFollowToggle"
+        :empty-message="$t('user.noFollowersYet')"
+        :show-follow-button="true"
+        @follow-toggle="handleFollowToggle"
       />
     </div>
 
@@ -240,9 +305,9 @@
       <UserList
         :users="following"
         :loading="isLoadingFollowing"
-        :emptyMessage="$t('user.noFollowingYet')"
-        :showFollowButton="true"
-        @followToggle="handleFollowToggle"
+        :empty-message="$t('user.noFollowingYet')"
+        :show-follow-button="true"
+        @follow-toggle="handleFollowToggle"
       />
     </div>
   </div>
@@ -318,7 +383,9 @@ const sortTabs = computed(() => [
 ])
 
 // Artwork sort state
-const artworkSort = ref<'latest' | 'creationDate' | 'popular' | 'views'>('latest')
+const artworkSort = ref<'latest' | 'creationDate' | 'popular' | 'views'>(
+  'latest',
+)
 const sortedArtworks = ref<ArtworkCardInput[]>([])
 const isLoadingSortedArtworks = ref(false)
 const hasFetchedSortedArtworks = ref(false)
@@ -333,7 +400,10 @@ const hasMoreArtworks = computed(() => {
     return props.artworks.length >= artworkLimit
   }
   // After fetching, check the last fetch result
-  return sortedArtworks.value.length > 0 && sortedArtworks.value.length % artworkLimit === 0
+  return (
+    sortedArtworks.value.length > 0 &&
+    sortedArtworks.value.length % artworkLimit === 0
+  )
 })
 
 const displayedArtworks = computed(() => {
@@ -350,9 +420,12 @@ const displayedArtworks = computed(() => {
 const fetchTopTags = async () => {
   try {
     isLoadingTopTags.value = true
-    const response = await api.get<{ tags: TopTag[] }>(`/api/users/${props.username}/top-tags`, {
-      params: { limit: 10 },
-    })
+    const response = await api.get<{ tags: TopTag[] }>(
+      `/api/users/${props.username}/top-tags`,
+      {
+        params: { limit: 10 },
+      },
+    )
     topTags.value = response.tags || []
   } catch (error) {
     console.error('Failed to fetch top tags:', error)
@@ -383,7 +456,9 @@ const fetchSortedArtworks = async (append = false) => {
 
     let apiSort: string = artworkSort.value
     if (artworkSort.value === 'creationDate') {
-      apiSort = creationDateSortDesc.value ? 'creationDateDesc' : 'creationDateAsc'
+      apiSort = creationDateSortDesc.value
+        ? 'creationDateDesc'
+        : 'creationDateAsc'
     }
 
     const params: Record<string, any> = {
@@ -397,7 +472,10 @@ const fetchSortedArtworks = async (append = false) => {
       params.tag = selectedTagFilter.value
     }
 
-    const response = await api.get<any>(`/api/artworks/user/${props.username}`, { params })
+    const response = await api.get<any>(
+      `/api/artworks/user/${props.username}`,
+      { params },
+    )
 
     const newArtworks = transformArtworks(response.artworks)
 
@@ -461,16 +539,28 @@ const isLoadingFollowing = ref(false)
 
 // Pagination for likes and bookmarks
 const loadingMoreLikes = ref(false)
-const hasMoreLikes = computed(() => likedArtworks.value.length > 0 && likedArtworks.value.length % likesLimit === 0)
+const hasMoreLikes = computed(
+  () =>
+    likedArtworks.value.length > 0 &&
+    likedArtworks.value.length % likesLimit === 0,
+)
 const likesPage = ref(1)
 const likesLimit = 20
 
 const loadingMoreBookmarks = ref(false)
-const hasMoreBookmarks = computed(() => bookmarkedArtworks.value.length > 0 && bookmarkedArtworks.value.length % bookmarksLimit === 0)
+const hasMoreBookmarks = computed(
+  () =>
+    bookmarkedArtworks.value.length > 0 &&
+    bookmarkedArtworks.value.length % bookmarksLimit === 0,
+)
 const bookmarksPage = ref(1)
 const bookmarksLimit = 20
 
-const getCollectionArtworkUrl = (artworkId: string, imageId: string, fallbackUrl: string) => {
+const getCollectionArtworkUrl = (
+  artworkId: string,
+  imageId: string,
+  fallbackUrl: string,
+) => {
   const cacheKey = `${artworkId}-${imageId}`
   return signedCollectionUrls.value.get(cacheKey) || fallbackUrl
 }
@@ -499,16 +589,21 @@ const fetchCollectionSignedUrls = async (collectionList: Collection[]) => {
         const cacheKey = `${artworkId}-${imageId}`
         signedCollectionUrls.value.set(cacheKey, signedUrl)
       } catch (error) {
-        console.error(`Failed to get signed URL for collection artwork ${artworkId}:`, error)
+        console.error(
+          `Failed to get signed URL for collection artwork ${artworkId}:`,
+          error,
+        )
       }
-    })
+    }),
   )
 }
 
 const fetchCollections = async () => {
   isLoadingCollections.value = true
   try {
-    const response = await api.get<Collection[]>(`/api/collections/user/${encodeURIComponent(props.userHandle)}`)
+    const response = await api.get<Collection[]>(
+      `/api/collections/user/${encodeURIComponent(props.userHandle)}`,
+    )
     collections.value = response || []
     await fetchCollectionSignedUrls(collections.value)
   } catch (error) {
@@ -530,15 +625,20 @@ const fetchLikedArtworks = async (append = false) => {
       likesPage.value = 1
     }
 
-    const response = await api.get<{ artworks: any[] }>(`/api/likes/user/${props.username}`, {
-      params: {
-        page: likesPage.value,
-        limit: likesLimit,
+    const response = await api.get<{ artworks: any[] }>(
+      `/api/likes/user/${props.username}`,
+      {
+        params: {
+          page: likesPage.value,
+          limit: likesLimit,
+        },
       },
-    })
+    )
 
     const newArtworks = transformArtworks(response.artworks)
-    likedArtworks.value = append ? [...likedArtworks.value, ...newArtworks] : newArtworks
+    likedArtworks.value = append
+      ? [...likedArtworks.value, ...newArtworks]
+      : newArtworks
   } catch (error) {
     console.error('Failed to fetch liked artworks:', error)
     if (!append) {
@@ -566,15 +666,20 @@ const fetchBookmarkedArtworks = async (append = false) => {
       bookmarksPage.value = 1
     }
 
-    const response = await api.get<{ artworks: any[] }>(`/api/bookmarks/user/${props.username}`, {
-      params: {
-        page: bookmarksPage.value,
-        limit: bookmarksLimit,
+    const response = await api.get<{ artworks: any[] }>(
+      `/api/bookmarks/user/${props.username}`,
+      {
+        params: {
+          page: bookmarksPage.value,
+          limit: bookmarksLimit,
+        },
       },
-    })
+    )
 
     const newArtworks = transformArtworks(response.artworks)
-    bookmarkedArtworks.value = append ? [...bookmarkedArtworks.value, ...newArtworks] : newArtworks
+    bookmarkedArtworks.value = append
+      ? [...bookmarkedArtworks.value, ...newArtworks]
+      : newArtworks
   } catch (error) {
     console.error('Failed to fetch bookmarked artworks:', error)
     if (!append) {
@@ -593,7 +698,9 @@ const loadMoreBookmarks = async () => {
 const fetchFollowers = async () => {
   isLoadingFollowers.value = true
   try {
-    const response = await api.get<{ followers: UserInList[] }>(`/api/follows/${encodeURIComponent(props.userHandle)}/followers`)
+    const response = await api.get<{ followers: UserInList[] }>(
+      `/api/follows/${encodeURIComponent(props.userHandle)}/followers`,
+    )
     followers.value = response.followers || []
   } catch (error) {
     console.error('Failed to fetch followers:', error)
@@ -605,7 +712,9 @@ const fetchFollowers = async () => {
 const fetchFollowing = async () => {
   isLoadingFollowing.value = true
   try {
-    const response = await api.get<{ following: UserInList[] }>(`/api/follows/${encodeURIComponent(props.userHandle)}/following`)
+    const response = await api.get<{ following: UserInList[] }>(
+      `/api/follows/${encodeURIComponent(props.userHandle)}/following`,
+    )
     following.value = response.following || []
   } catch (error) {
     console.error('Failed to fetch following:', error)
@@ -621,14 +730,24 @@ const handleFollowToggle = async (targetUser: UserInList) => {
       : targetUser.username
     const previousFollowing = targetUser.isFollowing ?? false
 
-    const result = await api.post<{ following: boolean }>(`/api/follows/${encodeURIComponent(handle)}/toggle`)
+    const result = await api.post<{ following: boolean }>(
+      `/api/follows/${encodeURIComponent(handle)}/toggle`,
+    )
     targetUser.isFollowing = result.following
 
     if (props.isOwnProfile) {
-      if (!result.following && previousFollowing && props.selectedTab === 'following') {
+      if (
+        !result.following &&
+        previousFollowing &&
+        props.selectedTab === 'following'
+      ) {
         emit('updateFollowingCount', -1)
       }
-      if (result.following && !previousFollowing && props.selectedTab === 'followers') {
+      if (
+        result.following &&
+        !previousFollowing &&
+        props.selectedTab === 'followers'
+      ) {
         emit('updateFollowingCount', 1)
       }
     }
@@ -638,23 +757,34 @@ const handleFollowToggle = async (targetUser: UserInList) => {
   }
 }
 
-watch(() => props.selectedTab, (newTab) => {
-  if (newTab === 'collections' && collections.value.length === 0) {
-    fetchCollections()
-  } else if (newTab === 'likes' && likedArtworks.value.length === 0) {
-    fetchLikedArtworks()
-  } else if (newTab === 'bookmarks' && bookmarkedArtworks.value.length === 0) {
-    fetchBookmarkedArtworks()
-  }
-}, { immediate: true })
+watch(
+  () => props.selectedTab,
+  (newTab) => {
+    if (newTab === 'collections' && collections.value.length === 0) {
+      fetchCollections()
+    } else if (newTab === 'likes' && likedArtworks.value.length === 0) {
+      fetchLikedArtworks()
+    } else if (
+      newTab === 'bookmarks' &&
+      bookmarkedArtworks.value.length === 0
+    ) {
+      fetchBookmarkedArtworks()
+    }
+  },
+  { immediate: true },
+)
 
-watch(() => props.activeStat, (newStat) => {
-  if (newStat === 'followers' && followers.value.length === 0) {
-    fetchFollowers()
-  } else if (newStat === 'following' && following.value.length === 0) {
-    fetchFollowing()
-  }
-}, { immediate: true })
+watch(
+  () => props.activeStat,
+  (newStat) => {
+    if (newStat === 'followers' && followers.value.length === 0) {
+      fetchFollowers()
+    } else if (newStat === 'following' && following.value.length === 0) {
+      fetchFollowing()
+    }
+  },
+  { immediate: true },
+)
 
 // Fetch top tags on component mount
 onMounted(() => {

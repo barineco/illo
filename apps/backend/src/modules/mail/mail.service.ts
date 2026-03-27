@@ -179,4 +179,83 @@ export class MailService {
       throw error
     }
   }
+
+  async sendEmailChangeVerification(
+    newEmail: string,
+    username: string,
+    token: string,
+  ) {
+    const verifyUrl = `${this.frontendUrl}/verify-email-change?token=${token}`
+
+    try {
+      await this.transporter.sendMail({
+        from: this.fromAddress,
+        to: newEmail,
+        subject: `メールアドレス変更の確認 - ${this.instanceName}`,
+        html: `
+          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #0096fa;">${this.instanceName}</h1>
+            <h2>メールアドレス変更の確認</h2>
+            <p>こんにちは、${username}さん</p>
+            <p>メールアドレスの変更リクエストを受け付けました。以下のリンクをクリックして、新しいメールアドレスを確認してください。</p>
+            <p>
+              <a href="${verifyUrl}" style="display: inline-block; padding: 12px 24px; background-color: #0096fa; color: white; text-decoration: none; border-radius: 4px;">
+                メールアドレスを確認
+              </a>
+            </p>
+            <p>または、以下のURLをブラウザにコピー＆ペーストしてください:</p>
+            <p style="word-break: break-all; color: #666;">${verifyUrl}</p>
+            <p style="color: #999; font-size: 14px;">このリンクは24時間有効です。</p>
+            <hr style="border: none; border-top: 1px solid #eee; margin: 32px 0;" />
+            <p style="color: #999; font-size: 12px;">
+              このメールに心当たりがない場合は、無視してください。メールアドレスは変更されません。
+            </p>
+          </div>
+        `,
+      })
+
+      this.logger.log(
+        `Email change verification sent to ${newEmail} for user ${username}`,
+      )
+    } catch (error) {
+      this.logger.error(
+        `Failed to send email change verification to ${newEmail}`,
+        error,
+      )
+      throw error
+    }
+  }
+
+  async sendEmailChangeNotification(oldEmail: string, username: string) {
+    try {
+      await this.transporter.sendMail({
+        from: this.fromAddress,
+        to: oldEmail,
+        subject: `メールアドレスの変更がリクエストされました - ${this.instanceName}`,
+        html: `
+          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #0096fa;">${this.instanceName}</h1>
+            <h2>メールアドレスの変更リクエスト</h2>
+            <p>こんにちは、${username}さん</p>
+            <p>あなたのアカウントでメールアドレスの変更がリクエストされました。</p>
+            <p>このリクエストに心当たりがある場合は、新しいメールアドレスに送信された確認メールをご確認ください。</p>
+            <p style="color: #d32f2f; font-weight: bold;">心当たりがない場合は、直ちにパスワードを変更し、アカウントのセキュリティを確認してください。</p>
+            <hr style="border: none; border-top: 1px solid #eee; margin: 32px 0;" />
+            <p style="color: #999; font-size: 12px;">
+              このメールは自動送信されています。
+            </p>
+          </div>
+        `,
+      })
+
+      this.logger.log(
+        `Email change notification sent to old email ${oldEmail} for user ${username}`,
+      )
+    } catch (error) {
+      this.logger.error(
+        `Failed to send email change notification to ${oldEmail}`,
+        error,
+      )
+    }
+  }
 }

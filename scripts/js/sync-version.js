@@ -15,13 +15,12 @@ const fs = require('fs')
 const path = require('path')
 
 const rootDir = path.join(__dirname, '..')
-const rootPkg = JSON.parse(fs.readFileSync(path.join(rootDir, 'package.json'), 'utf8'))
+const rootPkg = JSON.parse(
+  fs.readFileSync(path.join(rootDir, 'package.json'), 'utf8'),
+)
 const version = rootPkg.version
 
-const targets = [
-  'apps/frontend/package.json',
-  'apps/backend/package.json',
-]
+const targets = ['apps/frontend/package.json', 'apps/backend/package.json']
 
 console.log(`Syncing version ${version} to workspace packages...`)
 

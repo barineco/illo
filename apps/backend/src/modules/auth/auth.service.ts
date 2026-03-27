@@ -3,6 +3,7 @@ import {
   UnauthorizedException,
   ConflictException,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common'
 import { JwtService } from '@nestjs/jwt'
 import { ConfigService } from '@nestjs/config'
@@ -215,6 +216,7 @@ export class AuthService {
         emailVerifyExpires,
         tosAcceptedAt: new Date(),
         tosAcceptedVersion: tosVersion,
+        hasSetPassword: true,
         publicKey,
         privateKey,
         actorUrl,
@@ -370,6 +372,7 @@ export class AuthService {
       where: { id: userId },
       data: {
         passwordHash: newPasswordHash,
+        hasSetPassword: true,
       },
     })
 
@@ -385,6 +388,37 @@ export class AuthService {
       message: 'Password changed successfully',
       ...(revokeOtherSessions && { revokedSessions }),
     }
+  }
+
+  async setPassword(
+    userId: string,
+    newPassword: string,
+  ): Promise<{ message: string }> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    })
+
+    if (!user) {
+      throw new UnauthorizedException('User not found')
+    }
+
+    if (user.hasSetPassword) {
+      throw new BadRequestException(
+        'Password is already set. Use change password instead.',
+      )
+    }
+
+    const passwordHash = await bcrypt.hash(newPassword, 10)
+
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        passwordHash,
+        hasSetPassword: true,
+      },
+    })
+
+    return { message: 'Password set successfully' }
   }
 
   private async generateAccessToken(user: any): Promise<string> {
@@ -496,6 +530,51 @@ export class AuthService {
     return { message: 'Email verified successfully' }
   }
 
+  async verifyEmailChange(token: string): Promise<{ message: string }> {
+    const user = await this.prisma.user.findUnique({
+      where: { emailChangeToken: token },
+    })
+
+    if (!user) {
+      throw new UnauthorizedException('Invalid verification token')
+    }
+
+    if (!user.emailChangeExpires || user.emailChangeExpires < new Date()) {
+      throw new UnauthorizedException('Verification token has expired')
+    }
+
+    if (!user.pendingEmail) {
+      throw new BadRequestException('No pending email change')
+    }
+
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: user.pendingEmail },
+    })
+    if (existingUser && existingUser.id !== user.id) {
+      throw new ConflictException('Email is already in use')
+    }
+
+    try {
+      await this.prisma.user.update({
+        where: { id: user.id },
+        data: {
+          email: user.pendingEmail,
+          isEmailVerified: true,
+          pendingEmail: null,
+          emailChangeToken: null,
+          emailChangeExpires: null,
+        },
+      })
+    } catch (error: any) {
+      if (error.code === 'P2002') {
+        throw new ConflictException('Email is already in use')
+      }
+      throw error
+    }
+
+    return { message: 'Email changed successfully' }
+  }
+
   async resendVerificationEmail(email: string) {
     const user = await this.prisma.user.findUnique({
       where: { email },
@@ -587,6 +666,7 @@ export class AuthService {
       where: { id: user.id },
       data: {
         passwordHash,
+        hasSetPassword: true,
         resetPasswordToken: null,
         resetPasswordExpires: null,
       },

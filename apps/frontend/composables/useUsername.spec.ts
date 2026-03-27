@@ -29,9 +29,9 @@ describe('useUsername', () => {
     })
 
     it('formats remote user object', () => {
-      expect(
-        formatUserHandle({ username: 'bob', domain: 'remote.dev' }),
-      ).toBe('@bob@remote.dev')
+      expect(formatUserHandle({ username: 'bob', domain: 'remote.dev' })).toBe(
+        '@bob@remote.dev',
+      )
     })
   })
 

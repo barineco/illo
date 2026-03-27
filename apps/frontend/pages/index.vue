@@ -2,11 +2,7 @@
   <div>
     <!-- Category Tabs -->
     <div class="mb-6 overflow-x-auto pb-2">
-      <TabGroup
-        v-model="selectedCategory"
-        type="pill"
-        :tabs="categoryTabs"
-      />
+      <TabGroup v-model="selectedCategory" type="pill" :tabs="categoryTabs" />
     </div>
 
     <!-- Section Title -->
@@ -15,15 +11,19 @@
         selectedCategory === 'following'
           ? $t('home.followingWorks')
           : selectedCategory === 'local'
-          ? $t('home.localWorks')
-          : $t('home.recommendedWorks')
+            ? $t('home.localWorks')
+            : $t('home.recommendedWorks')
       }}
     </h2>
 
     <!-- Loading State -->
     <div v-if="loading" class="text-center py-12">
-      <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[var(--color-surface-secondary)] border-t-[var(--color-primary)]"></div>
-      <p class="mt-4 text-[var(--color-text-muted)]">{{ $t('common.loading') }}</p>
+      <div
+        class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[var(--color-surface-secondary)] border-t-[var(--color-primary)]"
+      />
+      <p class="mt-4 text-[var(--color-text-muted)]">
+        {{ $t('common.loading') }}
+      </p>
     </div>
 
     <!-- Error State -->
@@ -40,8 +40,13 @@
     </div>
 
     <!-- Empty State for Following Tab -->
-    <div v-else-if="selectedCategory === 'following' && artworks.length === 0" class="text-center py-16">
-      <p class="text-[var(--color-text-muted)] text-lg mb-4">{{ $t('home.noFollowingWorks') }}</p>
+    <div
+      v-else-if="selectedCategory === 'following' && artworks.length === 0"
+      class="text-center py-16"
+    >
+      <p class="text-[var(--color-text-muted)] text-lg mb-4">
+        {{ $t('home.noFollowingWorks') }}
+      </p>
       <BaseButton
         variant="primary"
         size="lg"
@@ -54,7 +59,9 @@
 
     <!-- General Empty State -->
     <div v-else-if="artworks.length === 0" class="text-center py-12">
-      <p class="text-[var(--color-text-muted)] text-lg">{{ $t('home.noWorksYet') }}</p>
+      <p class="text-[var(--color-text-muted)] text-lg">
+        {{ $t('home.noWorksYet') }}
+      </p>
       <BaseButton
         variant="primary"
         size="lg"
@@ -70,7 +77,10 @@
     <ArtworkGrid v-else :artworks="artworks" />
 
     <!-- Load More Button -->
-    <div v-if="!loading && artworks.length > 0 && hasMore" class="text-center mt-8 mb-4">
+    <div
+      v-if="!loading && artworks.length > 0 && hasMore"
+      class="text-center mt-8 mb-4"
+    >
       <BaseButton
         variant="primary"
         size="lg"
@@ -81,7 +91,6 @@
         {{ loadingMore ? $t('common.loading') : $t('home.loadMore') }}
       </BaseButton>
     </div>
-
   </div>
 </template>
 
@@ -115,7 +124,7 @@ const categoryTabs = computed(() => {
     illustration: t('home.illustration'),
     manga: t('home.manga'),
   }
-  return categories.value.map(cat => ({
+  return categories.value.map((cat) => ({
     value: cat,
     label: labelMap[cat] || cat,
   }))
@@ -160,7 +169,9 @@ const fetchArtworks = async (append = false) => {
       })
 
       const newArtworks = transformArtworks(response.artworks)
-      artworks.value = append ? [...artworks.value, ...newArtworks] : newArtworks
+      artworks.value = append
+        ? [...artworks.value, ...newArtworks]
+        : newArtworks
       hasMore.value = newArtworks.length === limit
       loading.value = false
       loadingMore.value = false
@@ -186,7 +197,10 @@ const fetchArtworks = async (append = false) => {
       params.federation = 'local'
     } else if (selectedCategory.value === 'all') {
       params.federation = 'all'
-    } else if (selectedCategory.value === 'illustration' || selectedCategory.value === 'manga') {
+    } else if (
+      selectedCategory.value === 'illustration' ||
+      selectedCategory.value === 'manga'
+    ) {
       params.federation = 'all'
     }
 

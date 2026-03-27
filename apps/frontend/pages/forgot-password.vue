@@ -1,5 +1,7 @@
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-[var(--color-background)] px-4">
+  <div
+    class="min-h-screen flex items-center justify-center bg-[var(--color-background)] px-4"
+  >
     <div class="max-w-md w-full">
       <!-- Card -->
       <div class="bg-[var(--color-surface)] rounded-lg p-8 shadow-xl">
@@ -17,10 +19,12 @@
                 stroke-linejoin="round"
                 stroke-width="2"
                 d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"
-              ></path>
+              />
             </svg>
           </div>
-          <h1 class="text-2xl font-bold text-[var(--color-text)] mb-4">{{ $t('auth.emailSent') }}</h1>
+          <h1 class="text-2xl font-bold text-[var(--color-text)] mb-4">
+            {{ $t('auth.emailSent') }}
+          </h1>
           <p class="text-[var(--color-text-muted)] mb-6">
             {{ $t('auth.passwordResetEmailSent') }}
           </p>
@@ -35,16 +39,21 @@
         <!-- Form State -->
         <div v-else>
           <div class="text-center mb-8">
-            <h1 class="text-2xl font-bold text-[var(--color-text)] mb-2">{{ $t('auth.passwordResetTitle') }}</h1>
+            <h1 class="text-2xl font-bold text-[var(--color-text)] mb-2">
+              {{ $t('auth.passwordResetTitle') }}
+            </h1>
             <p class="text-[var(--color-text-muted)] text-sm">
               {{ $t('auth.passwordResetDesc') }}
             </p>
           </div>
 
-          <form @submit.prevent="handleSubmit" class="space-y-4">
+          <form class="space-y-4" @submit.prevent="handleSubmit">
             <!-- Email Input -->
             <div>
-              <label for="email" class="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
+              <label
+                for="email"
+                class="block text-sm font-medium text-[var(--color-text-secondary)] mb-2"
+              >
                 {{ $t('auth.email') }}
               </label>
               <input

@@ -2,8 +2,12 @@
   <div>
     <!-- Loading State -->
     <div v-if="loading" class="text-center py-12">
-      <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[var(--color-border)] border-t-[var(--color-primary)]"></div>
-      <p class="mt-4 text-[var(--color-text-muted)]">{{ $t('common.loading') }}</p>
+      <div
+        class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[var(--color-border)] border-t-[var(--color-primary)]"
+      />
+      <p class="mt-4 text-[var(--color-text-muted)]">
+        {{ $t('common.loading') }}
+      </p>
     </div>
 
     <!-- Error State -->
@@ -20,9 +24,12 @@
     </div>
 
     <!-- Edit Form -->
-    <form v-else @submit.prevent="handleSubmit" class="space-y-6">
+    <form v-else class="space-y-6" @submit.prevent="handleSubmit">
       <!-- Error Message -->
-      <div v-if="submitError" class="bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] rounded-lg p-4 mb-6">
+      <div
+        v-if="submitError"
+        class="bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] rounded-lg p-4 mb-6"
+      >
         <p class="text-[var(--color-danger-text)]">{{ submitError }}</p>
       </div>
 
@@ -39,7 +46,9 @@
           class="w-full px-4 py-2 bg-[var(--color-background)] rounded-lg border border-[var(--color-border)] focus:border-[var(--color-primary)] focus:outline-none transition-colors"
           :placeholder="$t('settings.displayNamePlaceholder')"
         />
-        <p class="text-sm text-[var(--color-text-muted)] mt-2">{{ form.displayName?.length || 0 }}/50</p>
+        <p class="text-sm text-[var(--color-text-muted)] mt-2">
+          {{ form.displayName?.length || 0 }}/50
+        </p>
       </div>
 
       <!-- Bio -->
@@ -54,13 +63,17 @@
           maxlength="500"
           class="w-full px-4 py-2 bg-[var(--color-background)] rounded-lg border border-[var(--color-border)] focus:border-[var(--color-primary)] focus:outline-none transition-colors resize-none"
           :placeholder="$t('settings.bioPlaceholder')"
-        ></textarea>
-        <p class="text-sm text-[var(--color-text-muted)] mt-2">{{ form.bio?.length || 0 }}/500</p>
+        />
+        <p class="text-sm text-[var(--color-text-muted)] mt-2">
+          {{ form.bio?.length || 0 }}/500
+        </p>
       </div>
 
       <!-- Social Links -->
       <div class="bg-[var(--color-surface)] rounded-lg p-6">
-        <h3 class="text-lg font-medium mb-4">{{ $t('settings.websiteSocial') }}</h3>
+        <h3 class="text-lg font-medium mb-4">
+          {{ $t('settings.websiteSocial') }}
+        </h3>
 
         <!-- Custom Links -->
         <div class="flex items-center justify-between mb-3">
@@ -118,7 +131,9 @@
 
         <div class="flex items-center gap-6">
           <!-- Current Avatar -->
-          <div class="w-24 h-24 rounded-full bg-[var(--color-surface-secondary)] flex-shrink-0 overflow-hidden">
+          <div
+            class="w-24 h-24 rounded-full bg-[var(--color-surface-secondary)] flex-shrink-0 overflow-hidden"
+          >
             <img
               v-if="currentProfile?.avatarUrl"
               :src="currentProfile.avatarUrl"
@@ -126,7 +141,10 @@
               class="w-full h-full object-cover"
             />
             <div v-else class="w-full h-full flex items-center justify-center">
-              <Icon name="UserCircle" class="w-16 h-16 text-[var(--color-text-muted)]" />
+              <Icon
+                name="UserCircle"
+                class="w-16 h-16 text-[var(--color-text-muted)]"
+              />
             </div>
           </div>
 
@@ -159,18 +177,25 @@
 
       <!-- Cover Image -->
       <div class="bg-[var(--color-surface)] rounded-lg p-6">
-        <h3 class="text-lg font-medium mb-4">{{ $t('settings.coverImage') }}</h3>
+        <h3 class="text-lg font-medium mb-4">
+          {{ $t('settings.coverImage') }}
+        </h3>
 
         <div class="space-y-4">
           <!-- Current Cover -->
-          <div class="w-full h-48 rounded-lg bg-[var(--color-surface-secondary)] overflow-hidden">
+          <div
+            class="w-full h-48 rounded-lg bg-[var(--color-surface-secondary)] overflow-hidden"
+          >
             <img
               v-if="currentProfile?.coverImageUrl"
               :src="currentProfile.coverImageUrl"
               :alt="$t('settings.coverImage')"
               class="w-full h-full object-cover"
             />
-            <div v-else class="w-full h-full flex items-center justify-center text-[var(--color-text-muted)]">
+            <div
+              v-else
+              class="w-full h-full flex items-center justify-center text-[var(--color-text-muted)]"
+            >
               {{ $t('settings.noCoverImage') }}
             </div>
           </div>
@@ -246,7 +271,7 @@
     <CropperModal
       :is-open="showCoverCropper"
       :image-source="coverFileToUpload"
-      :aspect-ratio="16/9"
+      :aspect-ratio="16 / 9"
       stencil-type="rectangle"
       :title="$t('cropper.cropCover')"
       @close="cancelCoverUpload"
@@ -337,9 +362,12 @@ const fetchProfile = async () => {
 
     // Use /users/:username (without /api prefix) for GET - ActivityPub compatible endpoint
     // Need to use baseURL from api composable to ensure proper routing in dev environment
-    const response = await fetch(`${api.baseURL}/users/${user.value.username}`, {
-      headers: { Accept: 'application/json' },
-    })
+    const response = await fetch(
+      `${api.baseURL}/users/${user.value.username}`,
+      {
+        headers: { Accept: 'application/json' },
+      },
+    )
     if (!response.ok) {
       throw new Error(`Failed to fetch profile: ${response.status}`)
     }
@@ -372,12 +400,14 @@ const handleSubmit = async () => {
 
     // Filter out empty social links
     const socialLinks: SocialLinks = {}
-    if (form.value.socialLinks.bluesky) socialLinks.bluesky = form.value.socialLinks.bluesky
+    if (form.value.socialLinks.bluesky)
+      socialLinks.bluesky = form.value.socialLinks.bluesky
 
     // Filter custom links to only include those with both title and url
-    const validCustomLinks = form.value.socialLinks.customLinks?.filter(
-      link => link.url.trim() && link.title.trim()
-    ) || []
+    const validCustomLinks =
+      form.value.socialLinks.customLinks?.filter(
+        (link) => link.url.trim() && link.title.trim(),
+      ) || []
     if (validCustomLinks.length > 0) {
       socialLinks.customLinks = validCustomLinks
     }
@@ -445,7 +475,7 @@ const onAvatarCropConfirm = async (coordinates: CropCoordinates) => {
 
     const data = await api.uploadFormData<{ avatarUrl: string }>(
       `/api/users/${user.value.username}/avatar`,
-      formData
+      formData,
     )
 
     // Update current profile with cache-busting parameter
@@ -516,7 +546,7 @@ const onCoverCropConfirm = async (coordinates: CropCoordinates) => {
 
     const data = await api.uploadFormData<{ coverImageUrl: string }>(
       `/api/users/${user.value.username}/cover`,
-      formData
+      formData,
     )
 
     // Update current profile with cache-busting parameter

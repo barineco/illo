@@ -48,7 +48,7 @@ watch(
     if (role !== 'ADMIN') {
       router.push('/')
     }
-  }
+  },
 )
 
 interface Tab {
@@ -67,7 +67,7 @@ const tabs: Tab[] = [
 
 // TabGroup用のタブアイテム
 const tabItems = computed(() => {
-  return tabs.map(tab => ({
+  return tabs.map((tab) => ({
     value: tab.key,
     label: t(tab.labelKey),
   }))

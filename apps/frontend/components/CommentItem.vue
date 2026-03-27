@@ -9,8 +9,14 @@
           :alt="comment.user.username"
           class="w-10 h-10 rounded-full"
         />
-        <div v-else class="w-10 h-10 rounded-full bg-[var(--color-surface-secondary)] flex items-center justify-center">
-          <Icon name="UserCircle" class="w-6 h-6 text-[var(--color-text-muted)]" />
+        <div
+          v-else
+          class="w-10 h-10 rounded-full bg-[var(--color-surface-secondary)] flex items-center justify-center"
+        >
+          <Icon
+            name="UserCircle"
+            class="w-6 h-6 text-[var(--color-text-muted)]"
+          />
         </div>
       </NuxtLink>
 
@@ -23,16 +29,26 @@
           >
             {{ comment.user.displayName || comment.user.username }}
           </NuxtLink>
-          <span class="text-sm text-[var(--color-text-muted)]">@{{ comment.user.username }}</span>
+          <span class="text-sm text-[var(--color-text-muted)]"
+            >@{{ comment.user.username }}</span
+          >
           <span class="text-sm text-[var(--color-text-muted)]">·</span>
-          <span class="text-sm text-[var(--color-text-muted)]">{{ formatDate(comment.createdAt) }}</span>
-          <span v-if="comment.updatedAt !== comment.createdAt" class="text-sm text-[var(--color-text-muted)]">
+          <span class="text-sm text-[var(--color-text-muted)]">{{
+            formatDate(comment.createdAt)
+          }}</span>
+          <span
+            v-if="comment.updatedAt !== comment.createdAt"
+            class="text-sm text-[var(--color-text-muted)]"
+          >
             ({{ $t('comment.edited') }})
           </span>
         </div>
 
         <!-- Comment Content -->
-        <div v-if="!isEditing" class="text-[var(--color-text)] whitespace-pre-wrap break-words">
+        <div
+          v-if="!isEditing"
+          class="text-[var(--color-text)] whitespace-pre-wrap break-words"
+        >
           {{ comment.content }}
         </div>
 
@@ -42,20 +58,22 @@
             v-model="editContent"
             class="w-full px-3 py-2 bg-[var(--color-surface-secondary)] rounded border border-[var(--color-border)] focus:border-[var(--color-primary)] focus:outline-none resize-none"
             rows="3"
-          ></textarea>
+          />
           <div class="flex items-center gap-2 mt-2">
-            <span class="text-sm text-[var(--color-text-muted)]">{{ editContent.length }}/1000</span>
+            <span class="text-sm text-[var(--color-text-muted)]"
+              >{{ editContent.length }}/1000</span
+            >
             <div class="flex gap-2 ml-auto">
               <button
-                @click="saveEdit"
                 :disabled="!editContent.trim() || editContent.length > 1000"
                 class="px-4 py-1 bg-[var(--color-primary)] text-[var(--color-primary-text)] hover:bg-[var(--color-primary-hover)] rounded font-medium transition-colors text-sm disabled:opacity-50"
+                @click="saveEdit"
               >
                 {{ $t('common.save') }}
               </button>
               <button
-                @click="cancelEdit"
                 class="px-4 py-1 bg-[var(--color-surface-secondary)] hover:bg-[var(--color-hover)] rounded font-medium transition-colors text-sm"
+                @click="cancelEdit"
               >
                 {{ $t('common.cancel') }}
               </button>
@@ -67,24 +85,24 @@
         <div class="flex items-center gap-4 mt-2 text-sm">
           <button
             v-if="isAuthenticated && !isReply"
-            @click="toggleReplyForm"
             class="text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors"
+            @click="toggleReplyForm"
           >
             {{ $t('comment.reply') }}
           </button>
 
           <button
             v-if="isOwnComment && !isEditing"
-            @click="startEdit"
             class="text-[var(--color-text-muted)] hover:text-[var(--color-primary)] transition-colors"
+            @click="startEdit"
           >
             {{ $t('common.edit') }}
           </button>
 
           <button
             v-if="isOwnComment"
-            @click="$emit('delete', comment.id)"
             class="text-[var(--color-text-muted)] hover:text-[var(--color-danger-text)] transition-colors"
+            @click="$emit('delete', comment.id)"
           >
             {{ $t('common.delete') }}
           </button>
@@ -97,20 +115,22 @@
             :placeholder="$t('comment.replyPlaceholder')"
             class="w-full px-3 py-2 bg-[var(--color-surface-secondary)] rounded border border-[var(--color-border)] focus:border-[var(--color-primary)] focus:outline-none resize-none"
             rows="3"
-          ></textarea>
+          />
           <div class="flex items-center gap-2 mt-2">
-            <span class="text-sm text-[var(--color-text-muted)]">{{ replyContent.length }}/1000</span>
+            <span class="text-sm text-[var(--color-text-muted)]"
+              >{{ replyContent.length }}/1000</span
+            >
             <div class="flex gap-2 ml-auto">
               <button
-                @click="submitReply"
                 :disabled="!replyContent.trim() || replyContent.length > 1000"
                 class="px-4 py-1 bg-[var(--color-primary)] text-[var(--color-primary-text)] hover:bg-[var(--color-primary-hover)] rounded font-medium transition-colors text-sm disabled:opacity-50"
+                @click="submitReply"
               >
                 {{ $t('comment.reply') }}
               </button>
               <button
-                @click="toggleReplyForm"
                 class="px-4 py-1 bg-[var(--color-surface-secondary)] hover:bg-[var(--color-hover)] rounded font-medium transition-colors text-sm"
+                @click="toggleReplyForm"
               >
                 {{ $t('common.cancel') }}
               </button>
@@ -119,13 +139,16 @@
         </div>
 
         <!-- Nested Replies -->
-        <div v-if="comment.replies && comment.replies.length > 0" class="mt-4 space-y-4">
+        <div
+          v-if="comment.replies && comment.replies.length > 0"
+          class="mt-4 space-y-4"
+        >
           <CommentItem
             v-for="reply in comment.replies"
             :key="reply.id"
             :comment="reply"
-            :artworkId="artworkId"
-            :isReply="true"
+            :artwork-id="artworkId"
+            :is-reply="true"
             @delete="$emit('delete', $event)"
             @update="(id, content) => $emit('update', id, content)"
             @replied="$emit('replied')"

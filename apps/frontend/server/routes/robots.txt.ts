@@ -19,7 +19,7 @@ let cacheTimestamp: number = 0
 function isCacheValid(): boolean {
   if (!cachedRobotsTxt) return false
   const now = Date.now()
-  return (now - cacheTimestamp) < CACHE_DURATION_MS
+  return now - cacheTimestamp < CACHE_DURATION_MS
 }
 
 /**
@@ -77,7 +77,8 @@ ${aiBotsBlock}`
  */
 async function fetchInstanceSettings(): Promise<boolean> {
   try {
-    const backendUrl = process.env.NUXT_PUBLIC_API_BASE_URL || 'http://backend:11104'
+    const backendUrl =
+      process.env.NUXT_PUBLIC_API_BASE_URL || 'http://backend:11104'
     const response = await $fetch<{
       instanceInfo: { allowSearchEngineIndexing: boolean }
     }>(`${backendUrl}/api/setup/status`)

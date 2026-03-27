@@ -5,14 +5,18 @@
       class="fixed inset-0 z-50 flex items-center justify-center bg-[var(--color-overlay)]"
       @click.self="close"
     >
-      <div class="bg-[var(--color-surface)] rounded-xl p-8 max-w-md w-full mx-4">
+      <div
+        class="bg-[var(--color-surface)] rounded-xl p-8 max-w-md w-full mx-4"
+      >
         <h2 class="text-2xl font-bold mb-6">{{ $t('twoFactor.setup') }}</h2>
 
         <!-- Step 1: QR Code Display -->
         <div v-if="step === 1" class="space-y-4">
           <!-- Loading State -->
           <div v-if="loading" class="text-center py-8">
-            <p class="text-[var(--color-text-muted)]">{{ $t('twoFactor.generatingQRCode') }}</p>
+            <p class="text-[var(--color-text-muted)]">
+              {{ $t('twoFactor.generatingQRCode') }}
+            </p>
           </div>
 
           <!-- QR Code Display -->
@@ -27,7 +31,9 @@
             </div>
 
             <!-- Manual Entry Secret -->
-            <div class="bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg p-4">
+            <div
+              class="bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg p-4"
+            >
               <p class="text-sm text-[var(--color-text-muted)] mb-2">
                 {{ $t('twoFactor.manualEntry') }}
               </p>
@@ -60,7 +66,10 @@
           </div>
 
           <!-- Error State -->
-          <div v-if="error" class="bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] rounded-lg p-3">
+          <div
+            v-if="error"
+            class="bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] rounded-lg p-3"
+          >
             <p class="text-[var(--color-danger-text)] text-sm">{{ error }}</p>
           </div>
         </div>
@@ -73,7 +82,10 @@
 
           <!-- Code Input -->
           <div>
-            <label for="verification-code" class="block text-sm font-medium mb-2">
+            <label
+              for="verification-code"
+              class="block text-sm font-medium mb-2"
+            >
               {{ $t('twoFactor.verificationCode') }}
             </label>
             <input
@@ -91,14 +103,22 @@
           </div>
 
           <!-- Backup Codes Display -->
-          <div v-if="backupCodes.length > 0" class="bg-[var(--color-warning-bg)] border border-[var(--color-warning-text)] rounded-lg p-4">
-            <p class="text-[var(--color-warning-text)] font-medium mb-2 flex items-center gap-2">
-              <Icon name="ExclamationTriangle" class="w-5 h-5" /> {{ $t('twoFactor.backupCodes') }}
+          <div
+            v-if="backupCodes.length > 0"
+            class="bg-[var(--color-warning-bg)] border border-[var(--color-warning-text)] rounded-lg p-4"
+          >
+            <p
+              class="text-[var(--color-warning-text)] font-medium mb-2 flex items-center gap-2"
+            >
+              <Icon name="ExclamationTriangle" class="w-5 h-5" />
+              {{ $t('twoFactor.backupCodes') }}
             </p>
             <p class="text-sm text-[var(--color-text-muted)] mb-3">
               {{ $t('twoFactor.backupCodesDescription') }}
             </p>
-            <div class="grid grid-cols-2 gap-2 bg-[var(--color-background)] rounded p-3">
+            <div
+              class="grid grid-cols-2 gap-2 bg-[var(--color-background)] rounded p-3"
+            >
               <code
                 v-for="(code, index) in backupCodes"
                 :key="index"
@@ -115,18 +135,30 @@
               class="mt-3"
               @click="copyBackupCodes"
             >
-              {{ copied ? $t('twoFactor.copied') : $t('twoFactor.copyBackupCodes') }}
+              {{
+                copied
+                  ? $t('twoFactor.copied')
+                  : $t('twoFactor.copyBackupCodes')
+              }}
             </BaseButton>
           </div>
 
           <!-- Error Message -->
-          <div v-if="error" class="bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] rounded-lg p-3">
+          <div
+            v-if="error"
+            class="bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] rounded-lg p-3"
+          >
             <p class="text-[var(--color-danger-text)] text-sm">{{ error }}</p>
           </div>
 
           <!-- Success Message -->
-          <div v-if="success" class="bg-[var(--color-success-bg)] border border-[var(--color-success-border)] rounded-lg p-3">
-            <p class="text-[var(--color-success-text)] text-sm">{{ success }}</p>
+          <div
+            v-if="success"
+            class="bg-[var(--color-success-bg)] border border-[var(--color-success-border)] rounded-lg p-3"
+          >
+            <p class="text-[var(--color-success-text)] text-sm">
+              {{ success }}
+            </p>
           </div>
 
           <!-- Action Buttons -->
@@ -308,6 +340,6 @@ watch(
       // Setup 2FA
       setup2FA()
     }
-  }
+  },
 )
 </script>

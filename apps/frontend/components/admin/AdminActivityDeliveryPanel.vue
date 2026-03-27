@@ -3,25 +3,44 @@
     <!-- Stats -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
       <div class="bg-[var(--color-surface)] rounded-lg p-4 text-center">
-        <div class="text-2xl font-bold text-[var(--color-warning-text)]">{{ stats.pending }}</div>
-        <div class="text-sm text-[var(--color-text-muted)]">{{ $t('admin.deliveryPending') }}</div>
+        <div class="text-2xl font-bold text-[var(--color-warning-text)]">
+          {{ stats.pending }}
+        </div>
+        <div class="text-sm text-[var(--color-text-muted)]">
+          {{ $t('admin.deliveryPending') }}
+        </div>
       </div>
       <div class="bg-[var(--color-surface)] rounded-lg p-4 text-center">
-        <div class="text-2xl font-bold text-[var(--color-success-text)]">{{ stats.delivered }}</div>
-        <div class="text-sm text-[var(--color-text-muted)]">{{ $t('admin.deliveryDelivered') }}</div>
+        <div class="text-2xl font-bold text-[var(--color-success-text)]">
+          {{ stats.delivered }}
+        </div>
+        <div class="text-sm text-[var(--color-text-muted)]">
+          {{ $t('admin.deliveryDelivered') }}
+        </div>
       </div>
       <div class="bg-[var(--color-surface)] rounded-lg p-4 text-center">
-        <div class="text-2xl font-bold text-[var(--color-danger-text)]">{{ stats.failed }}</div>
-        <div class="text-sm text-[var(--color-text-muted)]">{{ $t('admin.deliveryFailed') }}</div>
+        <div class="text-2xl font-bold text-[var(--color-danger-text)]">
+          {{ stats.failed }}
+        </div>
+        <div class="text-sm text-[var(--color-text-muted)]">
+          {{ $t('admin.deliveryFailed') }}
+        </div>
       </div>
       <div class="bg-[var(--color-surface)] rounded-lg p-4 text-center">
-        <div class="text-2xl font-bold text-[var(--color-text)]">{{ stats.total }}</div>
-        <div class="text-sm text-[var(--color-text-muted)]">{{ $t('admin.total') }}</div>
+        <div class="text-2xl font-bold text-[var(--color-text)]">
+          {{ stats.total }}
+        </div>
+        <div class="text-sm text-[var(--color-text-muted)]">
+          {{ $t('admin.total') }}
+        </div>
       </div>
     </div>
 
     <!-- Activity Type Stats -->
-    <div v-if="stats.byType && stats.byType.length > 0" class="bg-[var(--color-surface)] rounded-lg p-4">
+    <div
+      v-if="stats.byType && stats.byType.length > 0"
+      class="bg-[var(--color-surface)] rounded-lg p-4"
+    >
       <h3 class="text-sm font-medium mb-3">{{ $t('admin.deliveryByType') }}</h3>
       <div class="flex flex-wrap gap-2">
         <span
@@ -46,12 +65,7 @@
         <Icon name="ArrowPath" class="w-4 h-4 mr-2" />
         {{ retryingAll ? $t('admin.retrying') : $t('admin.retryAllFailed') }}
       </BaseButton>
-      <BaseButton
-        variant="ghost"
-        size="sm"
-        shape="rounded"
-        @click="refresh"
-      >
+      <BaseButton variant="ghost" size="sm" shape="rounded" @click="refresh">
         <Icon name="ArrowPath" class="w-4 h-4 mr-2" />
         {{ $t('common.retry') }}
       </BaseButton>
@@ -60,7 +74,9 @@
     <!-- Filters -->
     <div class="bg-[var(--color-surface)] rounded-lg p-4 flex flex-wrap gap-4">
       <div class="flex-1 min-w-[150px]">
-        <label class="block text-sm font-medium mb-2">{{ $t('admin.status') }}</label>
+        <label class="block text-sm font-medium mb-2">{{
+          $t('admin.status')
+        }}</label>
         <select
           v-model="filters.status"
           class="w-full px-3 py-2 bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
@@ -73,7 +89,9 @@
         </select>
       </div>
       <div class="flex-1 min-w-[150px]">
-        <label class="block text-sm font-medium mb-2">{{ $t('admin.activityType') }}</label>
+        <label class="block text-sm font-medium mb-2">{{
+          $t('admin.activityType')
+        }}</label>
         <select
           v-model="filters.activityType"
           class="w-full px-3 py-2 bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
@@ -93,10 +111,15 @@
 
     <!-- Delivery List -->
     <div v-if="loading" class="text-center py-8">
-      <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[var(--color-border)] border-t-[var(--color-primary)]"></div>
+      <div
+        class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[var(--color-border)] border-t-[var(--color-primary)]"
+      />
     </div>
 
-    <div v-else-if="deliveries.length === 0" class="text-center py-8 text-[var(--color-text-muted)]">
+    <div
+      v-else-if="deliveries.length === 0"
+      class="text-center py-8 text-[var(--color-text-muted)]"
+    >
       {{ $t('admin.noDeliveries') }}
     </div>
 
@@ -108,14 +131,21 @@
       >
         <div class="flex items-start justify-between mb-3">
           <div class="flex items-center gap-2">
-            <span :class="getStatusClass(delivery.status)" class="px-2 py-1 text-xs rounded">
+            <span
+              :class="getStatusClass(delivery.status)"
+              class="px-2 py-1 text-xs rounded"
+            >
               {{ getStatusLabel(delivery.status) }}
             </span>
-            <span class="px-2 py-1 text-xs bg-[var(--color-surface-secondary)] rounded">
+            <span
+              class="px-2 py-1 text-xs bg-[var(--color-surface-secondary)] rounded"
+            >
               {{ delivery.activityType }}
             </span>
             <span class="text-xs text-[var(--color-text-muted)]">
-              {{ $t('admin.attempts') }}: {{ delivery.attemptCount }}/{{ delivery.maxAttempts }}
+              {{ $t('admin.attempts') }}: {{ delivery.attemptCount }}/{{
+                delivery.maxAttempts
+              }}
             </span>
           </div>
           <span class="text-xs text-[var(--color-text-muted)]">
@@ -125,7 +155,9 @@
 
         <!-- Sender -->
         <div class="text-sm mb-2">
-          <span class="text-[var(--color-text-muted)]">{{ $t('admin.sender') }}: </span>
+          <span class="text-[var(--color-text-muted)]"
+            >{{ $t('admin.sender') }}:
+          </span>
           <NuxtLink
             v-if="delivery.sender"
             :to="`/users/${delivery.sender.username}`"
@@ -133,23 +165,36 @@
           >
             {{ delivery.sender.displayName || delivery.sender.username }}
           </NuxtLink>
-          <span v-else class="text-[var(--color-text-muted)]">{{ $t('admin.modeUnknown') }}</span>
+          <span v-else class="text-[var(--color-text-muted)]">{{
+            $t('admin.modeUnknown')
+          }}</span>
         </div>
 
         <!-- Inbox URL -->
         <div class="text-sm mb-2">
-          <span class="text-[var(--color-text-muted)]">{{ $t('admin.inboxUrl') }}: </span>
-          <span class="font-mono text-xs break-all">{{ delivery.inboxUrl }}</span>
+          <span class="text-[var(--color-text-muted)]"
+            >{{ $t('admin.inboxUrl') }}:
+          </span>
+          <span class="font-mono text-xs break-all">{{
+            delivery.inboxUrl
+          }}</span>
         </div>
 
         <!-- Error -->
-        <div v-if="delivery.lastError" class="text-sm mb-3 p-3 bg-[var(--color-danger-bg)] rounded text-[var(--color-danger-text)]">
+        <div
+          v-if="delivery.lastError"
+          class="text-sm mb-3 p-3 bg-[var(--color-danger-bg)] rounded text-[var(--color-danger-text)]"
+        >
           {{ delivery.lastError }}
         </div>
 
         <!-- Last Attempt -->
-        <div v-if="delivery.lastAttemptAt" class="text-xs text-[var(--color-text-muted)] mb-2">
-          {{ $t('admin.lastAttempt') }}: {{ formatDate(delivery.lastAttemptAt) }}
+        <div
+          v-if="delivery.lastAttemptAt"
+          class="text-xs text-[var(--color-text-muted)] mb-2"
+        >
+          {{ $t('admin.lastAttempt') }}:
+          {{ formatDate(delivery.lastAttemptAt) }}
         </div>
 
         <!-- Actions -->
@@ -162,7 +207,11 @@
             @click="retryDelivery(delivery.id)"
           >
             <Icon name="ArrowPath" class="w-4 h-4 mr-1" />
-            {{ retryingIds.has(delivery.id) ? $t('admin.retrying') : $t('admin.retry') }}
+            {{
+              retryingIds.has(delivery.id)
+                ? $t('admin.retrying')
+                : $t('admin.retry')
+            }}
           </BaseButton>
           <BaseButton
             variant="ghost"
@@ -181,13 +230,13 @@
       <button
         v-for="page in totalPages"
         :key="page"
-        @click="goToPage(page)"
         :class="[
           'px-4 py-2 rounded-lg',
           currentPage === page
             ? 'bg-[var(--color-primary)] text-[var(--color-primary-text)]'
-            : 'bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-surface-secondary)]'
+            : 'bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-surface-secondary)]',
         ]"
+        @click="goToPage(page)"
       >
         {{ page }}
       </button>
@@ -200,16 +249,23 @@
         class="fixed inset-0 bg-[var(--color-overlay)] flex items-center justify-center z-50 p-4"
         @click.self="showDetailModal = false"
       >
-        <div class="bg-[var(--color-surface)] rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+        <div
+          class="bg-[var(--color-surface)] rounded-lg p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto"
+        >
           <div class="flex items-center justify-between mb-4">
             <h3 class="text-xl font-bold">{{ $t('admin.deliveryDetails') }}</h3>
-            <button @click="showDetailModal = false" class="text-[var(--color-text-muted)] hover:text-[var(--color-text)]">
+            <button
+              class="text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+              @click="showDetailModal = false"
+            >
               <Icon name="XMark" class="w-6 h-6" />
             </button>
           </div>
 
           <div v-if="detailLoading" class="text-center py-8">
-            <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[var(--color-border)] border-t-[var(--color-primary)]"></div>
+            <div
+              class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[var(--color-border)] border-t-[var(--color-primary)]"
+            />
           </div>
 
           <div v-else-if="detailData" class="space-y-4">
@@ -218,14 +274,24 @@
               <div class="font-mono text-xs">{{ detailData.id }}</div>
             </div>
             <div>
-              <div class="text-sm text-[var(--color-text-muted)] mb-1">{{ $t('admin.status') }}</div>
-              <span :class="getStatusClass(detailData.status)" class="px-2 py-1 text-xs rounded">
+              <div class="text-sm text-[var(--color-text-muted)] mb-1">
+                {{ $t('admin.status') }}
+              </div>
+              <span
+                :class="getStatusClass(detailData.status)"
+                class="px-2 py-1 text-xs rounded"
+              >
                 {{ getStatusLabel(detailData.status) }}
               </span>
             </div>
             <div>
-              <div class="text-sm text-[var(--color-text-muted)] mb-1">{{ $t('admin.activityPayload') }}</div>
-              <pre class="bg-[var(--color-background)] p-4 rounded overflow-x-auto text-xs">{{ JSON.stringify(detailData.activityPayload, null, 2) }}</pre>
+              <div class="text-sm text-[var(--color-text-muted)] mb-1">
+                {{ $t('admin.activityPayload') }}
+              </div>
+              <pre
+                class="bg-[var(--color-background)] p-4 rounded overflow-x-auto text-xs"
+                >{{ JSON.stringify(detailData.activityPayload, null, 2) }}</pre
+              >
             </div>
           </div>
         </div>
@@ -283,12 +349,12 @@ const stats = ref<Stats>({
   delivered: 0,
   failed: 0,
   total: 0,
-  byType: []
+  byType: [],
 })
 
 const filters = reactive({
   status: '',
-  activityType: ''
+  activityType: '',
 })
 
 const showDetailModal = ref(false)
@@ -300,11 +366,14 @@ const loadDeliveries = async () => {
   try {
     const params = new URLSearchParams()
     if (filters.status) params.append('status', filters.status)
-    if (filters.activityType) params.append('activityType', filters.activityType)
+    if (filters.activityType)
+      params.append('activityType', filters.activityType)
     params.append('page', currentPage.value.toString())
     params.append('limit', '20')
 
-    const data = await api.get<any>(`/api/admin/activity-deliveries?${params.toString()}`)
+    const data = await api.get<any>(
+      `/api/admin/activity-deliveries?${params.toString()}`,
+    )
     deliveries.value = data.deliveries
     totalPages.value = data.totalPages
   } catch (err) {
@@ -355,7 +424,9 @@ const viewDetails = async (id: string) => {
   detailData.value = null
 
   try {
-    detailData.value = await api.get<DeliveryDetail>(`/api/admin/activity-deliveries/${id}`)
+    detailData.value = await api.get<DeliveryDetail>(
+      `/api/admin/activity-deliveries/${id}`,
+    )
   } catch (err) {
     console.error('Failed to load details:', err)
   } finally {
@@ -374,19 +445,27 @@ const goToPage = (page: number) => {
 
 const getStatusClass = (status: string) => {
   switch (status) {
-    case 'PENDING': return 'bg-[var(--color-warning-bg)] text-[var(--color-warning-text)]'
-    case 'DELIVERED': return 'bg-[var(--color-success-bg)] text-[var(--color-success-text)]'
-    case 'FAILED': return 'bg-[var(--color-danger-bg)] text-[var(--color-danger-text)]'
-    default: return 'bg-[var(--color-surface-secondary)] text-[var(--color-text-muted)]'
+    case 'PENDING':
+      return 'bg-[var(--color-warning-bg)] text-[var(--color-warning-text)]'
+    case 'DELIVERED':
+      return 'bg-[var(--color-success-bg)] text-[var(--color-success-text)]'
+    case 'FAILED':
+      return 'bg-[var(--color-danger-bg)] text-[var(--color-danger-text)]'
+    default:
+      return 'bg-[var(--color-surface-secondary)] text-[var(--color-text-muted)]'
   }
 }
 
 const getStatusLabel = (status: string) => {
   switch (status) {
-    case 'PENDING': return t('admin.pending')
-    case 'DELIVERED': return t('admin.deliveryDelivered')
-    case 'FAILED': return t('admin.deliveryFailed')
-    default: return status
+    case 'PENDING':
+      return t('admin.pending')
+    case 'DELIVERED':
+      return t('admin.deliveryDelivered')
+    case 'FAILED':
+      return t('admin.deliveryFailed')
+    default:
+      return status
   }
 }
 

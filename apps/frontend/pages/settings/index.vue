@@ -45,7 +45,7 @@ const availableTabs = computed(() => tabs)
 
 // TabGroup用のタブアイテム
 const tabItems = computed(() => {
-  return availableTabs.value.map(tab => ({
+  return availableTabs.value.map((tab) => ({
     value: tab.key,
     label: t(tab.labelKey),
   }))
@@ -53,6 +53,6 @@ const tabItems = computed(() => {
 
 // Initialize selected tab from query parameter or default to 'profile'
 const initialTab = (route.query.tab as string) || 'profile'
-const validTab = tabs.some(t => t.key === initialTab) ? initialTab : 'profile'
+const validTab = tabs.some((t) => t.key === initialTab) ? initialTab : 'profile'
 const selectedTab = ref(validTab)
 </script>

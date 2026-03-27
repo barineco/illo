@@ -44,7 +44,7 @@ const handleAddClick = (event: MouseEvent) => {
       class="reaction-button"
       :class="{
         'reaction-button--active': reaction.userReacted,
-        'reaction-button--disabled': disabled
+        'reaction-button--disabled': disabled,
       }"
       :disabled="disabled"
       @click="handleReactionClick(reaction.emoji)"

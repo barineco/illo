@@ -26,7 +26,9 @@ export const useSession = () => {
    */
   const getSessions = async (): Promise<SessionInfo[]> => {
     try {
-      const response = await api.get<{ sessions: SessionInfo[] }>('/api/sessions')
+      const response = await api.get<{ sessions: SessionInfo[] }>(
+        '/api/sessions',
+      )
       return response.sessions
     } catch (error: any) {
       console.error('Failed to fetch sessions:', error)
@@ -65,7 +67,9 @@ export const useSession = () => {
   /**
    * Revoke all sessions including the current one (complete logout)
    */
-  const revokeAllSessionsIncludingCurrent = async (): Promise<{ count: number }> => {
+  const revokeAllSessionsIncludingCurrent = async (): Promise<{
+    count: number
+  }> => {
     try {
       const response = await api.post<{ count: number; message: string }>(
         '/api/sessions/revoke-all-including-current',
@@ -81,7 +85,9 @@ export const useSession = () => {
   /**
    * Get recent login attempts for the current user
    */
-  const getLoginAttempts = async (limit: number = 10): Promise<LoginAttempt[]> => {
+  const getLoginAttempts = async (
+    limit: number = 10,
+  ): Promise<LoginAttempt[]> => {
     try {
       const attempts = await api.get<LoginAttempt[]>(
         `/api/sessions/login-attempts?limit=${limit}`,

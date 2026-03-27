@@ -47,7 +47,7 @@ export function useReactions(artworkId: string) {
 
       userEmojis.value = userReactionsData.emojis || []
 
-      reactions.value = reactionsData.reactions.map(r => ({
+      reactions.value = reactionsData.reactions.map((r) => ({
         emoji: r.emoji,
         count: r.count,
         userReacted: userEmojis.value.includes(r.emoji),
@@ -61,7 +61,7 @@ export function useReactions(artworkId: string) {
   }
 
   const updateLocalState = (emoji: string, action: 'add' | 'remove') => {
-    const existingIndex = reactions.value.findIndex(r => r.emoji === emoji)
+    const existingIndex = reactions.value.findIndex((r) => r.emoji === emoji)
 
     if (action === 'add') {
       if (existingIndex >= 0) {
@@ -108,7 +108,9 @@ export function useReactions(artworkId: string) {
         if (action === 'add') {
           await api.post(`/api/reactions/${artworkId}`, { emoji })
         } else {
-          await api.delete(`/api/reactions/${artworkId}/${encodeURIComponent(emoji)}`)
+          await api.delete(
+            `/api/reactions/${artworkId}/${encodeURIComponent(emoji)}`,
+          )
         }
       } catch (e) {
         console.error(`Failed to ${action} reaction:`, e)
@@ -151,7 +153,7 @@ export function useReactions(artworkId: string) {
   }
 
   const getReactionCount = (emoji: string): number => {
-    const reaction = reactions.value.find(r => r.emoji === emoji)
+    const reaction = reactions.value.find((r) => r.emoji === emoji)
     return reaction?.count || 0
   }
 

@@ -5,7 +5,10 @@
       <h2 class="text-xl font-bold mb-4">{{ $t('security.passkeys') }}</h2>
 
       <!-- Not Supported Warning -->
-      <div v-if="!passkeySupported" class="bg-[var(--color-warning-bg)] border border-[var(--color-warning-text)] rounded-lg p-4 mb-4">
+      <div
+        v-if="!passkeySupported"
+        class="bg-[var(--color-warning-bg)] border border-[var(--color-warning-text)] rounded-lg p-4 mb-4"
+      >
         <p class="text-[var(--color-warning-text)] text-sm">
           {{ $t('passkey.notSupported') }}
         </p>
@@ -32,11 +35,19 @@
             <div>
               <p class="font-medium">{{ passkey.name }}</p>
               <p class="text-sm text-[var(--color-text-muted)] mt-1">
-                {{ passkey.credentialBackedUp ? $t('passkey.synced') : $t('passkey.deviceOnly') }}
-                <span v-if="passkey.lastUsedAt"> • {{ $t('security.lastUsed') }}: {{ formatDate(passkey.lastUsedAt) }}</span>
+                {{
+                  passkey.credentialBackedUp
+                    ? $t('passkey.synced')
+                    : $t('passkey.deviceOnly')
+                }}
+                <span v-if="passkey.lastUsedAt">
+                  • {{ $t('security.lastUsed') }}:
+                  {{ formatDate(passkey.lastUsedAt) }}</span
+                >
               </p>
               <p class="text-xs text-[var(--color-text-muted)] mt-1">
-                {{ $t('security.created') }}: {{ formatDate(passkey.createdAt) }}
+                {{ $t('security.created') }}:
+                {{ formatDate(passkey.createdAt) }}
               </p>
             </div>
             <div class="flex gap-2">
@@ -44,7 +55,10 @@
                 variant="outline"
                 size="sm"
                 shape="rounded"
-                :disabled="renamingPasskeyId === passkey.id || deletingPasskeyId === passkey.id"
+                :disabled="
+                  renamingPasskeyId === passkey.id ||
+                  deletingPasskeyId === passkey.id
+                "
                 @click="startRenamePasskey(passkey)"
               >
                 {{ $t('common.rename') }}
@@ -64,7 +78,10 @@
         </div>
 
         <!-- No Passkeys Message -->
-        <div v-if="passkeys.length === 0" class="text-[var(--color-text-muted)] text-sm">
+        <div
+          v-if="passkeys.length === 0"
+          class="text-[var(--color-text-muted)] text-sm"
+        >
           {{ $t('passkey.noPasskeys') }}
         </div>
 
@@ -80,13 +97,23 @@
       </div>
 
       <!-- Error Message -->
-      <div v-if="errorPasskeys" class="bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] rounded-lg p-3 mt-4">
-        <p class="text-[var(--color-danger-text)] text-sm">{{ errorPasskeys }}</p>
+      <div
+        v-if="errorPasskeys"
+        class="bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] rounded-lg p-3 mt-4"
+      >
+        <p class="text-[var(--color-danger-text)] text-sm">
+          {{ errorPasskeys }}
+        </p>
       </div>
 
       <!-- Success Message -->
-      <div v-if="successPasskeys" class="bg-[var(--color-success-bg)] border border-[var(--color-success-border)] rounded-lg p-3 mt-4">
-        <p class="text-[var(--color-success-text)] text-sm">{{ successPasskeys }}</p>
+      <div
+        v-if="successPasskeys"
+        class="bg-[var(--color-success-bg)] border border-[var(--color-success-border)] rounded-lg p-3 mt-4"
+      >
+        <p class="text-[var(--color-success-text)] text-sm">
+          {{ successPasskeys }}
+        </p>
       </div>
     </div>
 
@@ -101,8 +128,12 @@
 
       <!-- 2FA Enabled State -->
       <div v-else-if="twoFactorStatus?.enabled" class="space-y-4">
-        <div class="bg-[var(--color-success-bg)] border border-[var(--color-success-border)] rounded-lg p-4">
-          <p class="text-[var(--color-success-text)] font-medium">{{ $t('security.twoFactorEnabledStatus') }}</p>
+        <div
+          class="bg-[var(--color-success-bg)] border border-[var(--color-success-border)] rounded-lg p-4"
+        >
+          <p class="text-[var(--color-success-text)] font-medium">
+            {{ $t('security.twoFactorEnabledStatus') }}
+          </p>
           <p class="text-[var(--color-text-muted)] text-sm mt-1">
             {{ $t('security.securityEnhanced') }}
           </p>
@@ -144,14 +175,19 @@
       </div>
 
       <!-- Error Message -->
-      <div v-if="error2FA" class="bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] rounded-lg p-3 mt-4">
+      <div
+        v-if="error2FA"
+        class="bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] rounded-lg p-3 mt-4"
+      >
         <p class="text-[var(--color-danger-text)] text-sm">{{ error2FA }}</p>
       </div>
     </div>
 
     <!-- Active Sessions Section -->
     <div class="bg-[var(--color-surface)] rounded-lg p-6">
-      <h2 class="text-xl font-bold mb-4">{{ $t('security.activeSessions') }}</h2>
+      <h2 class="text-xl font-bold mb-4">
+        {{ $t('security.activeSessions') }}
+      </h2>
 
       <!-- Loading State -->
       <div v-if="loadingSessions" class="text-[var(--color-text-muted)]">
@@ -182,8 +218,10 @@
                 <span v-if="session.location"> • {{ session.location }}</span>
               </p>
               <p class="text-xs text-[var(--color-text-muted)] mt-1">
-                {{ $t('security.created') }}: {{ formatDate(session.createdAt) }} •
-                {{ $t('security.lastUsed') }}: {{ formatDate(session.lastUsedAt) }}
+                {{ $t('security.created') }}:
+                {{ formatDate(session.createdAt) }} •
+                {{ $t('security.lastUsed') }}:
+                {{ formatDate(session.lastUsedAt) }}
               </p>
             </div>
             <BaseButton
@@ -221,19 +259,31 @@
       </div>
 
       <!-- Error Message -->
-      <div v-if="errorSessions" class="bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] rounded-lg p-3 mt-4">
-        <p class="text-[var(--color-danger-text)] text-sm">{{ errorSessions }}</p>
+      <div
+        v-if="errorSessions"
+        class="bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] rounded-lg p-3 mt-4"
+      >
+        <p class="text-[var(--color-danger-text)] text-sm">
+          {{ errorSessions }}
+        </p>
       </div>
 
       <!-- Success Message -->
-      <div v-if="successSessions" class="bg-[var(--color-success-bg)] border border-[var(--color-success-border)] rounded-lg p-3 mt-4">
-        <p class="text-[var(--color-success-text)] text-sm">{{ successSessions }}</p>
+      <div
+        v-if="successSessions"
+        class="bg-[var(--color-success-bg)] border border-[var(--color-success-border)] rounded-lg p-3 mt-4"
+      >
+        <p class="text-[var(--color-success-text)] text-sm">
+          {{ successSessions }}
+        </p>
       </div>
     </div>
 
     <!-- Password Change Section -->
     <div class="bg-[var(--color-surface)] rounded-lg p-6">
-      <h2 class="text-xl font-bold mb-4">{{ $t('security.changePassword') }}</h2>
+      <h2 class="text-xl font-bold mb-4">
+        {{ $t('security.changePassword') }}
+      </h2>
       <p class="text-[var(--color-text-muted)] text-sm mb-4">
         {{ $t('security.changePasswordDescription') }}
       </p>
@@ -284,7 +334,9 @@
         class="fixed inset-0 z-50 flex items-center justify-center bg-[var(--color-overlay)]"
         @click.self="showRenamePasskeyModal = false"
       >
-        <div class="bg-[var(--color-surface)] rounded-xl p-6 max-w-sm w-full mx-4">
+        <div
+          class="bg-[var(--color-surface)] rounded-xl p-6 max-w-sm w-full mx-4"
+        >
           <h3 class="text-lg font-bold mb-4">{{ $t('passkey.rename') }}</h3>
           <input
             v-model="renamePasskeyName"
@@ -309,7 +361,9 @@
               size="md"
               shape="rounded"
               class="flex-1"
-              :disabled="!renamePasskeyName.trim() || renamingPasskeyId !== null"
+              :disabled="
+                !renamePasskeyName.trim() || renamingPasskeyId !== null
+              "
               :loading="renamingPasskeyId !== null"
               @click="doRenamePasskey"
             >
@@ -383,7 +437,8 @@ const fetch2FAStatus = async () => {
     const response = await api.get<{ enabled: boolean }>('/api/auth/2fa/status')
     twoFactorStatus.value = response
   } catch (err: any) {
-    error2FA.value = err.response?.data?.message || t('security.fetch2FAStatusFailed')
+    error2FA.value =
+      err.response?.data?.message || t('security.fetch2FAStatusFailed')
   } finally {
     loading2FA.value = false
   }
@@ -397,7 +452,8 @@ const fetchSessions = async () => {
   try {
     sessions.value = await getSessions()
   } catch (err: any) {
-    errorSessions.value = err.response?.data?.message || t('security.fetchSessionsFailed')
+    errorSessions.value =
+      err.response?.data?.message || t('security.fetchSessionsFailed')
   } finally {
     loadingSessions.value = false
   }
@@ -413,7 +469,8 @@ const revokeSessionById = async (sessionId: string) => {
     successSessions.value = t('security.sessionRevoked')
     await fetchSessions()
   } catch (err: any) {
-    errorSessions.value = err.response?.data?.message || t('security.revokeSessionFailed')
+    errorSessions.value =
+      err.response?.data?.message || t('security.revokeSessionFailed')
   } finally {
     revokingSessionId.value = null
   }
@@ -433,7 +490,8 @@ const revokeAllOtherSessions = async () => {
     successSessions.value = t('security.allSessionsRevoked')
     await fetchSessions()
   } catch (err: any) {
-    errorSessions.value = err.response?.data?.message || t('security.revokeSessionFailed')
+    errorSessions.value =
+      err.response?.data?.message || t('security.revokeSessionFailed')
   } finally {
     revokingAll.value = false
   }
@@ -500,7 +558,10 @@ const doRenamePasskey = async () => {
   errorPasskeys.value = ''
   successPasskeys.value = ''
   try {
-    await renamePasskey(renamePasskeyTarget.value.id, renamePasskeyName.value.trim())
+    await renamePasskey(
+      renamePasskeyTarget.value.id,
+      renamePasskeyName.value.trim(),
+    )
     successPasskeys.value = t('passkey.renamed')
     showRenamePasskeyModal.value = false
     await fetchPasskeys()

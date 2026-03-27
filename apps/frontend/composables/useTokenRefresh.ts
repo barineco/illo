@@ -17,7 +17,9 @@ export const useTokenRefresh = () => {
   const instanceId = config.public.instanceId || 'default'
 
   // Access token always has 15 minute maxAge
-  const accessToken = useCookie(`${instanceId}_accessToken`, { maxAge: 60 * 15 })
+  const accessToken = useCookie(`${instanceId}_accessToken`, {
+    maxAge: 60 * 15,
+  })
   // Refresh token maxAge is set during login based on rememberMe setting
   // Here we just read the existing cookie value
   const refreshToken = useCookie(`${instanceId}_refreshToken`)
@@ -57,7 +59,7 @@ export const useTokenRefresh = () => {
           {
             method: 'POST',
             body: { refreshToken: refreshToken.value },
-          }
+          },
         )
 
         accessToken.value = response.accessToken

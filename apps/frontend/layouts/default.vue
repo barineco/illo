@@ -4,13 +4,16 @@
     <aside
       :class="[
         'sidebar fixed left-0 top-0 h-screen bg-[var(--color-surface)] border-r border-[var(--color-border)] flex flex-col z-50 transition-all duration-300',
-        isCollapsed ? 'w-16 collapsed' : 'w-60'
+        isCollapsed ? 'w-16 collapsed' : 'w-60',
       ]"
     >
       <!-- Top Section: Logo & Navigation -->
       <div class="flex-1 overflow-y-auto p-2">
         <!-- Logo -->
-        <NuxtLink to="/" class="logo-link flex items-center mb-4 mt-2 h-12 px-2 rounded-lg hover:bg-[var(--color-surface-hover)] transition-all duration-300">
+        <NuxtLink
+          to="/"
+          class="logo-link flex items-center mb-4 mt-2 h-12 px-2 rounded-lg hover:bg-[var(--color-surface-hover)] transition-all duration-300"
+        >
           <img
             src="/assets/logo/illo-logo.svg"
             alt="Logo"
@@ -18,7 +21,11 @@
           />
           <h1
             class="app-title text-[var(--color-primary)] text-2xl whitespace-nowrap overflow-hidden transition-all duration-300"
-            :class="showText ? 'opacity-100 max-w-[200px] ml-3' : 'opacity-0 max-w-0 ml-0'"
+            :class="
+              showText
+                ? 'opacity-100 max-w-[200px] ml-3'
+                : 'opacity-0 max-w-0 ml-0'
+            "
           >
             {{ instanceName }}
           </h1>
@@ -34,8 +41,13 @@
             <Icon name="Home" class="nav-icon w-5 h-5 flex-shrink-0" />
             <span
               class="whitespace-nowrap overflow-hidden transition-all duration-300"
-              :class="showText ? 'opacity-100 max-w-[200px] ml-3' : 'opacity-0 max-w-0 ml-0'"
-            >{{ $t('nav.home') }}</span>
+              :class="
+                showText
+                  ? 'opacity-100 max-w-[200px] ml-3'
+                  : 'opacity-0 max-w-0 ml-0'
+              "
+              >{{ $t('nav.home') }}</span
+            >
           </NuxtLink>
 
           <!-- Authenticated: Show Dashboard, Profile, Settings -->
@@ -48,8 +60,13 @@
               <Icon name="Squares2X2" class="nav-icon w-5 h-5 flex-shrink-0" />
               <span
                 class="whitespace-nowrap overflow-hidden transition-all duration-300"
-                :class="showText ? 'opacity-100 max-w-[200px] ml-3' : 'opacity-0 max-w-0 ml-0'"
-              >{{ $t('nav.dashboard') }}</span>
+                :class="
+                  showText
+                    ? 'opacity-100 max-w-[200px] ml-3'
+                    : 'opacity-0 max-w-0 ml-0'
+                "
+                >{{ $t('nav.dashboard') }}</span
+              >
             </NuxtLink>
 
             <NuxtLink
@@ -60,8 +77,13 @@
               <Icon name="User" class="nav-icon w-5 h-5 flex-shrink-0" />
               <span
                 class="whitespace-nowrap overflow-hidden transition-all duration-300"
-                :class="showText ? 'opacity-100 max-w-[200px] ml-3' : 'opacity-0 max-w-0 ml-0'"
-              >{{ $t('nav.profile') }}</span>
+                :class="
+                  showText
+                    ? 'opacity-100 max-w-[200px] ml-3'
+                    : 'opacity-0 max-w-0 ml-0'
+                "
+                >{{ $t('nav.profile') }}</span
+              >
             </NuxtLink>
 
             <NuxtLink
@@ -72,8 +94,13 @@
               <Icon name="Cog6Tooth" class="nav-icon w-5 h-5 flex-shrink-0" />
               <span
                 class="whitespace-nowrap overflow-hidden transition-all duration-300"
-                :class="showText ? 'opacity-100 max-w-[200px] ml-3' : 'opacity-0 max-w-0 ml-0'"
-              >{{ $t('nav.settings') }}</span>
+                :class="
+                  showText
+                    ? 'opacity-100 max-w-[200px] ml-3'
+                    : 'opacity-0 max-w-0 ml-0'
+                "
+                >{{ $t('nav.settings') }}</span
+              >
             </NuxtLink>
 
             <NuxtLink
@@ -85,16 +112,28 @@
               <Icon name="Cog8Tooth" class="nav-icon w-5 h-5 flex-shrink-0" />
               <span
                 class="whitespace-nowrap overflow-hidden transition-all duration-300"
-                :class="showText ? 'opacity-100 max-w-[200px] ml-3' : 'opacity-0 max-w-0 ml-0'"
-              >{{ $t('nav.admin') }}</span>
+                :class="
+                  showText
+                    ? 'opacity-100 max-w-[200px] ml-3'
+                    : 'opacity-0 max-w-0 ml-0'
+                "
+                >{{ $t('nav.admin') }}</span
+              >
             </NuxtLink>
           </template>
 
           <!-- Unauthenticated: Show Login CTA -->
           <template v-else>
-            <div v-if="showText" class="mt-4 p-4 bg-[var(--color-surface-secondary)]/50 rounded-lg">
+            <div
+              v-if="showText"
+              class="mt-4 p-4 bg-[var(--color-surface-secondary)]/50 rounded-lg"
+            >
               <p class="text-sm text-[var(--color-text-muted)] mb-3">
-                {{ allowRegistration ? $t('auth.loginCta') : $t('auth.loginOnlyCta') }}
+                {{
+                  allowRegistration
+                    ? $t('auth.loginCta')
+                    : $t('auth.loginOnlyCta')
+                }}
               </p>
               <BaseButton
                 variant="primary"
@@ -139,7 +178,12 @@
 
       <!-- Bottom Section: Theme & Language Settings -->
       <div class="border-t border-[var(--color-border)] p-3">
-        <div :class="['flex items-center gap-2', isCollapsed ? 'flex-col' : 'justify-center']">
+        <div
+          :class="[
+            'flex items-center gap-2',
+            isCollapsed ? 'flex-col' : 'justify-center',
+          ]"
+        >
           <!-- About / Instance Info -->
           <IconButton
             variant="ghost"
@@ -157,11 +201,23 @@
             variant="ghost"
             size="sm"
             shape="rounded"
-            :aria-label="$colorMode.value === 'dark' ? $t('theme.switchToLight') : $t('theme.switchToDark')"
-            :title="$colorMode.value === 'dark' ? $t('theme.switchToLight') : $t('theme.switchToDark')"
+            :aria-label="
+              $colorMode.value === 'dark'
+                ? $t('theme.switchToLight')
+                : $t('theme.switchToDark')
+            "
+            :title="
+              $colorMode.value === 'dark'
+                ? $t('theme.switchToLight')
+                : $t('theme.switchToDark')
+            "
             @click="toggleTheme"
           >
-            <Icon v-if="$colorMode.value === 'dark'" name="Moon" class="w-5 h-5" />
+            <Icon
+              v-if="$colorMode.value === 'dark'"
+              name="Moon"
+              class="w-5 h-5"
+            />
             <Icon v-else name="Sun" class="w-5 h-5" />
           </IconButton>
 
@@ -185,22 +241,24 @@
                 'absolute w-32 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg shadow-xl py-1 z-50',
                 isCollapsed
                   ? 'left-full bottom-0 ml-1'
-                  : 'bottom-full left-1/2 -translate-x-1/2 mb-1'
+                  : 'bottom-full left-1/2 -translate-x-1/2 mb-1',
               ]"
             >
               <button
                 v-for="loc in availableLocales"
                 :key="loc.code"
-                @click="setLocale(loc.code)"
                 class="w-full flex items-center px-3 py-2 hover:bg-[var(--color-surface-hover)] transition-colors text-sm"
                 :class="{ 'text-[var(--color-primary)]': loc.code === locale }"
+                @click="setLocale(loc.code)"
               >
                 <Icon
                   v-if="loc.code === locale"
                   name="Check"
                   class="w-4 h-4 mr-2"
                 />
-                <span :class="{ 'ml-6': loc.code !== locale }">{{ loc.name }}</span>
+                <span :class="{ 'ml-6': loc.code !== locale }">{{
+                  loc.name
+                }}</span>
               </button>
             </div>
           </div>
@@ -211,18 +269,25 @@
             variant="ghost"
             size="sm"
             shape="rounded"
-            :aria-label="isCollapsed ? $t('sidebar.expand') : $t('sidebar.collapse')"
+            :aria-label="
+              isCollapsed ? $t('sidebar.expand') : $t('sidebar.collapse')
+            "
             :title="isCollapsed ? $t('sidebar.expand') : $t('sidebar.collapse')"
             @click="toggleSidebar"
           >
-            <Icon :name="isCollapsed ? 'ChevronRight' : 'ChevronLeft'" class="w-5 h-5" />
+            <Icon
+              :name="isCollapsed ? 'ChevronRight' : 'ChevronLeft'"
+              class="w-5 h-5"
+            />
           </IconButton>
         </div>
       </div>
     </aside>
 
     <!-- Main Content -->
-    <div :class="['transition-all duration-300', isCollapsed ? 'ml-16' : 'ml-60']">
+    <div
+      :class="['transition-all duration-300', isCollapsed ? 'ml-16' : 'ml-60']"
+    >
       <!-- Header -->
       <header
         class="sticky top-0 h-16 bg-[var(--color-surface)] border-b border-[var(--color-border)] px-6 flex items-center justify-between z-40"
@@ -253,9 +318,9 @@
             <!-- User Avatar with Dropdown -->
             <div class="relative" data-dropdown-container>
               <button
-                @click="userMenuDropdown.toggle()"
                 class="w-10 h-10 rounded-full bg-[var(--color-surface-secondary)] flex items-center justify-center hover:ring-2 ring-[var(--color-primary)] transition-all overflow-hidden"
                 :title="user ? `${user.username}` : ''"
+                @click="userMenuDropdown.toggle()"
               >
                 <img
                   v-if="user?.avatarUrl"
@@ -273,24 +338,24 @@
               >
                 <NuxtLink
                   :to="profileLink"
-                  @click="userMenuDropdown.close()"
                   class="flex items-center px-4 py-2 hover:bg-[var(--color-surface-hover)] transition-colors"
+                  @click="userMenuDropdown.close()"
                 >
                   <Icon name="UserCircle" class="w-5 h-5 mr-3" />
                   <span>{{ $t('nav.profile') }}</span>
                 </NuxtLink>
                 <NuxtLink
                   to="/settings"
-                  @click="userMenuDropdown.close()"
                   class="flex items-center px-4 py-2 hover:bg-[var(--color-surface-hover)] transition-colors"
+                  @click="userMenuDropdown.close()"
                 >
                   <Icon name="Cog6Tooth" class="w-5 h-5 mr-3" />
                   <span>{{ $t('nav.settings') }}</span>
                 </NuxtLink>
-                <div class="border-t border-[var(--color-border)] my-1"></div>
+                <div class="border-t border-[var(--color-border)] my-1" />
                 <button
-                  @click="handleLogoutFromMenu"
                   class="w-full flex items-center px-4 py-2 hover:bg-[var(--color-danger-bg)] text-[var(--color-danger-text)] transition-colors"
+                  @click="handleLogoutFromMenu"
                 >
                   <Icon name="ArrowRightOnRectangle" class="w-5 h-5 mr-3" />
                   <span>{{ $t('nav.logout') }}</span>
@@ -302,9 +367,9 @@
             <!-- Unauthenticated: User Icon with Dropdown -->
             <div class="relative" data-dropdown-container>
               <button
-                @click="userMenuDropdown.toggle()"
                 class="w-10 h-10 rounded-full bg-[var(--color-surface-secondary)] flex items-center justify-center hover:ring-2 ring-[var(--color-primary)] transition-all"
                 :title="$t('nav.login')"
+                @click="userMenuDropdown.toggle()"
               >
                 <Icon name="UserCircle" class="w-6 h-6" />
               </button>
@@ -316,8 +381,8 @@
               >
                 <NuxtLink
                   to="/login"
-                  @click="userMenuDropdown.close()"
                   class="flex items-center px-4 py-2 hover:bg-[var(--color-surface-hover)] transition-colors"
+                  @click="userMenuDropdown.close()"
                 >
                   <Icon name="Key" class="w-5 h-5 mr-3" />
                   <span>{{ $t('nav.login') }}</span>
@@ -325,8 +390,8 @@
                 <NuxtLink
                   v-if="allowRegistration"
                   to="/register"
-                  @click="userMenuDropdown.close()"
                   class="flex items-center px-4 py-2 hover:bg-[var(--color-surface-hover)] transition-colors"
+                  @click="userMenuDropdown.close()"
                 >
                   <Icon name="Sparkles" class="w-5 h-5 mr-3" />
                   <span>{{ $t('nav.register') }}</span>
@@ -363,7 +428,12 @@ const userMenuDropdown = useDropdown('user-menu')
 const languageMenuDropdown = useDropdown('language-menu')
 
 // Sidebar collapse management
-const { isCollapsed, canToggle, showText, toggle: toggleSidebar } = useSidebarCollapse()
+const {
+  isCollapsed,
+  canToggle,
+  showText,
+  toggle: toggleSidebar,
+} = useSidebarCollapse()
 
 // Setup global click handler to close dropdowns when clicking outside
 useGlobalDropdownClickHandler()
@@ -377,7 +447,9 @@ const allowRegistration = ref(true) // Default to true
 // Fetch instance info to check if registration is allowed
 const fetchInstanceInfo = async () => {
   try {
-    const response = await api.get<{ instanceInfo: { allowRegistration: boolean } }>('/api/setup/status')
+    const response = await api.get<{
+      instanceInfo: { allowRegistration: boolean }
+    }>('/api/setup/status')
     allowRegistration.value = response.instanceInfo?.allowRegistration ?? true
   } catch (error) {
     // If fetch fails, default to allowing registration

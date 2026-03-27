@@ -5,7 +5,11 @@ export const useApi = () => {
   // Note: Server-side環境変数はprocess.envから直接読む（Nuxtのビルド時に固定されないように）
   let baseURL = ''
   if (import.meta.server) {
-    baseURL = process.env.API_BASE_SERVER || config.apiBaseServer || config.public.apiBase || ''
+    baseURL =
+      process.env.API_BASE_SERVER ||
+      config.apiBaseServer ||
+      config.public.apiBase ||
+      ''
   } else {
     baseURL = config.public.apiBase || ''
   }
@@ -26,7 +30,10 @@ export const useApi = () => {
       const interactionToken = getToken()
       const realInteraction = hasRealUserInteraction()
 
-      console.log('[useApi] Interaction token:', interactionToken ? 'PRESENT' : 'MISSING')
+      console.log(
+        '[useApi] Interaction token:',
+        interactionToken ? 'PRESENT' : 'MISSING',
+      )
       console.log('[useApi] Real user interaction:', realInteraction)
 
       if (interactionToken) {
@@ -58,7 +65,7 @@ export const useApi = () => {
    */
   const executeWithRetry = async <T>(
     requestFn: () => Promise<T>,
-    retried: boolean = false
+    retried: boolean = false,
   ): Promise<T> => {
     try {
       return await requestFn()
@@ -94,7 +101,7 @@ export const useApi = () => {
     endpoint: string,
     formData: FormData,
     onProgress: (percent: number) => void,
-    retried: boolean = false
+    retried: boolean = false,
   ): Promise<T> => {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest()
@@ -122,7 +129,13 @@ export const useApi = () => {
             const refreshed = await refreshAccessToken()
             if (refreshed) {
               // Retry with new token
-              executeXhrWithRetry<T>(method, endpoint, formData, onProgress, true)
+              executeXhrWithRetry<T>(
+                method,
+                endpoint,
+                formData,
+                onProgress,
+                true,
+              )
                 .then(resolve)
                 .catch(reject)
               return
@@ -168,7 +181,10 @@ export const useApi = () => {
     // Expose baseURL for direct fetch usage
     baseURL,
 
-    async get<T>(endpoint: string, options?: { params?: Record<string, any> }): Promise<T> {
+    async get<T>(
+      endpoint: string,
+      options?: { params?: Record<string, any> },
+    ): Promise<T> {
       return executeWithRetry(async () => {
         const headers = {
           ...getAuthHeaders(),
@@ -265,7 +281,7 @@ export const useApi = () => {
     uploadFormDataWithProgress<T>(
       endpoint: string,
       formData: FormData,
-      onProgress: (percent: number) => void
+      onProgress: (percent: number) => void,
     ): Promise<T> {
       return executeXhrWithRetry<T>('POST', endpoint, formData, onProgress)
     },
@@ -279,7 +295,7 @@ export const useApi = () => {
     updateFormDataWithProgress<T>(
       endpoint: string,
       formData: FormData,
-      onProgress: (percent: number) => void
+      onProgress: (percent: number) => void,
     ): Promise<T> {
       return executeXhrWithRetry<T>('PUT', endpoint, formData, onProgress)
     },

@@ -3,7 +3,9 @@
     <!-- Page Header -->
     <div class="mb-8">
       <h1 class="text-3xl font-bold mb-2">{{ $t('dashboard.title') }}</h1>
-      <p class="text-[var(--color-text-muted)]">{{ $t('dashboard.subtitle') }}</p>
+      <p class="text-[var(--color-text-muted)]">
+        {{ $t('dashboard.subtitle') }}
+      </p>
     </div>
 
     <!-- Tabs -->
@@ -19,10 +21,7 @@
     <!-- Tab Content -->
     <div>
       <!-- Artworks Tab -->
-      <DashboardArtworks
-        v-if="selectedTab === 'artworks'"
-        ref="artworksRef"
-      />
+      <DashboardArtworks v-if="selectedTab === 'artworks'" ref="artworksRef" />
 
       <!-- Notifications Tab -->
       <DashboardNotifications
@@ -58,11 +57,14 @@ const tabItems = computed(() => [
 const selectedTab = ref((route.query.tab as string) || 'artworks')
 
 // Watch for route query changes
-watch(() => route.query.tab, (newTab) => {
-  if (newTab && typeof newTab === 'string') {
-    selectedTab.value = newTab
-  }
-})
+watch(
+  () => route.query.tab,
+  (newTab) => {
+    if (newTab && typeof newTab === 'string') {
+      selectedTab.value = newTab
+    }
+  },
+)
 
 // Component refs for refresh
 const artworksRef = ref<{ refresh: () => void } | null>(null)

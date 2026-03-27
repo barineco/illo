@@ -1,12 +1,9 @@
 import { describe, it, expect, vi } from 'vitest'
 import { ref } from 'vue'
 
-vi.stubGlobal(
-  'ref',
-  (val: any) => ref(val),
-)
-
 import { useCapsLock } from './useCapsLock'
+
+vi.stubGlobal('ref', (val: any) => ref(val))
 
 describe('useCapsLock', () => {
   it('initializes as false', () => {

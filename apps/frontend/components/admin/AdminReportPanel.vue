@@ -3,27 +3,45 @@
     <!-- Stats -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
       <div class="bg-[var(--color-surface)] rounded-lg p-4 text-center">
-        <div class="text-2xl font-bold text-[var(--color-warning-text)]">{{ reportStats.pending }}</div>
-        <div class="text-sm text-[var(--color-text-muted)]">{{ $t('admin.reportsPending') }}</div>
+        <div class="text-2xl font-bold text-[var(--color-warning-text)]">
+          {{ reportStats.pending }}
+        </div>
+        <div class="text-sm text-[var(--color-text-muted)]">
+          {{ $t('admin.reportsPending') }}
+        </div>
       </div>
       <div class="bg-[var(--color-surface)] rounded-lg p-4 text-center">
-        <div class="text-2xl font-bold text-[var(--color-info-text)]">{{ reportStats.investigating }}</div>
-        <div class="text-sm text-[var(--color-text-muted)]">{{ $t('admin.reportsInvestigating') }}</div>
+        <div class="text-2xl font-bold text-[var(--color-info-text)]">
+          {{ reportStats.investigating }}
+        </div>
+        <div class="text-sm text-[var(--color-text-muted)]">
+          {{ $t('admin.reportsInvestigating') }}
+        </div>
       </div>
       <div class="bg-[var(--color-surface)] rounded-lg p-4 text-center">
-        <div class="text-2xl font-bold text-[var(--color-success-text)]">{{ reportStats.resolved }}</div>
-        <div class="text-sm text-[var(--color-text-muted)]">{{ $t('admin.reportsResolved') }}</div>
+        <div class="text-2xl font-bold text-[var(--color-success-text)]">
+          {{ reportStats.resolved }}
+        </div>
+        <div class="text-sm text-[var(--color-text-muted)]">
+          {{ $t('admin.reportsResolved') }}
+        </div>
       </div>
       <div class="bg-[var(--color-surface)] rounded-lg p-4 text-center">
-        <div class="text-2xl font-bold text-[var(--color-text-muted)]">{{ reportStats.dismissed }}</div>
-        <div class="text-sm text-[var(--color-text-muted)]">{{ $t('admin.reportsDismissed') }}</div>
+        <div class="text-2xl font-bold text-[var(--color-text-muted)]">
+          {{ reportStats.dismissed }}
+        </div>
+        <div class="text-sm text-[var(--color-text-muted)]">
+          {{ $t('admin.reportsDismissed') }}
+        </div>
       </div>
     </div>
 
     <!-- Filters -->
     <div class="bg-[var(--color-surface)] rounded-lg p-4 flex flex-wrap gap-4">
       <div class="flex-1 min-w-[150px]">
-        <label class="block text-sm font-medium mb-2">{{ $t('admin.reportStatus') }}</label>
+        <label class="block text-sm font-medium mb-2">{{
+          $t('admin.reportStatus')
+        }}</label>
         <select
           v-model="reportFilters.status"
           class="w-full px-3 py-2 bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
@@ -37,7 +55,9 @@
         </select>
       </div>
       <div class="flex-1 min-w-[150px]">
-        <label class="block text-sm font-medium mb-2">{{ $t('admin.reportType') }}</label>
+        <label class="block text-sm font-medium mb-2">{{
+          $t('admin.reportType')
+        }}</label>
         <select
           v-model="reportFilters.type"
           class="w-full px-3 py-2 bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
@@ -53,10 +73,15 @@
 
     <!-- Reports List -->
     <div v-if="reportsLoading" class="text-center py-8">
-      <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[var(--color-border)] border-t-[var(--color-primary)]"></div>
+      <div
+        class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[var(--color-border)] border-t-[var(--color-primary)]"
+      />
     </div>
 
-    <div v-else-if="reports.length === 0" class="text-center py-8 text-[var(--color-text-muted)]">
+    <div
+      v-else-if="reports.length === 0"
+      class="text-center py-8 text-[var(--color-text-muted)]"
+    >
       {{ $t('admin.noReports') }}
     </div>
 
@@ -68,13 +93,20 @@
       >
         <div class="flex items-start justify-between mb-3">
           <div class="flex items-center gap-2">
-            <span :class="getReportStatusClass(report.status)" class="px-2 py-1 text-xs rounded">
+            <span
+              :class="getReportStatusClass(report.status)"
+              class="px-2 py-1 text-xs rounded"
+            >
               {{ getReportStatusLabel(report.status) }}
             </span>
-            <span class="px-2 py-1 text-xs bg-[var(--color-surface-secondary)] rounded">
+            <span
+              class="px-2 py-1 text-xs bg-[var(--color-surface-secondary)] rounded"
+            >
               {{ getReportTypeLabel(report.type) }}
             </span>
-            <span class="px-2 py-1 text-xs bg-[var(--color-surface-secondary)] rounded">
+            <span
+              class="px-2 py-1 text-xs bg-[var(--color-surface-secondary)] rounded"
+            >
               {{ getReportReasonLabel(report.reason) }}
             </span>
           </div>
@@ -85,30 +117,50 @@
 
         <!-- Reporter -->
         <div class="text-sm mb-2">
-          <span class="text-[var(--color-text-muted)]">{{ $t('admin.reportedBy') }}: </span>
-          <NuxtLink :to="`/users/${report.reporter.username}`" class="text-[var(--color-primary)] hover:underline">
+          <span class="text-[var(--color-text-muted)]"
+            >{{ $t('admin.reportedBy') }}:
+          </span>
+          <NuxtLink
+            :to="`/users/${report.reporter.username}`"
+            class="text-[var(--color-primary)] hover:underline"
+          >
             {{ report.reporter.displayName || report.reporter.username }}
           </NuxtLink>
         </div>
 
         <!-- Target -->
         <div class="text-sm mb-2">
-          <span class="text-[var(--color-text-muted)]">{{ $t('admin.reportTarget') }}: </span>
+          <span class="text-[var(--color-text-muted)]"
+            >{{ $t('admin.reportTarget') }}:
+          </span>
           <template v-if="report.type === 'ARTWORK' && report.artwork">
-            <NuxtLink :to="`/artworks/${report.artwork.id}`" class="text-[var(--color-primary)] hover:underline">
+            <NuxtLink
+              :to="`/artworks/${report.artwork.id}`"
+              class="text-[var(--color-primary)] hover:underline"
+            >
               {{ report.artwork.title }}
             </NuxtLink>
             <span class="text-[var(--color-text-muted)]">
-              ({{ $t('admin.by') }} {{ report.artwork.author?.displayName || report.artwork.author?.username }})
+              ({{ $t('admin.by') }}
+              {{
+                report.artwork.author?.displayName ||
+                report.artwork.author?.username
+              }})
             </span>
           </template>
           <template v-else-if="report.type === 'USER' && report.targetUser">
-            <NuxtLink :to="`/users/${report.targetUser.username}`" class="text-[var(--color-primary)] hover:underline">
+            <NuxtLink
+              :to="`/users/${report.targetUser.username}`"
+              class="text-[var(--color-primary)] hover:underline"
+            >
               {{ report.targetUser.displayName || report.targetUser.username }}
             </NuxtLink>
           </template>
           <template v-else-if="report.type === 'COMMENT' && report.comment">
-            <span class="text-[var(--color-text)]">"{{ report.comment.content.substring(0, 100) }}{{ report.comment.content.length > 100 ? '...' : '' }}"</span>
+            <span class="text-[var(--color-text)]"
+              >"{{ report.comment.content.substring(0, 100)
+              }}{{ report.comment.content.length > 100 ? '...' : '' }}"</span
+            >
           </template>
         </div>
 
@@ -118,7 +170,12 @@
         </div>
 
         <!-- Admin Actions -->
-        <div v-if="report.status === 'PENDING' || report.status === 'INVESTIGATING'" class="flex gap-2">
+        <div
+          v-if="
+            report.status === 'PENDING' || report.status === 'INVESTIGATING'
+          "
+          class="flex gap-2"
+        >
           <BaseButton
             v-if="report.status === 'PENDING'"
             variant="secondary"
@@ -147,8 +204,12 @@
         </div>
 
         <!-- Admin Notes (if resolved/dismissed) -->
-        <div v-if="report.adminNotes" class="mt-2 text-sm text-[var(--color-text-muted)]">
-          <span class="font-medium">{{ $t('admin.adminNotes') }}: </span>{{ report.adminNotes }}
+        <div
+          v-if="report.adminNotes"
+          class="mt-2 text-sm text-[var(--color-text-muted)]"
+        >
+          <span class="font-medium">{{ $t('admin.adminNotes') }}: </span
+          >{{ report.adminNotes }}
         </div>
       </div>
     </div>
@@ -158,13 +219,13 @@
       <button
         v-for="page in reportsTotalPages"
         :key="page"
-        @click="goToReportsPage(page)"
         :class="[
           'px-4 py-2 rounded-lg',
           reportsCurrentPage === page
             ? 'bg-[var(--color-primary)] text-[var(--color-primary-text)]'
-            : 'bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-surface-secondary)]'
+            : 'bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-surface-secondary)]',
         ]"
+        @click="goToReportsPage(page)"
       >
         {{ page }}
       </button>
@@ -184,7 +245,11 @@ interface Report {
   description: string
   createdAt: string
   reporter: { id: string; username: string; displayName?: string }
-  artwork?: { id: string; title: string; author?: { username: string; displayName?: string } }
+  artwork?: {
+    id: string
+    title: string
+    author?: { username: string; displayName?: string }
+  }
   targetUser?: { id: string; username: string; displayName?: string }
   comment?: { id: string; content: string }
   adminNotes?: string
@@ -197,14 +262,14 @@ const reportsTotalPages = ref(1)
 
 const reportFilters = reactive({
   status: '',
-  type: ''
+  type: '',
 })
 
 const reportStats = ref({
   pending: 0,
   investigating: 0,
   resolved: 0,
-  dismissed: 0
+  dismissed: 0,
 })
 
 const loadReports = async () => {
@@ -252,45 +317,59 @@ const goToReportsPage = (page: number) => {
 
 const getReportStatusClass = (status: string) => {
   switch (status) {
-    case 'PENDING': return 'bg-[var(--color-warning-bg)] text-[var(--color-warning-text)]'
-    case 'INVESTIGATING': return 'bg-[var(--color-info-bg)] text-[var(--color-info-text)]'
-    case 'RESOLVED': return 'bg-[var(--color-success-bg)] text-[var(--color-success-text)]'
-    case 'DISMISSED': return 'bg-[var(--color-surface-secondary)] text-[var(--color-text-muted)]'
-    default: return 'bg-[var(--color-surface-secondary)] text-[var(--color-text-muted)]'
+    case 'PENDING':
+      return 'bg-[var(--color-warning-bg)] text-[var(--color-warning-text)]'
+    case 'INVESTIGATING':
+      return 'bg-[var(--color-info-bg)] text-[var(--color-info-text)]'
+    case 'RESOLVED':
+      return 'bg-[var(--color-success-bg)] text-[var(--color-success-text)]'
+    case 'DISMISSED':
+      return 'bg-[var(--color-surface-secondary)] text-[var(--color-text-muted)]'
+    default:
+      return 'bg-[var(--color-surface-secondary)] text-[var(--color-text-muted)]'
   }
 }
 
 const getReportStatusLabel = (status: string) => {
   switch (status) {
-    case 'PENDING': return t('admin.pending')
-    case 'INVESTIGATING': return t('admin.investigating')
-    case 'RESOLVED': return t('admin.resolved')
-    case 'DISMISSED': return t('admin.dismissed')
-    default: return status
+    case 'PENDING':
+      return t('admin.pending')
+    case 'INVESTIGATING':
+      return t('admin.investigating')
+    case 'RESOLVED':
+      return t('admin.resolved')
+    case 'DISMISSED':
+      return t('admin.dismissed')
+    default:
+      return status
   }
 }
 
 const getReportTypeLabel = (type: string) => {
   switch (type) {
-    case 'ARTWORK': return t('report.targetArtwork')
-    case 'USER': return t('report.targetUser')
-    case 'COMMENT': return t('report.targetComment')
-    default: return type
+    case 'ARTWORK':
+      return t('report.targetArtwork')
+    case 'USER':
+      return t('report.targetUser')
+    case 'COMMENT':
+      return t('report.targetComment')
+    default:
+      return type
   }
 }
 
 const getReportReasonLabel = (reason: string) => {
   const reasonMap: Record<string, string> = {
-    'INAPPROPRIATE_CONTENT': t('report.reasons.inappropriateContent'),
-    'SPAM': t('report.reasons.spam'),
-    'HARASSMENT': t('report.reasons.harassment'),
-    'COPYRIGHT_VIOLATION': t('report.reasons.copyrightViolation'),
-    'SEXUAL_CONTENT': t('report.reasons.sexualContent'),
-    'VIOLENCE': t('report.reasons.violence'),
-    'ACCOUNT_SPAM': t('report.reasons.accountSpam'),
-    'IMPERSONATION': t('report.reasons.impersonation'),
-    'HATE_SPEECH': t('report.reasons.hateSpeech'),
-    'OTHER': t('report.reasons.other')
+    INAPPROPRIATE_CONTENT: t('report.reasons.inappropriateContent'),
+    SPAM: t('report.reasons.spam'),
+    HARASSMENT: t('report.reasons.harassment'),
+    COPYRIGHT_VIOLATION: t('report.reasons.copyrightViolation'),
+    SEXUAL_CONTENT: t('report.reasons.sexualContent'),
+    VIOLENCE: t('report.reasons.violence'),
+    ACCOUNT_SPAM: t('report.reasons.accountSpam'),
+    IMPERSONATION: t('report.reasons.impersonation'),
+    HATE_SPEECH: t('report.reasons.hateSpeech'),
+    OTHER: t('report.reasons.other'),
   }
   return reasonMap[reason] || reason
 }

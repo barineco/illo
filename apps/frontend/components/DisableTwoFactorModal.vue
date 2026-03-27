@@ -5,14 +5,23 @@
       class="fixed inset-0 z-50 flex items-center justify-center bg-[var(--color-overlay)]"
       @click.self="close"
     >
-      <div class="bg-[var(--color-surface)] rounded-xl p-8 max-w-md w-full mx-4">
-        <h2 class="text-2xl font-bold mb-6">{{ $t('twoFactor.disableTitle') }}</h2>
+      <div
+        class="bg-[var(--color-surface)] rounded-xl p-8 max-w-md w-full mx-4"
+      >
+        <h2 class="text-2xl font-bold mb-6">
+          {{ $t('twoFactor.disableTitle') }}
+        </h2>
 
         <div class="space-y-4">
           <!-- Warning Message -->
-          <div class="bg-[var(--color-warning-bg)] border border-[var(--color-warning-text)] rounded-lg p-4">
-            <p class="text-[var(--color-warning-text)] font-medium mb-2 flex items-center gap-2">
-              <Icon name="ExclamationTriangle" class="w-5 h-5" /> {{ $t('warning') }}
+          <div
+            class="bg-[var(--color-warning-bg)] border border-[var(--color-warning-text)] rounded-lg p-4"
+          >
+            <p
+              class="text-[var(--color-warning-text)] font-medium mb-2 flex items-center gap-2"
+            >
+              <Icon name="ExclamationTriangle" class="w-5 h-5" />
+              {{ $t('warning') }}
             </p>
             <p class="text-sm text-[var(--color-text-muted)]">
               {{ $t('twoFactor.disableWarning') }}
@@ -42,13 +51,21 @@
           </div>
 
           <!-- Error Message -->
-          <div v-if="error" class="bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] rounded-lg p-3">
+          <div
+            v-if="error"
+            class="bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] rounded-lg p-3"
+          >
             <p class="text-[var(--color-danger-text)] text-sm">{{ error }}</p>
           </div>
 
           <!-- Success Message -->
-          <div v-if="success" class="bg-[var(--color-success-bg)] border border-[var(--color-success-border)] rounded-lg p-3">
-            <p class="text-[var(--color-success-text)] text-sm">{{ success }}</p>
+          <div
+            v-if="success"
+            class="bg-[var(--color-success-bg)] border border-[var(--color-success-border)] rounded-lg p-3"
+          >
+            <p class="text-[var(--color-success-text)] text-sm">
+              {{ success }}
+            </p>
           </div>
 
           <!-- Action Buttons -->
@@ -162,6 +179,6 @@ watch(
       success.value = ''
       verificationCode.value = ''
     }
-  }
+  },
 )
 </script>

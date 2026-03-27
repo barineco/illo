@@ -1,11 +1,7 @@
 <template>
   <div class="space-y-4">
     <div class="flex items-center justify-between mb-4">
-      <TabGroup
-        v-model="filterMode"
-        type="pill"
-        :tabs="filterTabs"
-      />
+      <TabGroup v-model="filterMode" type="pill" :tabs="filterTabs" />
       <BaseButton
         v-if="notifications.length > 0"
         variant="secondary"
@@ -19,14 +15,23 @@
 
     <!-- Loading State -->
     <div v-if="loading" class="text-center py-12">
-      <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[var(--color-border)] border-t-[var(--color-primary)]"></div>
-      <p class="mt-4 text-[var(--color-text-muted)]">{{ $t('common.loading') }}</p>
+      <div
+        class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[var(--color-border)] border-t-[var(--color-primary)]"
+      />
+      <p class="mt-4 text-[var(--color-text-muted)]">
+        {{ $t('common.loading') }}
+      </p>
     </div>
 
     <!-- Empty State -->
     <div v-else-if="notifications.length === 0" class="text-center py-12">
-      <Icon name="BellSlash" class="w-16 h-16 mx-auto mb-4 text-[var(--color-text-muted)]" />
-      <p class="text-[var(--color-text-muted)]">{{ $t('notifications.empty') }}</p>
+      <Icon
+        name="BellSlash"
+        class="w-16 h-16 mx-auto mb-4 text-[var(--color-text-muted)]"
+      />
+      <p class="text-[var(--color-text-muted)]">
+        {{ $t('notifications.empty') }}
+      </p>
     </div>
 
     <!-- Notifications List -->
@@ -35,12 +40,21 @@
         v-for="notification in notifications"
         :key="notification.id"
         class="p-4 rounded-lg transition-colors"
-        :class="notification.isRead ? 'bg-[var(--color-surface)]' : 'bg-[var(--color-surface-secondary)]'"
+        :class="
+          notification.isRead
+            ? 'bg-[var(--color-surface)]'
+            : 'bg-[var(--color-surface-secondary)]'
+        "
       >
         <div class="flex items-start gap-3">
           <!-- Actor Avatar -->
-          <NuxtLink :to="`/users/${notification.actor.username}`" class="flex-shrink-0">
-            <div class="w-10 h-10 rounded-full bg-[var(--color-surface-tertiary)] overflow-hidden flex items-center justify-center">
+          <NuxtLink
+            :to="`/users/${notification.actor.username}`"
+            class="flex-shrink-0"
+          >
+            <div
+              class="w-10 h-10 rounded-full bg-[var(--color-surface-tertiary)] overflow-hidden flex items-center justify-center"
+            >
               <img
                 v-if="notification.actor.avatarUrl"
                 :src="notification.actor.avatarUrl"
@@ -58,9 +72,13 @@
                 :to="`/users/${notification.actor.username}`"
                 class="font-medium hover:text-[var(--color-primary)] transition-colors"
               >
-                {{ notification.actor.displayName || notification.actor.username }}
+                {{
+                  notification.actor.displayName || notification.actor.username
+                }}
               </NuxtLink>
-              <span class="text-[var(--color-text-muted)]">{{ getNotificationText(notification) }}</span>
+              <span class="text-[var(--color-text-muted)]">{{
+                getNotificationText(notification)
+              }}</span>
             </p>
 
             <!-- Artwork Thumbnail (for LIKE, COMMENT, COMMENT_REPLY) -->
@@ -69,7 +87,9 @@
               :to="getNotificationLink(notification)"
               class="mt-2 flex items-center gap-2 hover:opacity-80 transition-opacity"
             >
-              <div class="w-12 h-12 rounded bg-[var(--color-surface-tertiary)] overflow-hidden flex-shrink-0">
+              <div
+                class="w-12 h-12 rounded bg-[var(--color-surface-tertiary)] overflow-hidden flex-shrink-0"
+              >
                 <img
                   v-if="notification.artwork.images?.[0]"
                   :src="getArtworkThumbnailUrl(notification.artwork)"
@@ -77,11 +97,16 @@
                   class="w-full h-full object-cover"
                 />
               </div>
-              <span class="text-sm text-[var(--color-text-muted)] truncate">{{ notification.artwork.title }}</span>
+              <span class="text-sm text-[var(--color-text-muted)] truncate">{{
+                notification.artwork.title
+              }}</span>
             </NuxtLink>
 
             <!-- Comment Preview (for COMMENT, COMMENT_REPLY) -->
-            <p v-if="notification.comment" class="mt-1 text-sm text-[var(--color-text-muted)] line-clamp-2">
+            <p
+              v-if="notification.comment"
+              class="mt-1 text-sm text-[var(--color-text-muted)] line-clamp-2"
+            >
               "{{ notification.comment.content }}"
             </p>
 
@@ -94,9 +119,9 @@
           <!-- Mark as Read Button -->
           <button
             v-if="!notification.isRead"
-            @click="markAsRead(notification.id)"
             class="flex-shrink-0 p-2 hover:bg-[var(--color-hover)] rounded-full transition-colors"
             :title="$t('notifications.markAsRead')"
+            @click="markAsRead(notification.id)"
           >
             <Icon name="Check" class="w-5 h-5" />
           </button>
@@ -105,7 +130,10 @@
     </div>
 
     <!-- Pagination -->
-    <div v-if="totalPages > 1" class="flex justify-center gap-2 mt-6 items-center">
+    <div
+      v-if="totalPages > 1"
+      class="flex justify-center gap-2 mt-6 items-center"
+    >
       <BaseButton
         variant="secondary"
         size="md"
@@ -188,7 +216,10 @@ const fetchSignedArtworkUrls = async (notificationList: Notification[]) => {
   const artworkImages: { artworkId: string; imageId: string }[] = []
 
   for (const notification of notificationList) {
-    if (notification.artwork?.images?.[0]?.id && !signedArtworkUrls.value.has(notification.artwork.id)) {
+    if (
+      notification.artwork?.images?.[0]?.id &&
+      !signedArtworkUrls.value.has(notification.artwork.id)
+    ) {
       artworkImages.push({
         artworkId: notification.artwork.id,
         imageId: notification.artwork.images[0].id,
@@ -203,15 +234,22 @@ const fetchSignedArtworkUrls = async (notificationList: Notification[]) => {
         const signedUrl = await getSignedUrl(imageId, true)
         signedArtworkUrls.value.set(artworkId, signedUrl)
       } catch (error) {
-        console.error(`Failed to get signed URL for artwork ${artworkId}:`, error)
+        console.error(
+          `Failed to get signed URL for artwork ${artworkId}:`,
+          error,
+        )
       }
-    })
+    }),
   )
 }
 
 // Get signed URL for artwork thumbnail
 const getArtworkThumbnailUrl = (artwork: NotificationArtwork) => {
-  return signedArtworkUrls.value.get(artwork.id) || artwork.images?.[0]?.thumbnailUrl || ''
+  return (
+    signedArtworkUrls.value.get(artwork.id) ||
+    artwork.images?.[0]?.thumbnailUrl ||
+    ''
+  )
 }
 
 // Fetch notifications
@@ -224,9 +262,10 @@ const fetchNotifications = async () => {
       ...(filterUnreadOnly.value ? { unreadOnly: 'true' } : {}),
     })
 
-    const data = await api.get<{ notifications: Notification[]; total: number }>(
-      `/api/notifications?${params}`,
-    )
+    const data = await api.get<{
+      notifications: Notification[]
+      total: number
+    }>(`/api/notifications?${params}`)
 
     notifications.value = data.notifications
     totalPages.value = Math.ceil(data.total / 20)
@@ -244,7 +283,9 @@ const fetchNotifications = async () => {
 const markAsRead = async (notificationId: string) => {
   try {
     await api.patch(`/api/notifications/${notificationId}/read`)
-    const notification = notifications.value.find((n) => n.id === notificationId)
+    const notification = notifications.value.find(
+      (n) => n.id === notificationId,
+    )
     if (notification) {
       notification.isRead = true
       notification.readAt = new Date()

@@ -107,6 +107,9 @@
     "invalidCodeFormat": "6桁のTOTPコードまたは8桁のバックアップコードを入力してください。",
     "invalidAuthCode": "認証コードが無効です。もう一度お試しください。",
     "twoFactorFailed": "2要素認証に失敗しました。",
+    "emailChangeVerified": "メールアドレスが変更されました",
+    "emailChangeVerificationFailed": "メールアドレスの変更に失敗しました",
+    "emailAlreadyInUse": "このメールアドレスは既に使用されています",
     "bluesky": {
       "loginWithBluesky": "Blueskyでログイン",
       "registerWithBluesky": "Blueskyで登録",
@@ -424,7 +427,21 @@
       "alreadyExists": "このツールは既に登録されています",
       "myTools": "マイツール",
       "registered": "件登録"
-    }
+    },
+    "emailSection": "メールアドレス",
+    "emailSectionDescription": "アカウントの復旧やパスワードリセットに使用されます",
+    "emailNotSet": "メールアドレスが設定されていません",
+    "emailNotSetWarning": "メールアドレスが設定されていません。アカウント復旧のためにメールアドレスを設定してください。",
+    "emailVerified": "認証済み",
+    "emailNotVerified": "未認証",
+    "setEmail": "メールアドレスを設定",
+    "changeEmail": "変更",
+    "emailChangePending": "新しいメールアドレスに確認メールを送信しました",
+    "cancelEmailChange": "キャンセル",
+    "emailChangeRequested": "確認メールを送信しました",
+    "emailPlaceholder": "mail{'@'}example.com",
+    "submitEmailChange": "確認メールを送信",
+    "unlinkRequiresEmail": "メールアドレスを設定・認証してから解除できます"
   },
   "twoFactor": {
     "title": "二段階認証",
@@ -1074,6 +1091,10 @@
     "passwordMustBeDifferent": "新しいパスワードは現在のパスワードと異なる必要があります",
     "passwordChanged": "パスワードを変更しました",
     "passwordChangeFailed": "パスワードの変更に失敗しました",
+    "setPassword": "パスワードを設定",
+    "setPasswordDescription": "ログインに使用するパスワードを設定してください",
+    "setPasswordButton": "パスワードを設定",
+    "passwordSet": "パスワードを設定しました",
     "passkeys": "パスキー"
   },
   "passkey": {

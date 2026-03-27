@@ -2,31 +2,40 @@
   <div class="space-y-6">
     <!-- Title -->
     <div class="form-section">
-      <label for="title" class="section-label required">{{ $t('upload.title_field') }}</label>
+      <label for="title" class="section-label required">{{
+        $t('upload.title_field')
+      }}</label>
       <input
         id="title"
         :value="modelValue.title"
-        @input="updateField('title', ($event.target as HTMLInputElement).value)"
         type="text"
         class="input-field"
         :placeholder="$t('upload.titlePlaceholder')"
         maxlength="200"
         required
+        @input="updateField('title', ($event.target as HTMLInputElement).value)"
       />
       <p class="char-count">{{ modelValue.title.length }}/200</p>
     </div>
 
     <!-- Description -->
     <div class="form-section">
-      <label for="description" class="section-label">{{ $t('upload.caption') }}</label>
+      <label for="description" class="section-label">{{
+        $t('upload.caption')
+      }}</label>
       <textarea
         id="description"
         :value="modelValue.description"
-        @input="updateField('description', ($event.target as HTMLTextAreaElement).value)"
         class="textarea-field"
         :placeholder="$t('upload.descriptionPlaceholder')"
         rows="6"
         maxlength="5000"
+        @input="
+          updateField(
+            'description',
+            ($event.target as HTMLTextAreaElement).value,
+          )
+        "
       />
       <p class="char-count">{{ modelValue.description.length }}/5000</p>
     </div>
@@ -40,10 +49,12 @@
       <input
         id="tags"
         :value="tagsInput"
-        @input="$emit('update:tagsInput', ($event.target as HTMLInputElement).value)"
         type="text"
         class="input-field"
         :placeholder="$t('upload.tagsPlaceholder')"
+        @input="
+          $emit('update:tagsInput', ($event.target as HTMLInputElement).value)
+        "
       />
       <div v-if="parsedTags.length > 0" class="tag-preview">
         <TagChip v-for="tag in parsedTags" :key="tag" :tag="tag" />
@@ -52,24 +63,26 @@
 
     <!-- Artwork Type -->
     <div class="form-section">
-      <label class="section-label required">{{ $t('upload.artworkType') }}</label>
+      <label class="section-label required">{{
+        $t('upload.artworkType')
+      }}</label>
       <div class="radio-group">
         <label class="radio-label">
           <input
             :checked="modelValue.type === 'ILLUSTRATION'"
-            @change="updateField('type', 'ILLUSTRATION')"
             type="radio"
             name="artworkType"
             required
+            @change="updateField('type', 'ILLUSTRATION')"
           />
           <span>{{ $t('upload.typeIllustration') }}</span>
         </label>
         <label class="radio-label">
           <input
             :checked="modelValue.type === 'MANGA'"
-            @change="updateField('type', 'MANGA')"
             type="radio"
             name="artworkType"
+            @change="updateField('type', 'MANGA')"
           />
           <span>{{ $t('upload.typeManga') }}</span>
         </label>
@@ -83,19 +96,19 @@
         <label class="radio-label">
           <input
             :checked="modelValue.ageRating === 'ALL_AGES'"
-            @change="updateField('ageRating', 'ALL_AGES')"
             type="radio"
             name="ageRating"
             required
+            @change="updateField('ageRating', 'ALL_AGES')"
           />
           <span>{{ $t('upload.allAges') }}</span>
         </label>
         <label class="radio-label">
           <input
             :checked="modelValue.ageRating === 'NSFW'"
-            @change="updateField('ageRating', 'NSFW')"
             type="radio"
             name="ageRating"
+            @change="updateField('ageRating', 'NSFW')"
           />
           <span>{{ $t('upload.nsfw') }}</span>
           <Tooltip :content="$t('upload.nsfwTooltip')" position="top" />
@@ -103,18 +116,18 @@
         <label class="radio-label">
           <input
             :checked="modelValue.ageRating === 'R18'"
-            @change="updateField('ageRating', 'R18')"
             type="radio"
             name="ageRating"
+            @change="updateField('ageRating', 'R18')"
           />
           <span>{{ $t('upload.r18') }}</span>
         </label>
         <label class="radio-label">
           <input
             :checked="modelValue.ageRating === 'R18G'"
-            @change="updateField('ageRating', 'R18G')"
             type="radio"
             name="ageRating"
+            @change="updateField('ageRating', 'R18G')"
           />
           <span>{{ $t('upload.r18g') }}</span>
         </label>
@@ -123,60 +136,80 @@
 
     <!-- Visibility -->
     <div class="form-section">
-      <label class="section-label required">{{ $t('upload.visibility') }}</label>
+      <label class="section-label required">{{
+        $t('upload.visibility')
+      }}</label>
       <div class="radio-group vertical">
         <label class="radio-label with-icon">
           <input
             :checked="modelValue.visibility === 'PUBLIC'"
-            @change="updateField('visibility', 'PUBLIC')"
             type="radio"
             name="visibility"
             required
+            @change="updateField('visibility', 'PUBLIC')"
           />
           <Icon name="GlobeAlt" class="visibility-icon" />
           <div class="radio-content">
             <span class="radio-title">{{ $t('upload.visibilityPublic') }}</span>
           </div>
-          <Tooltip :content="$t('upload.visibilityPublicTooltip')" position="right" />
+          <Tooltip
+            :content="$t('upload.visibilityPublicTooltip')"
+            position="right"
+          />
         </label>
         <label class="radio-label with-icon">
           <input
             :checked="modelValue.visibility === 'UNLISTED'"
-            @change="updateField('visibility', 'UNLISTED')"
             type="radio"
             name="visibility"
+            @change="updateField('visibility', 'UNLISTED')"
           />
           <Icon name="Moon" class="visibility-icon" />
           <div class="radio-content">
-            <span class="radio-title">{{ $t('upload.visibilityUnlisted') }}</span>
+            <span class="radio-title">{{
+              $t('upload.visibilityUnlisted')
+            }}</span>
           </div>
-          <Tooltip :content="$t('upload.visibilityUnlistedTooltip')" position="right" />
+          <Tooltip
+            :content="$t('upload.visibilityUnlistedTooltip')"
+            position="right"
+          />
         </label>
         <label class="radio-label with-icon">
           <input
             :checked="modelValue.visibility === 'FOLLOWERS_ONLY'"
-            @change="updateField('visibility', 'FOLLOWERS_ONLY')"
             type="radio"
             name="visibility"
+            @change="updateField('visibility', 'FOLLOWERS_ONLY')"
           />
           <Icon name="LockClosed" class="visibility-icon" />
           <div class="radio-content">
-            <span class="radio-title">{{ $t('upload.visibilityFollowers') }}</span>
+            <span class="radio-title">{{
+              $t('upload.visibilityFollowers')
+            }}</span>
           </div>
-          <Tooltip :content="$t('upload.visibilityFollowersTooltip')" position="right" />
+          <Tooltip
+            :content="$t('upload.visibilityFollowersTooltip')"
+            position="right"
+          />
         </label>
         <label class="radio-label with-icon">
           <input
             :checked="modelValue.visibility === 'PRIVATE'"
-            @change="updateField('visibility', 'PRIVATE')"
             type="radio"
             name="visibility"
+            @change="updateField('visibility', 'PRIVATE')"
           />
           <Icon name="AtSymbol" class="visibility-icon" />
           <div class="radio-content">
-            <span class="radio-title">{{ $t('upload.visibilityPrivate') }}</span>
+            <span class="radio-title">{{
+              $t('upload.visibilityPrivate')
+            }}</span>
           </div>
-          <Tooltip :content="$t('upload.visibilityPrivateTooltip')" position="right" />
+          <Tooltip
+            :content="$t('upload.visibilityPrivateTooltip')"
+            position="right"
+          />
         </label>
       </div>
     </div>
@@ -184,51 +217,77 @@
     <!-- License Settings -->
     <div class="form-section">
       <label class="section-label">{{ $t('upload.licenseSettings') }}</label>
-      <p class="text-sm text-[var(--color-text-muted)] mb-3">{{ $t('upload.licenseHint') }}</p>
+      <p class="text-sm text-[var(--color-text-muted)] mb-3">
+        {{ $t('upload.licenseHint') }}
+      </p>
       <select
         :value="modelValue.license"
-        @change="updateField('license', ($event.target as HTMLSelectElement).value)"
         class="input-field mb-3"
+        @change="
+          updateField('license', ($event.target as HTMLSelectElement).value)
+        "
       >
         <option value="">{{ $t('upload.licenseDefault') }}</option>
-        <option value="All Rights Reserved">{{ $t('upload.licenseAllRights') }}</option>
+        <option value="All Rights Reserved">
+          {{ $t('upload.licenseAllRights') }}
+        </option>
         <option value="Fan Art">{{ $t('upload.licenseFanArt') }}</option>
         <option value="CC0">{{ $t('upload.licenseCC0') }}</option>
         <option value="CC BY 4.0">{{ $t('upload.licenseCCBY') }}</option>
         <option value="CC BY-SA 4.0">{{ $t('upload.licenseCCBYSA') }}</option>
         <option value="CC BY-NC 4.0">{{ $t('upload.licenseCCBYNC') }}</option>
-        <option value="CC BY-NC-ND 4.0">{{ $t('upload.licenseCCBYNCND') }}</option>
+        <option value="CC BY-NC-ND 4.0">
+          {{ $t('upload.licenseCCBYNCND') }}
+        </option>
         <option value="CC BY-ND 4.0">{{ $t('upload.licenseCCBYND') }}</option>
-        <option value="CC BY-NC-SA 4.0">{{ $t('upload.licenseCCBYNCSA') }}</option>
+        <option value="CC BY-NC-SA 4.0">
+          {{ $t('upload.licenseCCBYNCSA') }}
+        </option>
         <option value="Custom">{{ $t('upload.licenseCustom') }}</option>
       </select>
 
       <!-- Custom License Inputs -->
       <div v-if="modelValue.license === 'Custom'" class="mt-3 space-y-3">
         <div>
-          <label for="customLicenseUrl" class="text-sm text-[var(--color-text-muted)] block mb-2">
+          <label
+            for="customLicenseUrl"
+            class="text-sm text-[var(--color-text-muted)] block mb-2"
+          >
             {{ $t('upload.customLicenseUrl') }}
           </label>
           <input
             id="customLicenseUrl"
             :value="modelValue.customLicenseUrl"
-            @input="updateField('customLicenseUrl', ($event.target as HTMLInputElement).value)"
             type="url"
             class="input-field"
             :placeholder="$t('upload.customLicenseUrlPlaceholder')"
+            @input="
+              updateField(
+                'customLicenseUrl',
+                ($event.target as HTMLInputElement).value,
+              )
+            "
           />
         </div>
         <div>
-          <label for="customLicenseText" class="text-sm text-[var(--color-text-muted)] block mb-2">
+          <label
+            for="customLicenseText"
+            class="text-sm text-[var(--color-text-muted)] block mb-2"
+          >
             {{ $t('upload.customLicenseText') }}
           </label>
           <textarea
             id="customLicenseText"
             :value="modelValue.customLicenseText"
-            @input="updateField('customLicenseText', ($event.target as HTMLTextAreaElement).value)"
             class="input-field"
             rows="4"
             :placeholder="$t('upload.customLicenseTextPlaceholder')"
+            @input="
+              updateField(
+                'customLicenseText',
+                ($event.target as HTMLTextAreaElement).value,
+              )
+            "
           />
         </div>
       </div>
@@ -240,7 +299,11 @@
         @click="showCopyrightInfo = !showCopyrightInfo"
       >
         <label class="section-label cursor-pointer">
-          {{ showCopyrightInfo ? $t('upload.copyrightSettings') : $t('upload.copyrightSettingsCollapsed') }}
+          {{
+            showCopyrightInfo
+              ? $t('upload.copyrightSettings')
+              : $t('upload.copyrightSettingsCollapsed')
+          }}
         </label>
         <Icon
           :name="showCopyrightInfo ? 'ChevronUp' : 'ChevronDown'"
@@ -255,29 +318,56 @@
           <p class="field-hint mb-2">{{ $t('upload.copyrightTypeHint') }}</p>
           <select
             :value="modelValue.copyrightType || 'CREATOR'"
-            @change="updateField('copyrightType', ($event.target as HTMLSelectElement).value as CopyrightType)"
             class="input-field"
+            @change="
+              updateField(
+                'copyrightType',
+                ($event.target as HTMLSelectElement).value as CopyrightType,
+              )
+            "
           >
-            <option value="CREATOR">{{ $t('upload.copyrightTypeCreator') }}</option>
-            <option value="COMMISSION">{{ $t('upload.copyrightTypeCommission') }}</option>
-            <option value="LICENSED">{{ $t('upload.copyrightTypeLicensed') }}</option>
-            <option value="CORPORATE">{{ $t('upload.copyrightTypeCorporate') }}</option>
-            <option value="FAN_ART">{{ $t('upload.copyrightTypeFanArt') }}</option>
+            <option value="CREATOR">
+              {{ $t('upload.copyrightTypeCreator') }}
+            </option>
+            <option value="COMMISSION">
+              {{ $t('upload.copyrightTypeCommission') }}
+            </option>
+            <option value="LICENSED">
+              {{ $t('upload.copyrightTypeLicensed') }}
+            </option>
+            <option value="CORPORATE">
+              {{ $t('upload.copyrightTypeCorporate') }}
+            </option>
+            <option value="FAN_ART">
+              {{ $t('upload.copyrightTypeFanArt') }}
+            </option>
             <option value="OTHER">{{ $t('upload.copyrightTypeOther') }}</option>
           </select>
         </div>
 
         <!-- Copyright Holder (shown for non-CREATOR types) -->
-        <div v-if="modelValue.copyrightType && modelValue.copyrightType !== 'CREATOR'" class="sub-section">
-          <label for="copyrightHolder" class="sub-label">{{ $t('upload.copyrightHolder') }}</label>
+        <div
+          v-if="
+            modelValue.copyrightType && modelValue.copyrightType !== 'CREATOR'
+          "
+          class="sub-section"
+        >
+          <label for="copyrightHolder" class="sub-label">{{
+            $t('upload.copyrightHolder')
+          }}</label>
           <input
             id="copyrightHolder"
             :value="modelValue.copyrightHolder"
-            @input="updateField('copyrightHolder', ($event.target as HTMLInputElement).value)"
             type="text"
             class="input-field"
             maxlength="200"
             :placeholder="$t('upload.copyrightHolderPlaceholder')"
+            @input="
+              updateField(
+                'copyrightHolder',
+                ($event.target as HTMLInputElement).value,
+              )
+            "
           />
           <p class="field-hint">{{ $t('upload.copyrightHolderHint') }}</p>
         </div>
@@ -288,24 +378,43 @@
           <p class="field-hint mb-2">{{ $t('upload.originalCreatorHint') }}</p>
 
           <!-- Selected Original Creator -->
-          <div v-if="modelValue.originalCreator" class="flex items-center gap-3 p-3 bg-[var(--color-surface-secondary)] rounded-lg mb-2">
-            <div class="w-10 h-10 rounded-full bg-[var(--color-surface)] flex items-center justify-center overflow-hidden flex-shrink-0">
+          <div
+            v-if="modelValue.originalCreator"
+            class="flex items-center gap-3 p-3 bg-[var(--color-surface-secondary)] rounded-lg mb-2"
+          >
+            <div
+              class="w-10 h-10 rounded-full bg-[var(--color-surface)] flex items-center justify-center overflow-hidden flex-shrink-0"
+            >
               <img
                 v-if="modelValue.originalCreator.avatarUrl"
                 :src="modelValue.originalCreator.avatarUrl"
-                :alt="modelValue.originalCreator.displayName || modelValue.originalCreator.username"
+                :alt="
+                  modelValue.originalCreator.displayName ||
+                  modelValue.originalCreator.username
+                "
                 class="w-full h-full object-cover"
               />
-              <Icon v-else name="UserCircle" class="w-6 h-6 text-[var(--color-text-muted)]" />
+              <Icon
+                v-else
+                name="UserCircle"
+                class="w-6 h-6 text-[var(--color-text-muted)]"
+              />
             </div>
             <div class="flex-1 min-w-0">
-              <div class="font-medium truncate">{{ modelValue.originalCreator.displayName || modelValue.originalCreator.username }}</div>
-              <div class="text-sm text-[var(--color-text-muted)] truncate">@{{ modelValue.originalCreator.username }}</div>
+              <div class="font-medium truncate">
+                {{
+                  modelValue.originalCreator.displayName ||
+                  modelValue.originalCreator.username
+                }}
+              </div>
+              <div class="text-sm text-[var(--color-text-muted)] truncate">
+                @{{ modelValue.originalCreator.username }}
+              </div>
             </div>
             <button
               type="button"
-              @click="clearOriginalCreator"
               class="p-1.5 hover:bg-[var(--color-hover)] rounded transition-colors text-[var(--color-text-muted)] hover:text-[var(--color-danger)]"
+              @click="clearOriginalCreator"
             >
               <Icon name="XMark" class="w-5 h-5" />
             </button>
@@ -323,11 +432,19 @@
             />
             <!-- Search Results Dropdown -->
             <div
-              v-if="showUserDropdown && (originalCreatorSearchResults.length > 0 || isSearchingUsers)"
+              v-if="
+                showUserDropdown &&
+                (originalCreatorSearchResults.length > 0 || isSearchingUsers)
+              "
               class="absolute z-10 w-full mt-1 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg shadow-lg max-h-60 overflow-y-auto"
             >
-              <div v-if="isSearchingUsers" class="p-3 text-center text-[var(--color-text-muted)]">
-                <div class="inline-block animate-spin rounded-full h-4 w-4 border-2 border-[var(--color-border)] border-t-[var(--color-primary)]"></div>
+              <div
+                v-if="isSearchingUsers"
+                class="p-3 text-center text-[var(--color-text-muted)]"
+              >
+                <div
+                  class="inline-block animate-spin rounded-full h-4 w-4 border-2 border-[var(--color-border)] border-t-[var(--color-primary)]"
+                />
               </div>
               <button
                 v-for="user in originalCreatorSearchResults"
@@ -336,18 +453,28 @@
                 class="w-full flex items-center gap-3 p-3 hover:bg-[var(--color-hover)] transition-colors text-left"
                 @mousedown.prevent="selectOriginalCreator(user)"
               >
-                <div class="w-8 h-8 rounded-full bg-[var(--color-surface-secondary)] flex items-center justify-center overflow-hidden flex-shrink-0">
+                <div
+                  class="w-8 h-8 rounded-full bg-[var(--color-surface-secondary)] flex items-center justify-center overflow-hidden flex-shrink-0"
+                >
                   <img
                     v-if="user.avatarUrl"
                     :src="user.avatarUrl"
                     :alt="user.displayName || user.username"
                     class="w-full h-full object-cover"
                   />
-                  <Icon v-else name="UserCircle" class="w-5 h-5 text-[var(--color-text-muted)]" />
+                  <Icon
+                    v-else
+                    name="UserCircle"
+                    class="w-5 h-5 text-[var(--color-text-muted)]"
+                  />
                 </div>
                 <div class="flex-1 min-w-0">
-                  <div class="font-medium truncate">{{ user.displayName || user.username }}</div>
-                  <div class="text-sm text-[var(--color-text-muted)] truncate">@{{ user.username }}</div>
+                  <div class="font-medium truncate">
+                    {{ user.displayName || user.username }}
+                  </div>
+                  <div class="text-sm text-[var(--color-text-muted)] truncate">
+                    @{{ user.username }}
+                  </div>
                 </div>
               </button>
             </div>
@@ -357,12 +484,18 @@
           <div v-if="modelValue.originalCreator" class="mt-3">
             <div class="toggle-option">
               <div class="toggle-content">
-                <span class="toggle-title">{{ $t('upload.originalCreatorAllowDownload') }}</span>
-                <p class="field-hint">{{ $t('upload.originalCreatorAllowDownloadHint') }}</p>
+                <span class="toggle-title">{{
+                  $t('upload.originalCreatorAllowDownload')
+                }}</span>
+                <p class="field-hint">
+                  {{ $t('upload.originalCreatorAllowDownloadHint') }}
+                </p>
               </div>
               <ToggleSwitch
                 :model-value="modelValue.originalCreatorAllowDownload || false"
-                @update:model-value="updateField('originalCreatorAllowDownload', $event)"
+                @update:model-value="
+                  updateField('originalCreatorAllowDownload', $event)
+                "
               />
             </div>
           </div>
@@ -370,15 +503,22 @@
 
         <!-- Copyright Note -->
         <div class="sub-section">
-          <label for="copyrightNote" class="sub-label">{{ $t('upload.copyrightNote') }}</label>
+          <label for="copyrightNote" class="sub-label">{{
+            $t('upload.copyrightNote')
+          }}</label>
           <textarea
             id="copyrightNote"
             :value="modelValue.copyrightNote"
-            @input="updateField('copyrightNote', ($event.target as HTMLTextAreaElement).value)"
             class="input-field"
             rows="3"
             maxlength="2000"
             :placeholder="$t('upload.copyrightNotePlaceholder')"
+            @input="
+              updateField(
+                'copyrightNote',
+                ($event.target as HTMLTextAreaElement).value,
+              )
+            "
           />
         </div>
       </div>
@@ -386,7 +526,9 @@
 
     <!-- Creation Info Section -->
     <div class="form-section">
-      <label class="section-label">{{ $t('upload.creationInfoSection') }}</label>
+      <label class="section-label">{{
+        $t('upload.creationInfoSection')
+      }}</label>
 
       <!-- Creation Info (toggle) -->
       <button
@@ -394,7 +536,9 @@
         class="section-header-toggle mt-3"
         @click="showCreationInfo = !showCreationInfo"
       >
-        <label class="section-label cursor-pointer">{{ $t('upload.creationInfo') }}</label>
+        <label class="section-label cursor-pointer">{{
+          $t('upload.creationInfo')
+        }}</label>
         <Icon
           :name="showCreationInfo ? 'ChevronUp' : 'ChevronDown'"
           class="w-5 h-5 text-[var(--color-text-muted)] ml-auto"
@@ -404,13 +548,20 @@
       <div v-if="showCreationInfo" class="creation-info-content">
         <!-- Creation Date -->
         <div class="sub-section">
-          <label for="creationDate" class="sub-label">{{ $t('upload.creationDate') }}</label>
+          <label for="creationDate" class="sub-label">{{
+            $t('upload.creationDate')
+          }}</label>
           <input
             id="creationDate"
             :value="modelValue.creationDate"
-            @input="updateField('creationDate', ($event.target as HTMLInputElement).value)"
             type="date"
             class="input-field"
+            @input="
+              updateField(
+                'creationDate',
+                ($event.target as HTMLInputElement).value,
+              )
+            "
           />
           <p class="field-hint">{{ $t('upload.creationDateHint') }}</p>
         </div>
@@ -421,19 +572,34 @@
           <div class="flex gap-3">
             <input
               :value="modelValue.creationPeriodValue"
-              @input="updateField('creationPeriodValue', parseInt(($event.target as HTMLInputElement).value) || undefined)"
               type="number"
               min="1"
               max="999"
               class="input-field !w-24 flex-shrink-0"
               :placeholder="$t('upload.creationPeriodValuePlaceholder')"
+              @input="
+                updateField(
+                  'creationPeriodValue',
+                  parseInt(($event.target as HTMLInputElement).value) ||
+                    undefined,
+                )
+              "
             />
             <select
               :value="modelValue.creationPeriodUnit"
-              @change="updateField('creationPeriodUnit', (($event.target as HTMLSelectElement).value || undefined) as CreationPeriodUnit | undefined)"
               class="input-field flex-1 min-w-0"
+              @change="
+                updateField(
+                  'creationPeriodUnit',
+                  (($event.target as HTMLSelectElement).value || undefined) as
+                    | CreationPeriodUnit
+                    | undefined,
+                )
+              "
             >
-              <option value="">{{ $t('upload.creationPeriodUnitSelect') }}</option>
+              <option value="">
+                {{ $t('upload.creationPeriodUnitSelect') }}
+              </option>
               <option value="HOURS">{{ $t('upload.periodHours') }}</option>
               <option value="DAYS">{{ $t('upload.periodDays') }}</option>
               <option value="WEEKS">{{ $t('upload.periodWeeks') }}</option>
@@ -449,45 +615,45 @@
             <label class="radio-label">
               <input
                 :checked="!modelValue.medium"
-                @change="updateField('medium', undefined)"
                 type="radio"
                 name="medium"
+                @change="updateField('medium', undefined)"
               />
               <span>{{ $t('upload.mediumUnset') }}</span>
             </label>
             <label class="radio-label">
               <input
                 :checked="modelValue.medium === 'DIGITAL'"
-                @change="updateField('medium', 'DIGITAL')"
                 type="radio"
                 name="medium"
+                @change="updateField('medium', 'DIGITAL')"
               />
               <span>{{ $t('upload.mediumDigital') }}</span>
             </label>
             <label class="radio-label">
               <input
                 :checked="modelValue.medium === 'TRADITIONAL'"
-                @change="updateField('medium', 'TRADITIONAL')"
                 type="radio"
                 name="medium"
+                @change="updateField('medium', 'TRADITIONAL')"
               />
               <span>{{ $t('upload.mediumTraditional') }}</span>
             </label>
             <label class="radio-label">
               <input
                 :checked="modelValue.medium === 'THREE_D'"
-                @change="updateField('medium', 'THREE_D')"
                 type="radio"
                 name="medium"
+                @change="updateField('medium', 'THREE_D')"
               />
               <span>{{ $t('upload.medium3D') }}</span>
             </label>
             <label class="radio-label">
               <input
                 :checked="modelValue.medium === 'MIXED'"
-                @change="updateField('medium', 'MIXED')"
                 type="radio"
                 name="medium"
+                @change="updateField('medium', 'MIXED')"
               />
               <span>{{ $t('upload.mediumMixed') }}</span>
             </label>
@@ -505,15 +671,22 @@
 
         <!-- Project Name -->
         <div class="sub-section">
-          <label for="projectName" class="sub-label">{{ $t('upload.projectName') }}</label>
+          <label for="projectName" class="sub-label">{{
+            $t('upload.projectName')
+          }}</label>
           <input
             id="projectName"
             :value="modelValue.projectName"
-            @input="updateField('projectName', ($event.target as HTMLInputElement).value)"
             type="text"
             class="input-field"
             maxlength="200"
             :placeholder="$t('upload.projectNamePlaceholder')"
+            @input="
+              updateField(
+                'projectName',
+                ($event.target as HTMLInputElement).value,
+              )
+            "
           />
         </div>
 
@@ -530,15 +703,22 @@
             />
           </div>
           <div v-if="modelValue.isCommission" class="mt-3">
-            <label for="clientName" class="sub-label">{{ $t('upload.clientName') }}</label>
+            <label for="clientName" class="sub-label">{{
+              $t('upload.clientName')
+            }}</label>
             <input
               id="clientName"
               :value="modelValue.clientName"
-              @input="updateField('clientName', ($event.target as HTMLInputElement).value)"
               type="text"
               class="input-field"
               maxlength="200"
               :placeholder="$t('upload.clientNamePlaceholder')"
+              @input="
+                updateField(
+                  'clientName',
+                  ($event.target as HTMLInputElement).value,
+                )
+              "
             />
             <p class="field-hint">{{ $t('upload.clientNameHint') }}</p>
           </div>
@@ -546,14 +726,21 @@
 
         <!-- External URL -->
         <div class="sub-section">
-          <label for="externalUrl" class="sub-label">{{ $t('upload.externalUrl') }}</label>
+          <label for="externalUrl" class="sub-label">{{
+            $t('upload.externalUrl')
+          }}</label>
           <input
             id="externalUrl"
             :value="modelValue.externalUrl"
-            @input="updateField('externalUrl', ($event.target as HTMLInputElement).value)"
             type="url"
             class="input-field"
             :placeholder="$t('upload.externalUrlPlaceholder')"
+            @input="
+              updateField(
+                'externalUrl',
+                ($event.target as HTMLInputElement).value,
+              )
+            "
           />
           <p class="field-hint">{{ $t('upload.externalUrlHint') }}</p>
         </div>
@@ -567,8 +754,13 @@
         <div class="toggle-option">
           <div class="toggle-content">
             <div class="flex items-center gap-2">
-              <span class="toggle-title">{{ $t('upload.disableRightClick') }}</span>
-              <Tooltip :content="$t('upload.disableRightClickTooltip')" position="top" />
+              <span class="toggle-title">{{
+                $t('upload.disableRightClick')
+              }}</span>
+              <Tooltip
+                :content="$t('upload.disableRightClickTooltip')"
+                position="top"
+              />
             </div>
           </div>
           <ToggleSwitch
@@ -586,7 +778,13 @@ import { ref, computed, watch } from 'vue'
 
 export type CreationPeriodUnit = 'HOURS' | 'DAYS' | 'WEEKS' | 'MONTHS'
 export type ArtworkMedium = 'DIGITAL' | 'TRADITIONAL' | 'THREE_D' | 'MIXED'
-export type CopyrightType = 'CREATOR' | 'COMMISSION' | 'LICENSED' | 'CORPORATE' | 'FAN_ART' | 'OTHER'
+export type CopyrightType =
+  | 'CREATOR'
+  | 'COMMISSION'
+  | 'LICENSED'
+  | 'CORPORATE'
+  | 'FAN_ART'
+  | 'OTHER'
 
 export interface OriginalCreatorInfo {
   id: string
@@ -658,11 +856,14 @@ const parsedTags = computed(() => {
   if (!props.tagsInput.trim()) return []
   return props.tagsInput
     .split(',')
-    .map(tag => tag.trim())
-    .filter(tag => tag.length > 0)
+    .map((tag) => tag.trim())
+    .filter((tag) => tag.length > 0)
 })
 
-const updateField = <K extends keyof ArtworkFormData>(field: K, value: ArtworkFormData[K]) => {
+const updateField = <K extends keyof ArtworkFormData>(
+  field: K,
+  value: ArtworkFormData[K],
+) => {
   emit('update:modelValue', {
     ...props.modelValue,
     [field]: value,
@@ -717,11 +918,15 @@ const clearOriginalCreator = () => {
 }
 
 // Auto-expand copyright section if data exists
-watch(() => props.modelValue.copyrightType, (type) => {
-  if (type && type !== 'CREATOR') {
-    showCopyrightInfo.value = true
-  }
-}, { immediate: true })
+watch(
+  () => props.modelValue.copyrightType,
+  (type) => {
+    if (type && type !== 'CREATOR') {
+      showCopyrightInfo.value = true
+    }
+  },
+  { immediate: true },
+)
 </script>
 
 <style scoped>
@@ -812,7 +1017,7 @@ watch(() => props.modelValue.copyrightType, (type) => {
   font-size: 0.9375rem;
 }
 
-.radio-label input[type="radio"] {
+.radio-label input[type='radio'] {
   width: 18px;
   height: 18px;
   cursor: pointer;

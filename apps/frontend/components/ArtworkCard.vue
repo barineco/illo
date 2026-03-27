@@ -4,7 +4,9 @@
     v-if="artwork.isDeleted"
     class="block relative overflow-hidden rounded-lg bg-[var(--color-surface-secondary)] border border-[var(--color-border)]"
   >
-    <div class="aspect-[3/4] flex flex-col items-center justify-center text-[var(--color-text-muted)] p-4">
+    <div
+      class="aspect-[3/4] flex flex-col items-center justify-center text-[var(--color-text-muted)] p-4"
+    >
       <Icon name="TrashIcon" class="w-12 h-12 mb-2 opacity-50" />
       <span class="text-sm text-center">{{ $t('artwork.deleted') }}</span>
     </div>
@@ -28,7 +30,9 @@
           v-if="isImageLoading"
           class="absolute inset-0 flex items-center justify-center bg-[var(--color-surface-secondary)]"
         >
-          <div class="w-8 h-8 border-2 border-[var(--color-border)] border-t-[var(--color-primary)] rounded-full animate-spin" />
+          <div
+            class="w-8 h-8 border-2 border-[var(--color-border)] border-t-[var(--color-primary)] rounded-full animate-spin"
+          />
         </div>
         <img
           :src="currentImageUrl"
@@ -65,13 +69,22 @@
         <div
           v-if="shouldShowBlur && !isBlurRemoved"
           class="absolute inset-0 backdrop-blur-2xl bg-black/50 flex items-center justify-center z-10"
-          :class="{ 'cursor-pointer': artwork.ageRating === 'NSFW', 'pointer-events-none': artwork.ageRating === 'R18' || artwork.ageRating === 'R18G' }"
+          :class="{
+            'cursor-pointer': artwork.ageRating === 'NSFW',
+            'pointer-events-none':
+              artwork.ageRating === 'R18' || artwork.ageRating === 'R18G',
+          }"
           @click.prevent.stop="handleBlurClick"
         >
           <div class="text-white text-center px-4">
             <Icon name="EyeSlashIcon" class="w-8 h-8 mx-auto mb-2" />
-            <span class="text-sm">{{ $t(`artwork.rating.${artwork.ageRating?.toLowerCase() || 'nsfw'}`) }}</span>
-            <p v-if="artwork.ageRating === 'NSFW'" class="text-xs text-white/70 mt-1">
+            <span class="text-sm">{{
+              $t(`artwork.rating.${artwork.ageRating?.toLowerCase() || 'nsfw'}`)
+            }}</span>
+            <p
+              v-if="artwork.ageRating === 'NSFW'"
+              class="text-xs text-white/70 mt-1"
+            >
               {{ $t('common.showMore') }}
             </p>
             <p v-else class="text-xs text-white/70 mt-1">
@@ -107,16 +120,18 @@
       <div
         class="absolute inset-0 bg-[var(--color-scrim-light)] opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none"
         style="bottom: 72px"
-      ></div>
+      />
     </NuxtLink>
 
     <!-- Action menu button (bottom right) -->
     <div v-if="isAuthenticated" class="absolute bottom-[72px] right-2 z-10">
       <button
-        @click.stop.prevent="toggleMenu"
         class="p-1.5 bg-[var(--color-overlay-light)] hover:bg-[var(--color-scrim)] rounded transition-opacity"
-        :class="isMenuOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'"
+        :class="
+          isMenuOpen ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'
+        "
         :title="$t('common.menu')"
+        @click.stop.prevent="toggleMenu"
       >
         <Icon name="EllipsisVertical" class="w-5 h-5 text-white" />
       </button>
@@ -127,24 +142,32 @@
         class="absolute bottom-full right-0 mb-1 bg-[var(--color-surface)] rounded-lg shadow-lg border border-[var(--color-border)] overflow-hidden min-w-[140px]"
       >
         <button
-          @click.stop.prevent="toggleLike"
           class="w-full px-3 py-2 text-left text-sm hover:bg-[var(--color-hover)] transition-colors flex items-center gap-2"
           :class="{ 'text-[var(--color-toggle-like-text)]': isLiked }"
+          @click.stop.prevent="toggleLike"
         >
-          <Icon :name="isLiked ? 'Heart' : 'Heart'" :solid="isLiked" class="w-4 h-4" />
+          <Icon
+            :name="isLiked ? 'Heart' : 'Heart'"
+            :solid="isLiked"
+            class="w-4 h-4"
+          />
           {{ isLiked ? $t('artwork.liked') : $t('artwork.like') }}
         </button>
         <button
-          @click.stop.prevent="toggleBookmark"
           class="w-full px-3 py-2 text-left text-sm hover:bg-[var(--color-hover)] transition-colors flex items-center gap-2"
           :class="{ 'text-[var(--color-toggle-bookmark-text)]': isBookmarked }"
+          @click.stop.prevent="toggleBookmark"
         >
-          <Icon :name="isBookmarked ? 'Bookmark' : 'Bookmark'" :solid="isBookmarked" class="w-4 h-4" />
+          <Icon
+            :name="isBookmarked ? 'Bookmark' : 'Bookmark'"
+            :solid="isBookmarked"
+            class="w-4 h-4"
+          />
           {{ isBookmarked ? $t('artwork.bookmarked') : $t('artwork.bookmark') }}
         </button>
         <button
-          @click.stop.prevent="openCollectionModal"
           class="w-full px-3 py-2 text-left text-sm hover:bg-[var(--color-hover)] transition-colors flex items-center gap-2"
+          @click.stop.prevent="openCollectionModal"
         >
           <Icon name="FolderOpen" class="w-4 h-4" />
           {{ $t('user.collections') }}
@@ -165,7 +188,9 @@
     <div class="p-3">
       <!-- Title - clickable to artwork -->
       <NuxtLink :to="`/artworks/${artwork.id}`">
-        <h3 class="text-sm font-medium mb-1 line-clamp-1 hover:text-[var(--color-primary)] transition-colors">
+        <h3
+          class="text-sm font-medium mb-1 line-clamp-1 hover:text-[var(--color-primary)] transition-colors"
+        >
           {{ artwork.title }}
         </h3>
       </NuxtLink>
@@ -175,7 +200,9 @@
         :to="getUserPathFromUser(artwork.author)"
         class="flex items-center gap-2 hover:text-[var(--color-primary)] transition-colors w-fit max-w-full"
       >
-        <div class="w-6 h-6 rounded-full bg-[var(--color-surface-secondary)] flex-shrink-0 flex items-center justify-center overflow-hidden">
+        <div
+          class="w-6 h-6 rounded-full bg-[var(--color-surface-secondary)] flex-shrink-0 flex items-center justify-center overflow-hidden"
+        >
           <img
             v-if="artwork.author.avatarUrl"
             :src="artwork.author.avatarUrl"
@@ -189,7 +216,10 @@
             <span class="text-xs text-[var(--color-text-muted)] truncate">
               {{ artwork.author.displayName || artwork.author.username }}
             </span>
-            <span v-if="artwork.author.domain" class="text-[10px] text-[var(--color-text-muted)] truncate">
+            <span
+              v-if="artwork.author.domain"
+              class="text-[10px] text-[var(--color-text-muted)] truncate"
+            >
               {{ artwork.author.domain }}
             </span>
           </div>
@@ -358,7 +388,10 @@ const imageCount = computed(() => {
 })
 
 // Get signed URL for an image, using cache
-const getImageUrl = async (imageId: string | undefined, fallbackUrl: string): Promise<string> => {
+const getImageUrl = async (
+  imageId: string | undefined,
+  fallbackUrl: string,
+): Promise<string> => {
   if (!imageId) return fallbackUrl
 
   // Check cache first
@@ -386,21 +419,30 @@ const firstImageId = computed(() => {
 })
 
 // Update display URL when hover changes
-watch([currentHoverIndex, isHovering], async ([index, hovering]) => {
-  const images = previewImages.value
-  if (images.length <= 1 || !hovering) {
-    // Use signed URL for the first image
-    if (firstImageId.value) {
-      displayImageUrl.value = await getImageUrl(firstImageId.value, props.artwork.thumbnailUrl)
+watch(
+  [currentHoverIndex, isHovering],
+  async ([index, hovering]) => {
+    const images = previewImages.value
+    if (images.length <= 1 || !hovering) {
+      // Use signed URL for the first image
+      if (firstImageId.value) {
+        displayImageUrl.value = await getImageUrl(
+          firstImageId.value,
+          props.artwork.thumbnailUrl,
+        )
+      }
+      return
     }
-    return
-  }
 
-  const img = images[index] as ArtworkImage | { thumbnailUrl: string }
-  const imageId = 'id' in img ? img.id : undefined
-  const fallbackUrl = ('thumbnailUrl' in img ? img.thumbnailUrl : props.artwork.thumbnailUrl) || ''
-  displayImageUrl.value = await getImageUrl(imageId, fallbackUrl)
-}, { immediate: false })
+    const img = images[index] as ArtworkImage | { thumbnailUrl: string }
+    const imageId = 'id' in img ? img.id : undefined
+    const fallbackUrl =
+      ('thumbnailUrl' in img ? img.thumbnailUrl : props.artwork.thumbnailUrl) ||
+      ''
+    displayImageUrl.value = await getImageUrl(imageId, fallbackUrl)
+  },
+  { immediate: false },
+)
 
 // Current image URL (computed for template)
 const currentImageUrl = computed(() => displayImageUrl.value)
@@ -460,7 +502,9 @@ const fetchStatus = async () => {
   try {
     const [likeRes, bookmarkRes] = await Promise.all([
       api.get<{ hasLiked: boolean }>(`/api/likes/${props.artwork.id}/check`),
-      api.get<{ hasBookmarked: boolean }>(`/api/bookmarks/${props.artwork.id}/check`),
+      api.get<{ hasBookmarked: boolean }>(
+        `/api/bookmarks/${props.artwork.id}/check`,
+      ),
     ])
     isLiked.value = likeRes.hasLiked
     isBookmarked.value = bookmarkRes.hasBookmarked
@@ -473,7 +517,9 @@ const fetchStatus = async () => {
 const toggleLike = async () => {
   try {
     // Use toggle endpoint - server determines the actual state
-    const result = await api.post<{ liked: boolean }>(`/api/likes/${props.artwork.id}/toggle`)
+    const result = await api.post<{ liked: boolean }>(
+      `/api/likes/${props.artwork.id}/toggle`,
+    )
     isLiked.value = result.liked
   } catch (error) {
     console.error('Failed to toggle like:', error)
@@ -484,7 +530,9 @@ const toggleLike = async () => {
 const toggleBookmark = async () => {
   try {
     // Use toggle endpoint - server determines the actual state
-    const result = await api.post<{ bookmarked: boolean }>(`/api/bookmarks/${props.artwork.id}/toggle`)
+    const result = await api.post<{ bookmarked: boolean }>(
+      `/api/bookmarks/${props.artwork.id}/toggle`,
+    )
     isBookmarked.value = result.bookmarked
   } catch (error) {
     console.error('Failed to toggle bookmark:', error)
@@ -508,7 +556,10 @@ onMounted(async () => {
 
   // Fetch signed URL for initial image on mount
   if (firstImageId.value) {
-    displayImageUrl.value = await getImageUrl(firstImageId.value, props.artwork.thumbnailUrl)
+    displayImageUrl.value = await getImageUrl(
+      firstImageId.value,
+      props.artwork.thumbnailUrl,
+    )
   }
 })
 

@@ -8,11 +8,7 @@
         class="tool-chip selected"
       >
         <span>{{ tool }}</span>
-        <button
-          type="button"
-          class="remove-btn"
-          @click="removeTool(index)"
-        >
+        <button type="button" class="remove-btn" @click="removeTool(index)">
           <Icon name="XMark" class="w-3 h-3" />
         </button>
       </div>
@@ -40,7 +36,10 @@
       </div>
 
       <!-- Dropdown -->
-      <div v-if="showDropdown && filteredTools.length > 0" class="tools-dropdown">
+      <div
+        v-if="showDropdown && filteredTools.length > 0"
+        class="tools-dropdown"
+      >
         <button
           v-for="tool in filteredTools"
           :key="tool"
@@ -56,7 +55,9 @@
     <!-- Profile Tools Hint -->
     <p v-if="profileTools.length === 0" class="hint-text">
       {{ $t('upload.toolsProfileHint') }}
-      <NuxtLink to="/settings" class="hint-link">{{ $t('upload.toolsProfileLink') }}</NuxtLink>
+      <NuxtLink to="/settings" class="hint-link">{{
+        $t('upload.toolsProfileLink')
+      }}</NuxtLink>
     </p>
   </div>
 </template>
@@ -106,8 +107,8 @@ const presetTools = [
 // Combine profile tools with presets, removing duplicates
 const allAvailableTools = computed(() => {
   const combined = [...profileTools.value]
-  presetTools.forEach(tool => {
-    if (!combined.some(t => t.toLowerCase() === tool.toLowerCase())) {
+  presetTools.forEach((tool) => {
+    if (!combined.some((t) => t.toLowerCase() === tool.toLowerCase())) {
       combined.push(tool)
     }
   })
@@ -117,8 +118,10 @@ const allAvailableTools = computed(() => {
 const filteredTools = computed(() => {
   const search = searchInput.value.toLowerCase().trim()
   return allAvailableTools.value
-    .filter(tool => {
-      const isSelected = props.modelValue.some(t => t.toLowerCase() === tool.toLowerCase())
+    .filter((tool) => {
+      const isSelected = props.modelValue.some(
+        (t) => t.toLowerCase() === tool.toLowerCase(),
+      )
       if (isSelected) return false
 
       if (!search) return true
@@ -145,7 +148,7 @@ const addCustomTool = async () => {
   const tool = searchInput.value.trim()
   if (!tool) return
 
-  if (props.modelValue.some(t => t.toLowerCase() === tool.toLowerCase())) {
+  if (props.modelValue.some((t) => t.toLowerCase() === tool.toLowerCase())) {
     searchInput.value = ''
     return
   }

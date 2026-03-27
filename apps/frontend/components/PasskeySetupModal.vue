@@ -5,7 +5,9 @@
       class="fixed inset-0 z-50 flex items-center justify-center bg-[var(--color-overlay)]"
       @click.self="close"
     >
-      <div class="bg-[var(--color-surface)] rounded-xl p-8 max-w-md w-full mx-4 relative">
+      <div
+        class="bg-[var(--color-surface)] rounded-xl p-8 max-w-md w-full mx-4 relative"
+      >
         <h2 class="text-2xl font-bold mb-6">{{ $t('passkey.setup') }}</h2>
 
         <!-- Step 1: Name Input -->
@@ -30,7 +32,10 @@
           </div>
 
           <!-- Error Message -->
-          <div v-if="error" class="bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] rounded-lg p-3">
+          <div
+            v-if="error"
+            class="bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] rounded-lg p-3"
+          >
             <p class="text-[var(--color-danger-text)] text-sm">{{ error }}</p>
           </div>
 
@@ -62,16 +67,31 @@
 
         <!-- Step 2: Success -->
         <div v-else-if="step === 2" class="space-y-4">
-          <div class="bg-[var(--color-success-bg)] border border-[var(--color-success-border)] rounded-lg p-4 text-center">
-            <Icon name="CheckCircle" class="w-12 h-12 text-[var(--color-success-text)] mx-auto mb-2" />
-            <p class="text-[var(--color-success-text)] font-medium">{{ $t('passkey.registered') }}</p>
+          <div
+            class="bg-[var(--color-success-bg)] border border-[var(--color-success-border)] rounded-lg p-4 text-center"
+          >
+            <Icon
+              name="CheckCircle"
+              class="w-12 h-12 text-[var(--color-success-text)] mx-auto mb-2"
+            />
+            <p class="text-[var(--color-success-text)] font-medium">
+              {{ $t('passkey.registered') }}
+            </p>
           </div>
 
-          <div class="bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg p-4">
-            <p class="text-sm text-[var(--color-text-muted)] mb-1">{{ $t('passkey.name') }}</p>
+          <div
+            class="bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg p-4"
+          >
+            <p class="text-sm text-[var(--color-text-muted)] mb-1">
+              {{ $t('passkey.name') }}
+            </p>
             <p class="font-medium">{{ registeredPasskey?.name }}</p>
             <p class="text-sm text-[var(--color-text-muted)] mt-2">
-              {{ registeredPasskey?.credentialBackedUp ? $t('passkey.synced') : $t('passkey.deviceOnly') }}
+              {{
+                registeredPasskey?.credentialBackedUp
+                  ? $t('passkey.synced')
+                  : $t('passkey.deviceOnly')
+              }}
             </p>
           </div>
 
@@ -153,7 +173,8 @@ const register = async () => {
     } else if (err.name === 'NotSupportedError') {
       error.value = t('passkey.notSupported')
     } else {
-      error.value = err.data?.message || err.message || t('passkey.registrationFailed')
+      error.value =
+        err.data?.message || err.message || t('passkey.registrationFailed')
     }
   } finally {
     registering.value = false
@@ -185,6 +206,6 @@ watch(
       error.value = ''
       registeredPasskey.value = null
     }
-  }
+  },
 )
 </script>

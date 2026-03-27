@@ -11,22 +11,19 @@
     <!-- Filters -->
     <div class="mb-6 space-y-4">
       <!-- Type Filter -->
-      <TabGroup
-        v-model="selectedType"
-        type="pill"
-        :tabs="typeTabs"
-      />
+      <TabGroup v-model="selectedType" type="pill" :tabs="typeTabs" />
 
       <!-- Sort Options -->
-      <TabGroup
-        v-model="selectedSort"
-        type="pill"
-        :tabs="sortTabs"
-      />
+      <TabGroup v-model="selectedSort" type="pill" :tabs="sortTabs" />
 
       <!-- Active Tags -->
-      <div v-if="filters.tags && filters.tags.length > 0" class="flex gap-2 flex-wrap items-center">
-        <span class="text-sm text-[var(--color-text-muted)]">{{ $t('search.filteringTags') }}</span>
+      <div
+        v-if="filters.tags && filters.tags.length > 0"
+        class="flex gap-2 flex-wrap items-center"
+      >
+        <span class="text-sm text-[var(--color-text-muted)]">{{
+          $t('search.filteringTags')
+        }}</span>
         <TagChip
           v-for="tag in filters.tags"
           :key="tag"
@@ -41,8 +38,10 @@
     <div v-if="loading" class="text-center py-12">
       <div
         class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[var(--color-border)] border-t-[var(--color-primary)]"
-      ></div>
-      <p class="mt-4 text-[var(--color-text-muted)]">{{ $t('search.searching') }}</p>
+      />
+      <p class="mt-4 text-[var(--color-text-muted)]">
+        {{ $t('search.searching') }}
+      </p>
     </div>
 
     <!-- Error State -->
@@ -61,7 +60,11 @@
     <!-- Empty State -->
     <div v-else-if="artworks.length === 0" class="text-center py-12">
       <p class="text-[var(--color-text-muted)] text-lg">
-        {{ searchQuery ? $t('search.noResults', { query: searchQuery }) : $t('search.enterKeyword') }}
+        {{
+          searchQuery
+            ? $t('search.noResults', { query: searchQuery })
+            : $t('search.enterKeyword')
+        }}
       </p>
     </div>
 
@@ -274,6 +277,6 @@ watch(
     currentPage.value = 1
     fetchSearchResults()
   },
-  { immediate: true }
+  { immediate: true },
 )
 </script>

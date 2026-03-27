@@ -2,8 +2,12 @@
   <div>
     <!-- Loading State -->
     <div v-if="loading" class="text-center py-12">
-      <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[var(--color-border)] border-t-[var(--color-primary)]"></div>
-      <p class="mt-4 text-[var(--color-text-muted)]">{{ $t('common.loading') }}</p>
+      <div
+        class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[var(--color-border)] border-t-[var(--color-primary)]"
+      />
+      <p class="mt-4 text-[var(--color-text-muted)]">
+        {{ $t('common.loading') }}
+      </p>
     </div>
 
     <!-- Error State -->
@@ -31,7 +35,7 @@
               'py-2 px-4 text-sm font-medium border-b-2 transition-colors',
               activeSubTab === tab.key
                 ? 'border-[var(--color-primary)] text-[var(--color-primary)]'
-                : 'border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text)]'
+                : 'border-transparent text-[var(--color-text-muted)] hover:text-[var(--color-text)]',
             ]"
             @click="activeSubTab = tab.key"
           >
@@ -43,44 +47,66 @@
       <!-- Stats Overview (always visible) -->
       <div v-if="stats" class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div class="bg-[var(--color-surface)] rounded-lg p-4">
-          <div class="text-sm text-[var(--color-text-muted)]">{{ $t('admin.rateLimit.activePenalties') }}</div>
-          <div class="text-2xl font-bold text-[var(--color-danger-text)]">{{ stats.activePenalties }}</div>
+          <div class="text-sm text-[var(--color-text-muted)]">
+            {{ $t('admin.rateLimit.activePenalties') }}
+          </div>
+          <div class="text-2xl font-bold text-[var(--color-danger-text)]">
+            {{ stats.activePenalties }}
+          </div>
         </div>
         <div class="bg-[var(--color-surface)] rounded-lg p-4">
-          <div class="text-sm text-[var(--color-text-muted)]">{{ $t('admin.rateLimit.logsLast24h') }}</div>
+          <div class="text-sm text-[var(--color-text-muted)]">
+            {{ $t('admin.rateLimit.logsLast24h') }}
+          </div>
           <div class="text-2xl font-bold">{{ stats.last24Hours.logs }}</div>
         </div>
         <div class="bg-[var(--color-surface)] rounded-lg p-4">
-          <div class="text-sm text-[var(--color-text-muted)]">{{ $t('admin.rateLimit.uniqueIPs') }}</div>
+          <div class="text-sm text-[var(--color-text-muted)]">
+            {{ $t('admin.rateLimit.uniqueIPs') }}
+          </div>
           <div class="text-2xl font-bold">{{ stats.uniqueIPs }}</div>
         </div>
         <div class="bg-[var(--color-surface)] rounded-lg p-4">
-          <div class="text-sm text-[var(--color-text-muted)]">{{ $t('admin.rateLimit.totalLogs') }}</div>
+          <div class="text-sm text-[var(--color-text-muted)]">
+            {{ $t('admin.rateLimit.totalLogs') }}
+          </div>
           <div class="text-2xl font-bold">{{ stats.totalLogs }}</div>
         </div>
       </div>
 
       <!-- Config Panel -->
-      <div v-if="activeSubTab === 'config'" class="bg-[var(--color-surface)] rounded-lg p-6">
-        <h2 class="text-xl font-bold mb-6">{{ $t('admin.rateLimit.configTitle') }}</h2>
+      <div
+        v-if="activeSubTab === 'config'"
+        class="bg-[var(--color-surface)] rounded-lg p-6"
+      >
+        <h2 class="text-xl font-bold mb-6">
+          {{ $t('admin.rateLimit.configTitle') }}
+        </h2>
 
         <!-- Enabled Toggle -->
-        <div class="flex items-center justify-between mb-6 p-4 bg-[var(--color-background)] rounded-lg">
+        <div
+          class="flex items-center justify-between mb-6 p-4 bg-[var(--color-background)] rounded-lg"
+        >
           <div>
             <div class="font-medium">{{ $t('admin.rateLimit.enabled') }}</div>
-            <div class="text-sm text-[var(--color-text-muted)]">{{ $t('admin.rateLimit.enabledDesc') }}</div>
+            <div class="text-sm text-[var(--color-text-muted)]">
+              {{ $t('admin.rateLimit.enabledDesc') }}
+            </div>
           </div>
-          <ToggleSwitch
-            v-model="config.enabled"
-            @change="updateConfig"
-          />
+          <ToggleSwitch v-model="config.enabled" @change="updateConfig" />
         </div>
 
         <!-- Composite Score Toggle -->
-        <div class="flex items-center justify-between mb-6 p-4 bg-[var(--color-background)] rounded-lg">
+        <div
+          class="flex items-center justify-between mb-6 p-4 bg-[var(--color-background)] rounded-lg"
+        >
           <div>
-            <div class="font-medium">{{ $t('admin.rateLimit.useCompositeScore') }}</div>
-            <div class="text-sm text-[var(--color-text-muted)]">{{ $t('admin.rateLimit.useCompositeScoreDesc') }}</div>
+            <div class="font-medium">
+              {{ $t('admin.rateLimit.useCompositeScore') }}
+            </div>
+            <div class="text-sm text-[var(--color-text-muted)]">
+              {{ $t('admin.rateLimit.useCompositeScoreDesc') }}
+            </div>
           </div>
           <ToggleSwitch
             v-model="config.useCompositeScore"
@@ -92,10 +118,14 @@
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <!-- Window Settings -->
           <div class="space-y-4">
-            <h3 class="font-medium text-[var(--color-text)]">{{ $t('admin.rateLimit.windowSettings') }}</h3>
+            <h3 class="font-medium text-[var(--color-text)]">
+              {{ $t('admin.rateLimit.windowSettings') }}
+            </h3>
 
             <div>
-              <label class="block text-sm font-medium mb-1">{{ $t('admin.rateLimit.windowSeconds') }}</label>
+              <label class="block text-sm font-medium mb-1">{{
+                $t('admin.rateLimit.windowSeconds')
+              }}</label>
               <input
                 v-model.number="config.windowSeconds"
                 type="number"
@@ -107,7 +137,9 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium mb-1">{{ $t('admin.rateLimit.softLimitPerWindow') }}</label>
+              <label class="block text-sm font-medium mb-1">{{
+                $t('admin.rateLimit.softLimitPerWindow')
+              }}</label>
               <input
                 v-model.number="config.softLimitPerWindow"
                 type="number"
@@ -119,7 +151,9 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium mb-1">{{ $t('admin.rateLimit.hardLimitPerWindow') }}</label>
+              <label class="block text-sm font-medium mb-1">{{
+                $t('admin.rateLimit.hardLimitPerWindow')
+              }}</label>
               <input
                 v-model.number="config.hardLimitPerWindow"
                 type="number"
@@ -133,10 +167,14 @@
 
           <!-- Hourly Settings -->
           <div class="space-y-4">
-            <h3 class="font-medium text-[var(--color-text)]">{{ $t('admin.rateLimit.hourlySettings') }}</h3>
+            <h3 class="font-medium text-[var(--color-text)]">
+              {{ $t('admin.rateLimit.hourlySettings') }}
+            </h3>
 
             <div>
-              <label class="block text-sm font-medium mb-1">{{ $t('admin.rateLimit.softLimitPerHour') }}</label>
+              <label class="block text-sm font-medium mb-1">{{
+                $t('admin.rateLimit.softLimitPerHour')
+              }}</label>
               <input
                 v-model.number="config.softLimitPerHour"
                 type="number"
@@ -148,7 +186,9 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium mb-1">{{ $t('admin.rateLimit.hardLimitPerHour') }}</label>
+              <label class="block text-sm font-medium mb-1">{{
+                $t('admin.rateLimit.hardLimitPerHour')
+              }}</label>
               <input
                 v-model.number="config.hardLimitPerHour"
                 type="number"
@@ -162,10 +202,14 @@
 
           <!-- Penalty Duration -->
           <div class="space-y-4">
-            <h3 class="font-medium text-[var(--color-text)]">{{ $t('admin.rateLimit.penaltyDuration') }}</h3>
+            <h3 class="font-medium text-[var(--color-text)]">
+              {{ $t('admin.rateLimit.penaltyDuration') }}
+            </h3>
 
             <div>
-              <label class="block text-sm font-medium mb-1">{{ $t('admin.rateLimit.softPenaltyMinutes') }}</label>
+              <label class="block text-sm font-medium mb-1">{{
+                $t('admin.rateLimit.softPenaltyMinutes')
+              }}</label>
               <input
                 v-model.number="config.softPenaltyMinutes"
                 type="number"
@@ -177,7 +221,9 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium mb-1">{{ $t('admin.rateLimit.hardPenaltyMinutes') }}</label>
+              <label class="block text-sm font-medium mb-1">{{
+                $t('admin.rateLimit.hardPenaltyMinutes')
+              }}</label>
               <input
                 v-model.number="config.hardPenaltyMinutes"
                 type="number"
@@ -189,7 +235,9 @@
             </div>
 
             <div>
-              <label class="block text-sm font-medium mb-1">{{ $t('admin.rateLimit.maxPenaltyMinutes') }}</label>
+              <label class="block text-sm font-medium mb-1">{{
+                $t('admin.rateLimit.maxPenaltyMinutes')
+              }}</label>
               <input
                 v-model.number="config.maxPenaltyMinutes"
                 type="number"
@@ -203,14 +251,24 @@
         </div>
 
         <!-- Headless Detection Integration -->
-        <div class="mt-6 p-4 bg-[var(--color-background)] rounded-lg border border-[var(--color-border)]">
-          <h3 class="font-medium text-[var(--color-text)] mb-4">{{ $t('admin.rateLimit.headlessDetection') }}</h3>
-          <p class="text-sm text-[var(--color-text-muted)] mb-4">{{ $t('admin.rateLimit.headlessDetectionDesc') }}</p>
+        <div
+          class="mt-6 p-4 bg-[var(--color-background)] rounded-lg border border-[var(--color-border)]"
+        >
+          <h3 class="font-medium text-[var(--color-text)] mb-4">
+            {{ $t('admin.rateLimit.headlessDetection') }}
+          </h3>
+          <p class="text-sm text-[var(--color-text-muted)] mb-4">
+            {{ $t('admin.rateLimit.headlessDetectionDesc') }}
+          </p>
 
           <div class="flex items-center justify-between mb-4">
             <div>
-              <div class="font-medium text-sm">{{ $t('admin.rateLimit.noInteractionEnabled') }}</div>
-              <div class="text-xs text-[var(--color-text-muted)]">{{ $t('admin.rateLimit.noInteractionEnabledDesc') }}</div>
+              <div class="font-medium text-sm">
+                {{ $t('admin.rateLimit.noInteractionEnabled') }}
+              </div>
+              <div class="text-xs text-[var(--color-text-muted)]">
+                {{ $t('admin.rateLimit.noInteractionEnabledDesc') }}
+              </div>
             </div>
             <ToggleSwitch
               v-model="config.noInteractionEnabled"
@@ -219,7 +277,9 @@
           </div>
 
           <div v-if="config.noInteractionEnabled">
-            <label class="block text-sm font-medium mb-1">{{ $t('admin.rateLimit.noInteractionThresholdMultiplier') }}</label>
+            <label class="block text-sm font-medium mb-1">{{
+              $t('admin.rateLimit.noInteractionThresholdMultiplier')
+            }}</label>
             <input
               v-model.number="config.noInteractionThresholdMultiplier"
               type="number"
@@ -229,19 +289,29 @@
               class="w-full px-3 py-2 bg-[var(--color-surface)] border border-[var(--color-border)] rounded-lg"
               @change="updateConfig"
             />
-            <p class="text-xs text-[var(--color-text-muted)] mt-1">{{ $t('admin.rateLimit.noInteractionThresholdMultiplierDesc') }}</p>
+            <p class="text-xs text-[var(--color-text-muted)] mt-1">
+              {{ $t('admin.rateLimit.noInteractionThresholdMultiplierDesc') }}
+            </p>
           </div>
         </div>
 
         <!-- Save Message -->
-        <div v-if="configSaved" class="mt-4 p-3 bg-[var(--color-success-bg)] text-[var(--color-success-text)] rounded-lg">
+        <div
+          v-if="configSaved"
+          class="mt-4 p-3 bg-[var(--color-success-bg)] text-[var(--color-success-text)] rounded-lg"
+        >
           {{ $t('admin.rateLimit.configSaved') }}
         </div>
       </div>
 
       <!-- Logs Panel -->
-      <div v-if="activeSubTab === 'logs'" class="bg-[var(--color-surface)] rounded-lg p-6">
-        <h2 class="text-xl font-bold mb-4">{{ $t('admin.rateLimit.logsTitle') }}</h2>
+      <div
+        v-if="activeSubTab === 'logs'"
+        class="bg-[var(--color-surface)] rounded-lg p-6"
+      >
+        <h2 class="text-xl font-bold mb-4">
+          {{ $t('admin.rateLimit.logsTitle') }}
+        </h2>
 
         <!-- Filters -->
         <div class="flex flex-wrap gap-4 mb-4">
@@ -270,12 +340,24 @@
           <table class="w-full text-sm">
             <thead>
               <tr class="border-b border-[var(--color-border)]">
-                <th class="text-left py-2 px-3">{{ $t('admin.rateLimit.time') }}</th>
-                <th class="text-left py-2 px-3">{{ $t('admin.rateLimit.tier') }}</th>
-                <th class="text-left py-2 px-3">{{ $t('admin.rateLimit.ip') }}</th>
-                <th class="text-left py-2 px-3">{{ $t('admin.rateLimit.user') }}</th>
-                <th class="text-left py-2 px-3">{{ $t('admin.rateLimit.requests') }}</th>
-                <th class="text-left py-2 px-3">{{ $t('admin.rateLimit.reason') }}</th>
+                <th class="text-left py-2 px-3">
+                  {{ $t('admin.rateLimit.time') }}
+                </th>
+                <th class="text-left py-2 px-3">
+                  {{ $t('admin.rateLimit.tier') }}
+                </th>
+                <th class="text-left py-2 px-3">
+                  {{ $t('admin.rateLimit.ip') }}
+                </th>
+                <th class="text-left py-2 px-3">
+                  {{ $t('admin.rateLimit.user') }}
+                </th>
+                <th class="text-left py-2 px-3">
+                  {{ $t('admin.rateLimit.requests') }}
+                </th>
+                <th class="text-left py-2 px-3">
+                  {{ $t('admin.rateLimit.reason') }}
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -291,7 +373,9 @@
                 <td class="py-2 px-3 font-mono text-xs">{{ log.ipAddress }}</td>
                 <td class="py-2 px-3">{{ log.username || '-' }}</td>
                 <td class="py-2 px-3">{{ log.requestCount }}</td>
-                <td class="py-2 px-3 text-xs">{{ log.detectionReason || '-' }}</td>
+                <td class="py-2 px-3 text-xs">
+                  {{ log.detectionReason || '-' }}
+                </td>
               </tr>
             </tbody>
           </table>
@@ -322,8 +406,13 @@
       </div>
 
       <!-- Penalties Panel -->
-      <div v-if="activeSubTab === 'penalties'" class="bg-[var(--color-surface)] rounded-lg p-6">
-        <h2 class="text-xl font-bold mb-4">{{ $t('admin.rateLimit.penaltiesTitle') }}</h2>
+      <div
+        v-if="activeSubTab === 'penalties'"
+        class="bg-[var(--color-surface)] rounded-lg p-6"
+      >
+        <h2 class="text-xl font-bold mb-4">
+          {{ $t('admin.rateLimit.penaltiesTitle') }}
+        </h2>
 
         <!-- Filters -->
         <div class="flex flex-wrap gap-4 mb-4">
@@ -343,13 +432,27 @@
           <table class="w-full text-sm">
             <thead>
               <tr class="border-b border-[var(--color-border)]">
-                <th class="text-left py-2 px-3">{{ $t('admin.rateLimit.startedAt') }}</th>
-                <th class="text-left py-2 px-3">{{ $t('admin.rateLimit.expiresAt') }}</th>
-                <th class="text-left py-2 px-3">{{ $t('admin.rateLimit.tier') }}</th>
-                <th class="text-left py-2 px-3">{{ $t('admin.rateLimit.ip') }}</th>
-                <th class="text-left py-2 px-3">{{ $t('admin.rateLimit.user') }}</th>
-                <th class="text-left py-2 px-3">{{ $t('admin.rateLimit.violations') }}</th>
-                <th class="text-left py-2 px-3">{{ $t('admin.rateLimit.actions') }}</th>
+                <th class="text-left py-2 px-3">
+                  {{ $t('admin.rateLimit.startedAt') }}
+                </th>
+                <th class="text-left py-2 px-3">
+                  {{ $t('admin.rateLimit.expiresAt') }}
+                </th>
+                <th class="text-left py-2 px-3">
+                  {{ $t('admin.rateLimit.tier') }}
+                </th>
+                <th class="text-left py-2 px-3">
+                  {{ $t('admin.rateLimit.ip') }}
+                </th>
+                <th class="text-left py-2 px-3">
+                  {{ $t('admin.rateLimit.user') }}
+                </th>
+                <th class="text-left py-2 px-3">
+                  {{ $t('admin.rateLimit.violations') }}
+                </th>
+                <th class="text-left py-2 px-3">
+                  {{ $t('admin.rateLimit.actions') }}
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -360,14 +463,24 @@
               >
                 <td class="py-2 px-3">{{ formatDate(penalty.startedAt) }}</td>
                 <td class="py-2 px-3">
-                  <span :class="penalty.isActive ? 'text-[var(--color-danger-text)]' : 'text-[var(--color-text-muted)]'">
+                  <span
+                    :class="
+                      penalty.isActive
+                        ? 'text-[var(--color-danger-text)]'
+                        : 'text-[var(--color-text-muted)]'
+                    "
+                  >
                     {{ formatDate(penalty.expiresAt) }}
                   </span>
                 </td>
                 <td class="py-2 px-3">
-                  <span :class="getTierClass(penalty.tier)">{{ penalty.tier }}</span>
+                  <span :class="getTierClass(penalty.tier)">{{
+                    penalty.tier
+                  }}</span>
                 </td>
-                <td class="py-2 px-3 font-mono text-xs">{{ penalty.ipAddress }}</td>
+                <td class="py-2 px-3 font-mono text-xs">
+                  {{ penalty.ipAddress }}
+                </td>
                 <td class="py-2 px-3">{{ penalty.username || '-' }}</td>
                 <td class="py-2 px-3">{{ penalty.violationCount }}</td>
                 <td class="py-2 px-3">
@@ -386,12 +499,18 @@
         </div>
 
         <!-- Empty State -->
-        <div v-if="penalties.data.length === 0" class="text-center py-8 text-[var(--color-text-muted)]">
+        <div
+          v-if="penalties.data.length === 0"
+          class="text-center py-8 text-[var(--color-text-muted)]"
+        >
           {{ $t('admin.rateLimit.noPenalties') }}
         </div>
 
         <!-- Pagination -->
-        <div v-if="penalties.totalPages > 1" class="flex justify-center gap-2 mt-4">
+        <div
+          v-if="penalties.totalPages > 1"
+          class="flex justify-center gap-2 mt-4"
+        >
           <BaseButton
             variant="secondary"
             size="sm"

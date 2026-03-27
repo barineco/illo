@@ -24,7 +24,10 @@ const handleChange = (event: Event) => {
 </script>
 
 <template>
-  <label class="relative inline-flex items-center cursor-pointer" :class="{ 'opacity-50 cursor-not-allowed': disabled }">
+  <label
+    class="relative inline-flex items-center cursor-pointer"
+    :class="{ 'opacity-50 cursor-not-allowed': disabled }"
+  >
     <input
       type="checkbox"
       :checked="modelValue"
@@ -35,7 +38,9 @@ const handleChange = (event: Event) => {
     <div
       class="rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-[var(--color-border)] after:border after:rounded-full after:transition-all peer-checked:bg-[var(--color-primary)] bg-[var(--color-surface-secondary)] peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-[var(--color-focus-ring)]"
       :class="[
-        size === 'sm' ? 'w-9 h-5 after:h-4 after:w-4' : 'w-11 h-6 after:h-5 after:w-5',
+        size === 'sm'
+          ? 'w-9 h-5 after:h-4 after:w-4'
+          : 'w-11 h-6 after:h-5 after:w-5',
       ]"
     />
   </label>

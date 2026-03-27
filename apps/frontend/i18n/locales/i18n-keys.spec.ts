@@ -25,7 +25,13 @@ function loadLocale(filename: string): Record<string, any> {
 function walkFiles(dir: string, exts: string[]): string[] {
   const results: string[] = []
   for (const entry of readdirSync(dir)) {
-    if (entry.startsWith('.') || entry === 'node_modules' || entry === '.nuxt' || entry === '.output') continue
+    if (
+      entry.startsWith('.') ||
+      entry === 'node_modules' ||
+      entry === '.nuxt' ||
+      entry === '.output'
+    )
+      continue
     const full = join(dir, entry)
     const stat = statSync(full)
     if (stat.isDirectory()) {
@@ -37,7 +43,10 @@ function walkFiles(dir: string, exts: string[]): string[] {
   return results
 }
 
-function extractUsedKeys(files: string[], topLevelKeys: Set<string>): { keys: Set<string>; prefixes: Set<string> } {
+function extractUsedKeys(
+  files: string[],
+  topLevelKeys: Set<string>,
+): { keys: Set<string>; prefixes: Set<string> } {
   const keys = new Set<string>()
   const prefixes = new Set<string>()
   // 1. Static t()/\$t() calls with quoted strings
@@ -45,7 +54,8 @@ function extractUsedKeys(files: string[], topLevelKeys: Set<string>): { keys: Se
   // 2. Dynamic t() calls with template literals: t(`prefix.${var}`)
   const tTemplateLitPattern = /\$?t\(\s*`([\w.]+)\.\$\{/g
   // 3. i18n key references in known property patterns
-  const keyPropPattern = /(?:labelKey|i18nKey|titleKey|messageKey|placeholderKey)\s*[:=]\s*['"]([\w.]+)['"]/g
+  const keyPropPattern =
+    /(?:labelKey|i18nKey|titleKey|messageKey|placeholderKey)\s*[:=]\s*['"]([\w.]+)['"]/g
   for (const file of files) {
     const content = readFileSync(file, 'utf-8')
     let match
@@ -90,7 +100,9 @@ describe('i18n key consistency', () => {
   it('en.json keys all exist in ja.json', () => {
     const missing = enKeys.filter((k) => !jaSet.has(k))
     if (missing.length > 0) {
-      console.warn(`[i18n] ${missing.length} keys in en.json missing from ja.json:`)
+      console.warn(
+        `[i18n] ${missing.length} keys in en.json missing from ja.json:`,
+      )
       missing.forEach((k) => console.warn(`  - ${k}`))
     }
     expect(missing).toEqual([])
@@ -99,7 +111,9 @@ describe('i18n key consistency', () => {
   it('ja.json keys all exist in en.json', () => {
     const missing = jaKeys.filter((k) => !enSet.has(k))
     if (missing.length > 0) {
-      console.warn(`[i18n] ${missing.length} keys in ja.json missing from en.json:`)
+      console.warn(
+        `[i18n] ${missing.length} keys in ja.json missing from en.json:`,
+      )
       missing.forEach((k) => console.warn(`  - ${k}`))
     }
     expect(missing).toEqual([])
@@ -110,12 +124,17 @@ describe('i18n key consistency', () => {
       (f) => !f.includes('.spec.') && !f.includes('/node_modules/'),
     )
     const topLevelKeys = new Set(Object.keys(en))
-    const { keys: usedKeys, prefixes: dynamicPrefixes } = extractUsedKeys(sourceFiles, topLevelKeys)
+    const { keys: usedKeys, prefixes: dynamicPrefixes } = extractUsedKeys(
+      sourceFiles,
+      topLevelKeys,
+    )
 
     it('all statically referenced keys exist in en.json', () => {
       const missing = [...usedKeys].filter((k) => !keyExists(en, k)).sort()
       if (missing.length > 0) {
-        console.warn(`[i18n] ${missing.length} keys used in code but missing from en.json:`)
+        console.warn(
+          `[i18n] ${missing.length} keys used in code but missing from en.json:`,
+        )
         missing.forEach((k) => console.warn(`  - ${k}`))
       }
       expect(missing).toEqual([])
@@ -124,7 +143,9 @@ describe('i18n key consistency', () => {
     it('all statically referenced keys exist in ja.json', () => {
       const missing = [...usedKeys].filter((k) => !keyExists(ja, k)).sort()
       if (missing.length > 0) {
-        console.warn(`[i18n] ${missing.length} keys used in code but missing from ja.json:`)
+        console.warn(
+          `[i18n] ${missing.length} keys used in code but missing from ja.json:`,
+        )
         missing.forEach((k) => console.warn(`  - ${k}`))
       }
       expect(missing).toEqual([])
@@ -149,7 +170,9 @@ describe('i18n key consistency', () => {
       })
 
       if (unreferencedEn.length > 0) {
-        console.warn(`[i18n] ${unreferencedEn.length} keys in en.json appear unused (may include false positives from dynamic key patterns):`)
+        console.warn(
+          `[i18n] ${unreferencedEn.length} keys in en.json appear unused (may include false positives from dynamic key patterns):`,
+        )
         unreferencedEn.forEach((k) => console.warn(`  - ${k}`))
       }
       // Warn-only: dynamic key patterns make exhaustive static detection impractical.

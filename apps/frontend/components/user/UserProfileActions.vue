@@ -47,8 +47,8 @@
       >
         <!-- Share Profile -->
         <button
-          @click.stop="shareProfile"
           class="w-full px-4 py-3 text-left text-sm hover:bg-[var(--color-hover)] transition-colors flex items-center gap-3"
+          @click.stop="shareProfile"
         >
           <Icon name="Share" class="w-4 h-4" />
           {{ $t('user.copyLink') }}
@@ -62,25 +62,32 @@
           @click.stop="navigateToMessage"
         >
           <Icon name="Envelope" class="w-4 h-4" />
-          {{ isNavigatingToMessage ? $t('common.loading') : $t('user.sendMessage') }}
+          {{
+            isNavigatingToMessage
+              ? $t('common.loading')
+              : $t('user.sendMessage')
+          }}
         </button>
 
         <!-- Mute/Unmute User (if logged in and not own profile) -->
         <button
           v-if="currentUser && !isOwnProfile"
-          @click.stop="toggleMuteUser"
           class="w-full px-4 py-3 text-left text-sm hover:bg-[var(--color-hover)] transition-colors flex items-center gap-3"
           :class="{ 'text-[var(--color-warning-text)]': isMuted }"
+          @click.stop="toggleMuteUser"
         >
-          <Icon :name="isMuted ? 'SpeakerWave' : 'SpeakerXMark'" class="w-4 h-4" />
+          <Icon
+            :name="isMuted ? 'SpeakerWave' : 'SpeakerXMark'"
+            class="w-4 h-4"
+          />
           {{ isMuted ? $t('user.unmuteUser') : $t('user.muteUser') }}
         </button>
 
         <!-- Report User (if logged in and not own profile) -->
         <button
           v-if="currentUser && !isOwnProfile"
-          @click.stop="openReportModal"
           class="w-full px-4 py-3 text-left text-sm hover:bg-[var(--color-hover)] transition-colors flex items-center gap-3 text-[var(--color-danger-text)]"
+          @click.stop="openReportModal"
         >
           <Icon name="Flag" class="w-4 h-4" />
           {{ $t('user.reportUser') }}
@@ -171,16 +178,19 @@ const navigateToMessage = async () => {
 
   isNavigatingToMessage.value = true
   try {
-    const existingResponse = await api.get<{ conversation: { id: string } | null }>(
-      `/api/messages/conversation-with/${props.user.id}`,
-    )
+    const existingResponse = await api.get<{
+      conversation: { id: string } | null
+    }>(`/api/messages/conversation-with/${props.user.id}`)
 
     if (existingResponse.conversation) {
       await navigateTo(`/messages/${existingResponse.conversation.id}`)
     } else {
-      const newConversation = await api.post<{ id: string }>('/api/messages/conversations', {
-        recipientId: props.user.id,
-      })
+      const newConversation = await api.post<{ id: string }>(
+        '/api/messages/conversations',
+        {
+          recipientId: props.user.id,
+        },
+      )
       await navigateTo(`/messages/${newConversation.id}`)
     }
   } catch (error) {

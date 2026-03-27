@@ -7,7 +7,9 @@
       <!-- Birthday Input -->
       <div class="space-y-4">
         <div>
-          <label class="block text-sm font-medium mb-2">{{ $t('settings.birthday') }}</label>
+          <label class="block text-sm font-medium mb-2">{{
+            $t('settings.birthday')
+          }}</label>
           <input
             v-model="birthdayInput"
             type="date"
@@ -18,29 +20,46 @@
 
         <!-- Birthday Display Setting -->
         <div>
-          <label class="block text-sm font-medium mb-2">{{ $t('settings.birthdayDisplay') }}</label>
+          <label class="block text-sm font-medium mb-2">{{
+            $t('settings.birthdayDisplay')
+          }}</label>
           <select
             v-model="birthdayDisplay"
             class="w-full px-3 py-2 bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
           >
             <option value="HIDDEN">{{ $t('settings.birthdayHidden') }}</option>
-            <option value="MONTH_DAY">{{ $t('settings.birthdayMonthDay') }}</option>
-            <option value="FULL_DATE">{{ $t('settings.birthdayFullDate') }}</option>
+            <option value="MONTH_DAY">
+              {{ $t('settings.birthdayMonthDay') }}
+            </option>
+            <option value="FULL_DATE">
+              {{ $t('settings.birthdayFullDate') }}
+            </option>
           </select>
         </div>
 
         <!-- Age Verification Status -->
-        <div class="flex items-center gap-2 p-3 rounded-lg" :class="isAdult ? 'bg-green-500/10' : 'bg-yellow-500/10'">
-          <Icon :name="isAdult ? 'CheckCircleIcon' : 'ExclamationTriangleIcon'" class="w-5 h-5" :class="isAdult ? 'text-green-500' : 'text-yellow-500'" />
+        <div
+          class="flex items-center gap-2 p-3 rounded-lg"
+          :class="isAdult ? 'bg-green-500/10' : 'bg-yellow-500/10'"
+        >
+          <Icon
+            :name="isAdult ? 'CheckCircleIcon' : 'ExclamationTriangleIcon'"
+            class="w-5 h-5"
+            :class="isAdult ? 'text-green-500' : 'text-yellow-500'"
+          />
           <span class="text-sm">
-            {{ isAdult ? $t('settings.ageVerified') : $t('settings.ageNotVerified') }}
+            {{
+              isAdult
+                ? $t('settings.ageVerified')
+                : $t('settings.ageNotVerified')
+            }}
           </span>
         </div>
 
         <button
-          @click="saveBirthday"
           :disabled="isSavingBirthday"
           class="px-4 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:opacity-90 disabled:opacity-50"
+          @click="saveBirthday"
         >
           {{ isSavingBirthday ? $t('common.saving') : $t('common.save') }}
         </button>
@@ -49,15 +68,23 @@
 
     <!-- Content Filters Section -->
     <section class="bg-[var(--color-surface)] rounded-lg p-6">
-      <h2 class="text-lg font-semibold mb-2">{{ $t('settings.contentFilters') }}</h2>
-      <p class="text-sm text-[var(--color-text-muted)] mb-4">{{ $t('settings.contentFiltersHint') }}</p>
+      <h2 class="text-lg font-semibold mb-2">
+        {{ $t('settings.contentFilters') }}
+      </h2>
+      <p class="text-sm text-[var(--color-text-muted)] mb-4">
+        {{ $t('settings.contentFiltersHint') }}
+      </p>
 
       <div class="space-y-4">
         <!-- NSFW Filter -->
-        <div class="flex items-center justify-between p-4 bg-[var(--color-background)] rounded-lg">
+        <div
+          class="flex items-center justify-between p-4 bg-[var(--color-background)] rounded-lg"
+        >
           <div>
             <div class="font-medium">{{ $t('settings.filterNsfw') }}</div>
-            <div class="text-sm text-[var(--color-text-muted)]">{{ $t('settings.filterNsfwDesc') }}</div>
+            <div class="text-sm text-[var(--color-text-muted)]">
+              {{ $t('settings.filterNsfwDesc') }}
+            </div>
           </div>
           <select
             v-model="filters.nsfw"
@@ -70,11 +97,19 @@
         </div>
 
         <!-- R-18 Filter -->
-        <div class="flex items-center justify-between p-4 bg-[var(--color-background)] rounded-lg" :class="{ 'opacity-50': !isAdult }">
+        <div
+          class="flex items-center justify-between p-4 bg-[var(--color-background)] rounded-lg"
+          :class="{ 'opacity-50': !isAdult }"
+        >
           <div>
             <div class="font-medium">{{ $t('settings.filterR18') }}</div>
-            <div class="text-sm text-[var(--color-text-muted)]">{{ $t('settings.filterR18Desc') }}</div>
-            <div v-if="!isAdult" class="text-xs text-[var(--color-warning-text)] mt-1">
+            <div class="text-sm text-[var(--color-text-muted)]">
+              {{ $t('settings.filterR18Desc') }}
+            </div>
+            <div
+              v-if="!isAdult"
+              class="text-xs text-[var(--color-warning-text)] mt-1"
+            >
               {{ $t('settings.filterDisabledUnder18') }}
             </div>
           </div>
@@ -90,11 +125,19 @@
         </div>
 
         <!-- R-18G Filter -->
-        <div class="flex items-center justify-between p-4 bg-[var(--color-background)] rounded-lg" :class="{ 'opacity-50': !isAdult }">
+        <div
+          class="flex items-center justify-between p-4 bg-[var(--color-background)] rounded-lg"
+          :class="{ 'opacity-50': !isAdult }"
+        >
           <div>
             <div class="font-medium">{{ $t('settings.filterR18g') }}</div>
-            <div class="text-sm text-[var(--color-text-muted)]">{{ $t('settings.filterR18gDesc') }}</div>
-            <div v-if="!isAdult" class="text-xs text-[var(--color-warning-text)] mt-1">
+            <div class="text-sm text-[var(--color-text-muted)]">
+              {{ $t('settings.filterR18gDesc') }}
+            </div>
+            <div
+              v-if="!isAdult"
+              class="text-xs text-[var(--color-warning-text)] mt-1"
+            >
               {{ $t('settings.filterDisabledUnder18') }}
             </div>
           </div>
@@ -110,9 +153,9 @@
         </div>
 
         <button
-          @click="saveFilters"
           :disabled="isSavingFilters"
           class="px-4 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:opacity-90 disabled:opacity-50"
+          @click="saveFilters"
         >
           {{ isSavingFilters ? $t('common.saving') : $t('common.save') }}
         </button>
@@ -122,7 +165,10 @@
     <!-- Info Box -->
     <div class="p-4 bg-blue-500/10 rounded-lg">
       <div class="flex items-start gap-3">
-        <Icon name="InformationCircleIcon" class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5" />
+        <Icon
+          name="InformationCircleIcon"
+          class="w-5 h-5 text-blue-500 flex-shrink-0 mt-0.5"
+        />
         <p class="text-sm text-[var(--color-text-muted)]">
           {{ $t('settings.ageVerificationHint') }}
         </p>
@@ -177,7 +223,9 @@ interface ContentSettingsResponse {
 const loadData = async () => {
   try {
     // Fetch all content settings (birthday + filters) in one request
-    const data = await api.get<ContentSettingsResponse>('/api/users/me/content-settings')
+    const data = await api.get<ContentSettingsResponse>(
+      '/api/users/me/content-settings',
+    )
 
     // Set birthday data
     birthdayInput.value = data.birthday || ''
@@ -195,13 +243,14 @@ const loadData = async () => {
 const saveBirthday = async () => {
   isSavingBirthday.value = true
   try {
-    const result = await api.put<{ birthday: string | null; birthdayDisplay: string; isAdult: boolean }>(
-      '/api/users/me/birthday',
-      {
-        birthday: birthdayInput.value || null,
-        birthdayDisplay: birthdayDisplay.value,
-      },
-    )
+    const result = await api.put<{
+      birthday: string | null
+      birthdayDisplay: string
+      isAdult: boolean
+    }>('/api/users/me/birthday', {
+      birthday: birthdayInput.value || null,
+      birthdayDisplay: birthdayDisplay.value,
+    })
     isAdult.value = result.isAdult
     toast.success(t('settings.birthdayUpdated'))
 
@@ -221,7 +270,10 @@ const saveBirthday = async () => {
 const saveFilters = async () => {
   isSavingFilters.value = true
   try {
-    const result = await api.put<ContentFilters>('/api/users/me/content-filters', filters.value)
+    const result = await api.put<ContentFilters>(
+      '/api/users/me/content-filters',
+      filters.value,
+    )
     filters.value = result
     toast.success(t('settings.filtersUpdated'))
   } catch (error) {

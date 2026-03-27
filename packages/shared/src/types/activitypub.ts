@@ -23,7 +23,12 @@ export type ActivityType =
   | 'Announce'
   | 'Undo'
 
-export type ActorType = 'Person' | 'Service' | 'Application' | 'Group' | 'Organization'
+export type ActorType =
+  | 'Person'
+  | 'Service'
+  | 'Application'
+  | 'Group'
+  | 'Organization'
 
 export type ObjectType = 'Note' | 'Image' | 'Article' | 'Video' | 'Document'
 

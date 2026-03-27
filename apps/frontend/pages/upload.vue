@@ -3,18 +3,17 @@
     <div class="container">
       <h1 class="page-title">{{ $t('upload.title') }}</h1>
 
-      <form @submit.prevent="handleSubmit" class="upload-form">
+      <form class="upload-form" @submit.prevent="handleSubmit">
         <!-- 画像アップロード -->
         <div class="form-section">
-          <label class="section-label required">{{ $t('upload.images') }}</label>
+          <label class="section-label required">{{
+            $t('upload.images')
+          }}</label>
           <ImageUploader @update:images="images = $event" />
         </div>
 
         <!-- Form Fields Component -->
-        <ArtworkFormFields
-          v-model="form"
-          v-model:tags-input="tagsInput"
-        />
+        <ArtworkFormFields v-model="form" v-model:tags-input="tagsInput" />
 
         <!-- コレクション選択 -->
         <div class="form-section">
@@ -35,9 +34,9 @@
             {{ $t('linkCard.description') }}
           </p>
           <LinkCardUploader
-            :image-source="firstImage"
             v-model:blur="linkCardBlur"
             v-model:crop-coordinates="linkCardCropCoordinates"
+            :image-source="firstImage"
             :age-rating="form.ageRating"
             :original-width="firstImageOriginalWidth"
             :original-height="firstImageOriginalHeight"
@@ -146,7 +145,7 @@ const form = ref<ArtworkFormData>({
   ageRating: 'ALL_AGES',
   visibility: 'PUBLIC',
   disableRightClick: true,
-  license: '',  // Empty = use default license
+  license: '', // Empty = use default license
   customLicenseUrl: '',
   customLicenseText: '',
   // Creation metadata (portfolio fields)
@@ -172,8 +171,8 @@ const parsedTags = computed(() => {
   if (!tagsInput.value.trim()) return []
   return tagsInput.value
     .split(',')
-    .map(tag => tag.trim())
-    .filter(tag => tag.length > 0)
+    .map((tag) => tag.trim())
+    .filter((tag) => tag.length > 0)
 })
 
 const isValid = computed(() => {
@@ -221,7 +220,7 @@ const handleSubmit = async () => {
     }
 
     // タグを追加
-    parsedTags.value.forEach(tag => {
+    parsedTags.value.forEach((tag) => {
       formData.append('tags', tag)
     })
 
@@ -230,7 +229,10 @@ const handleSubmit = async () => {
       formData.append('creationDate', form.value.creationDate)
     }
     if (form.value.creationPeriodValue) {
-      formData.append('creationPeriodValue', String(form.value.creationPeriodValue))
+      formData.append(
+        'creationPeriodValue',
+        String(form.value.creationPeriodValue),
+      )
     }
     if (form.value.creationPeriodUnit) {
       formData.append('creationPeriodUnit', form.value.creationPeriodUnit)
@@ -266,11 +268,17 @@ const handleSubmit = async () => {
       formData.append('originalCreatorId', form.value.originalCreatorId)
     }
     if (form.value.originalCreatorAllowDownload) {
-      formData.append('originalCreatorAllowDownload', String(form.value.originalCreatorAllowDownload))
+      formData.append(
+        'originalCreatorAllowDownload',
+        String(form.value.originalCreatorAllowDownload),
+      )
     }
     // コレクションを追加
     if (selectedCollectionIds.value.length > 0) {
-      formData.append('collectionIds', JSON.stringify(selectedCollectionIds.value))
+      formData.append(
+        'collectionIds',
+        JSON.stringify(selectedCollectionIds.value),
+      )
     }
 
     // 画像を追加
@@ -282,8 +290,14 @@ const handleSubmit = async () => {
     if (linkCardCropCoordinates.value) {
       formData.append('ogCardCropX', String(linkCardCropCoordinates.value.x))
       formData.append('ogCardCropY', String(linkCardCropCoordinates.value.y))
-      formData.append('ogCardCropWidth', String(linkCardCropCoordinates.value.width))
-      formData.append('ogCardCropHeight', String(linkCardCropCoordinates.value.height))
+      formData.append(
+        'ogCardCropWidth',
+        String(linkCardCropCoordinates.value.width),
+      )
+      formData.append(
+        'ogCardCropHeight',
+        String(linkCardCropCoordinates.value.height),
+      )
     }
     formData.append('ogCardBlur', String(linkCardBlur.value))
 
@@ -292,7 +306,7 @@ const handleSubmit = async () => {
       formData,
       (percent) => {
         uploadProgress.value = percent
-      }
+      },
     )
 
     // OGカード生成（常に実行 - 座標未指定時はデフォルト中央切り抜き）
@@ -322,7 +336,10 @@ const handleSubmit = async () => {
 // Fetch user tools settings and apply defaults
 const fetchToolsSettings = async () => {
   try {
-    const data = await api.get<{ tools: string[]; useProfileToolsAsDefault: boolean }>('/api/users/me/tools')
+    const data = await api.get<{
+      tools: string[]
+      useProfileToolsAsDefault: boolean
+    }>('/api/users/me/tools')
     if (data.useProfileToolsAsDefault && data.tools && data.tools.length > 0) {
       form.value.toolsUsed = [...data.tools]
     }

@@ -73,7 +73,7 @@ export const useAuth = () => {
 
   const setTokensWithRememberMe = (
     tokens: { accessToken: string; refreshToken: string },
-    rememberMe: boolean
+    rememberMe: boolean,
   ) => {
     rememberMeState.value = rememberMe
 
@@ -92,13 +92,21 @@ export const useAuth = () => {
       })
 
       if (response.requiresTwoFactor && response.userId) {
-        return { requiresTwoFactor: true, userId: response.userId, user: response.user, rememberMe }
+        return {
+          requiresTwoFactor: true,
+          userId: response.userId,
+          user: response.user,
+          rememberMe,
+        }
       }
 
       user.value = response.user
       setTokensWithRememberMe(
-        { accessToken: response.accessToken, refreshToken: response.refreshToken },
-        rememberMe
+        {
+          accessToken: response.accessToken,
+          refreshToken: response.refreshToken,
+        },
+        rememberMe,
       )
       return { user: response.user }
     } catch (error: any) {
@@ -107,16 +115,25 @@ export const useAuth = () => {
     }
   }
 
-  const verify2FA = async (params: Verify2FADto, rememberMe: boolean = false) => {
+  const verify2FA = async (
+    params: Verify2FADto,
+    rememberMe: boolean = false,
+  ) => {
     try {
-      const response = await api.post<Verify2FAResponse>('/api/auth/2fa/verify', {
-        ...params,
-        rememberMe,
-      })
+      const response = await api.post<Verify2FAResponse>(
+        '/api/auth/2fa/verify',
+        {
+          ...params,
+          rememberMe,
+        },
+      )
       user.value = response.user
       setTokensWithRememberMe(
-        { accessToken: response.accessToken, refreshToken: response.refreshToken },
-        rememberMe
+        {
+          accessToken: response.accessToken,
+          refreshToken: response.refreshToken,
+        },
+        rememberMe,
       )
 
       return {
@@ -132,7 +149,9 @@ export const useAuth = () => {
 
   const verifyEmail = async (token: string) => {
     try {
-      const response = await api.get<{ message: string }>(`/api/auth/verify-email?token=${token}`)
+      const response = await api.get<{ message: string }>(
+        `/api/auth/verify-email?token=${token}`,
+      )
       return { success: true, message: response.message }
     } catch (error: any) {
       console.error('Email verification failed:', error)
@@ -140,9 +159,24 @@ export const useAuth = () => {
     }
   }
 
+  const verifyEmailChange = async (token: string) => {
+    try {
+      const response = await api.get<{ message: string }>(
+        `/api/auth/verify-email-change?token=${token}`,
+      )
+      return { success: true, message: response.message }
+    } catch (error: any) {
+      console.error('Email change verification failed:', error)
+      throw error
+    }
+  }
+
   const resendVerificationEmail = async (email: string) => {
     try {
-      const response = await api.post<{ message: string }>('/api/auth/resend-verification', { email })
+      const response = await api.post<{ message: string }>(
+        '/api/auth/resend-verification',
+        { email },
+      )
       return { success: true, message: response.message }
     } catch (error: any) {
       console.error('Failed to resend verification email:', error)
@@ -152,7 +186,10 @@ export const useAuth = () => {
 
   const forgotPassword = async (email: string) => {
     try {
-      const response = await api.post<{ message: string }>('/api/auth/forgot-password', { email })
+      const response = await api.post<{ message: string }>(
+        '/api/auth/forgot-password',
+        { email },
+      )
       return { success: true, message: response.message }
     } catch (error: any) {
       console.error('Failed to request password reset:', error)
@@ -162,10 +199,13 @@ export const useAuth = () => {
 
   const resetPassword = async (token: string, newPassword: string) => {
     try {
-      const response = await api.post<{ message: string }>('/api/auth/reset-password', {
-        token,
-        newPassword,
-      })
+      const response = await api.post<{ message: string }>(
+        '/api/auth/reset-password',
+        {
+          token,
+          newPassword,
+        },
+      )
       return { success: true, message: response.message }
     } catch (error: any) {
       console.error('Failed to reset password:', error)
@@ -209,7 +249,10 @@ export const useAuth = () => {
     accessToken.value = token
   }
 
-  const setTokens = (tokens: { accessToken: string; refreshToken?: string }) => {
+  const setTokens = (tokens: {
+    accessToken: string
+    refreshToken?: string
+  }) => {
     accessToken.value = tokens.accessToken
     if (tokens.refreshToken) {
       refreshToken.value = tokens.refreshToken
@@ -243,6 +286,7 @@ export const useAuth = () => {
     logout,
     verify2FA,
     verifyEmail,
+    verifyEmailChange,
     resendVerificationEmail,
     forgotPassword,
     resetPassword,

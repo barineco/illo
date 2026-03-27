@@ -1,6 +1,8 @@
 <template>
   <div class="mt-12">
-    <h2 class="text-2xl font-bold mb-6">{{ $t('comment.title', { count: totalComments }) }}</h2>
+    <h2 class="text-2xl font-bold mb-6">
+      {{ $t('comment.title', { count: totalComments }) }}
+    </h2>
 
     <!-- Comment Form (認証ユーザーのみ) -->
     <div v-if="isAuthenticated" class="mb-8">
@@ -10,13 +12,19 @@
         class="w-full px-4 py-3 bg-[var(--color-surface-secondary)] rounded-lg border border-[var(--color-border)] focus:border-[var(--color-primary)] focus:outline-none resize-none"
         rows="3"
         :disabled="isSubmitting"
-      ></textarea>
+      />
       <div class="flex justify-between items-center mt-2">
-        <span class="text-sm text-[var(--color-text-muted)]">{{ newCommentContent.length }}/1000</span>
+        <span class="text-sm text-[var(--color-text-muted)]"
+          >{{ newCommentContent.length }}/1000</span
+        >
         <button
-          @click="submitComment"
-          :disabled="!newCommentContent.trim() || isSubmitting || newCommentContent.length > 1000"
+          :disabled="
+            !newCommentContent.trim() ||
+            isSubmitting ||
+            newCommentContent.length > 1000
+          "
           class="px-6 py-2 bg-[var(--color-primary)] text-[var(--color-primary-text)] hover:bg-[var(--color-primary-hover)] rounded-full font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          @click="submitComment"
         >
           {{ isSubmitting ? $t('comment.submitting') : $t('comment.submit') }}
         </button>
@@ -24,8 +32,13 @@
     </div>
 
     <!-- Login Prompt (未認証ユーザー) -->
-    <div v-else class="mb-8 text-center py-6 bg-[var(--color-surface)] rounded-lg">
-      <p class="text-[var(--color-text-muted)] mb-3">{{ $t('comment.loginRequired') }}</p>
+    <div
+      v-else
+      class="mb-8 text-center py-6 bg-[var(--color-surface)] rounded-lg"
+    >
+      <p class="text-[var(--color-text-muted)] mb-3">
+        {{ $t('comment.loginRequired') }}
+      </p>
       <NuxtLink
         to="/login"
         class="inline-block px-6 py-2 bg-[var(--color-primary)] text-[var(--color-primary-text)] hover:bg-[var(--color-primary-hover)] rounded-full font-medium transition-colors"
@@ -40,7 +53,9 @@
     </div>
 
     <div v-else-if="comments.length === 0" class="text-center py-8">
-      <p class="text-[var(--color-text-muted)]">{{ $t('comment.noComments') }}</p>
+      <p class="text-[var(--color-text-muted)]">
+        {{ $t('comment.noComments') }}
+      </p>
     </div>
 
     <div v-else class="space-y-6">
@@ -48,7 +63,7 @@
         v-for="comment in comments"
         :key="comment.id"
         :comment="comment"
-        :artworkId="artworkId"
+        :artwork-id="artworkId"
         @reply="handleReply"
         @delete="handleDelete"
         @update="handleUpdate"
@@ -61,13 +76,13 @@
       <button
         v-for="page in totalPages"
         :key="page"
-        @click="currentPage = page"
         :class="[
           'px-4 py-2 rounded',
           currentPage === page
             ? 'bg-[var(--color-primary)] text-[var(--color-primary-text)]'
-            : 'bg-[var(--color-surface)] hover:bg-[var(--color-hover)]'
+            : 'bg-[var(--color-surface)] hover:bg-[var(--color-hover)]',
         ]"
+        @click="currentPage = page"
       >
         {{ page }}
       </button>
@@ -103,12 +118,15 @@ const limit = 20
 const fetchComments = async () => {
   isLoadingComments.value = true
   try {
-    const response = await api.get<CommentsResponse>(`/api/comments/artwork/${props.artworkId}`, {
-      params: {
-        page: currentPage.value,
-        limit,
+    const response = await api.get<CommentsResponse>(
+      `/api/comments/artwork/${props.artworkId}`,
+      {
+        params: {
+          page: currentPage.value,
+          limit,
+        },
       },
-    })
+    )
 
     comments.value = response.comments
     totalComments.value = response.total
@@ -121,7 +139,12 @@ const fetchComments = async () => {
 }
 
 const submitComment = async () => {
-  if (!newCommentContent.value.trim() || isSubmitting.value || newCommentContent.value.length > 1000) return
+  if (
+    !newCommentContent.value.trim() ||
+    isSubmitting.value ||
+    newCommentContent.value.length > 1000
+  )
+    return
 
   isSubmitting.value = true
   try {

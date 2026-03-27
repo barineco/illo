@@ -1,16 +1,26 @@
 <template>
-  <div class="min-h-screen bg-[var(--color-background)] flex items-center justify-center px-4">
+  <div
+    class="min-h-screen bg-[var(--color-background)] flex items-center justify-center px-4"
+  >
     <!-- Loading state while checking setup status -->
     <div v-if="checking" class="text-center">
-      <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-primary)] mx-auto mb-4"></div>
-      <p class="text-[var(--color-text-muted)]">{{ $t('setup.checkingStatus') }}</p>
+      <div
+        class="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-primary)] mx-auto mb-4"
+      />
+      <p class="text-[var(--color-text-muted)]">
+        {{ $t('setup.checkingStatus') }}
+      </p>
     </div>
 
     <div v-else class="max-w-2xl w-full">
       <!-- Header -->
       <div class="text-center mb-8">
-        <h1 class="text-4xl font-bold text-[var(--color-text)] mb-2">{{ $t('setup.welcomeTitle') }}</h1>
-        <p class="text-[var(--color-text-muted)]">{{ $t('setup.welcomeSubtitle') }}</p>
+        <h1 class="text-4xl font-bold text-[var(--color-text)] mb-2">
+          {{ $t('setup.welcomeTitle') }}
+        </h1>
+        <p class="text-[var(--color-text-muted)]">
+          {{ $t('setup.welcomeSubtitle') }}
+        </p>
       </div>
 
       <!-- Setup Form -->
@@ -18,7 +28,10 @@
         <form @submit.prevent="handleSubmit">
           <!-- Instance Name -->
           <div class="mb-6">
-            <label for="instanceName" class="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
+            <label
+              for="instanceName"
+              class="block text-sm font-medium text-[var(--color-text-secondary)] mb-2"
+            >
               {{ $t('setup.instanceName') }}
             </label>
             <input
@@ -33,11 +46,20 @@
 
           <!-- Instance Mode -->
           <div class="mb-6">
-            <label class="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
+            <label
+              class="block text-sm font-medium text-[var(--color-text-secondary)] mb-2"
+            >
               {{ $t('setup.instanceMode') }}
             </label>
             <div class="space-y-3">
-              <label class="flex items-start p-4 bg-[var(--color-background)] border-2 rounded-lg cursor-pointer transition" :class="form.instanceMode === 'PERSONAL' ? 'border-[var(--color-primary)]' : 'border-[var(--color-border)]'">
+              <label
+                class="flex items-start p-4 bg-[var(--color-background)] border-2 rounded-lg cursor-pointer transition"
+                :class="
+                  form.instanceMode === 'PERSONAL'
+                    ? 'border-[var(--color-primary)]'
+                    : 'border-[var(--color-border)]'
+                "
+              >
                 <input
                   v-model="form.instanceMode"
                   type="radio"
@@ -45,11 +67,22 @@
                   class="mt-1 mr-3"
                 />
                 <div>
-                  <div class="font-medium text-[var(--color-text)]">{{ $t('setup.modePersonal') }}</div>
-                  <div class="text-sm text-[var(--color-text-muted)]">{{ $t('setup.modePersonalDesc') }}</div>
+                  <div class="font-medium text-[var(--color-text)]">
+                    {{ $t('setup.modePersonal') }}
+                  </div>
+                  <div class="text-sm text-[var(--color-text-muted)]">
+                    {{ $t('setup.modePersonalDesc') }}
+                  </div>
                 </div>
               </label>
-              <label class="flex items-start p-4 bg-[var(--color-background)] border-2 rounded-lg cursor-pointer transition" :class="form.instanceMode === 'FEDERATION_ONLY' ? 'border-[var(--color-primary)]' : 'border-[var(--color-border)]'">
+              <label
+                class="flex items-start p-4 bg-[var(--color-background)] border-2 rounded-lg cursor-pointer transition"
+                :class="
+                  form.instanceMode === 'FEDERATION_ONLY'
+                    ? 'border-[var(--color-primary)]'
+                    : 'border-[var(--color-border)]'
+                "
+              >
                 <input
                   v-model="form.instanceMode"
                   type="radio"
@@ -57,8 +90,12 @@
                   class="mt-1 mr-3"
                 />
                 <div>
-                  <div class="font-medium text-[var(--color-text)]">{{ $t('setup.modeFederation') }}</div>
-                  <div class="text-sm text-[var(--color-text-muted)]">{{ $t('setup.modeFederationDesc') }}</div>
+                  <div class="font-medium text-[var(--color-text)]">
+                    {{ $t('setup.modeFederation') }}
+                  </div>
+                  <div class="text-sm text-[var(--color-text-muted)]">
+                    {{ $t('setup.modeFederationDesc') }}
+                  </div>
                 </div>
               </label>
             </div>
@@ -66,7 +103,10 @@
 
           <!-- Public URL -->
           <div class="mb-6">
-            <label for="publicUrl" class="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
+            <label
+              for="publicUrl"
+              class="block text-sm font-medium text-[var(--color-text-secondary)] mb-2"
+            >
               {{ $t('setup.publicUrl') }}
             </label>
             <input
@@ -84,7 +124,10 @@
 
           <!-- Description -->
           <div class="mb-6">
-            <label for="description" class="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
+            <label
+              for="description"
+              class="block text-sm font-medium text-[var(--color-text-secondary)] mb-2"
+            >
               {{ $t('setup.description') }}
             </label>
             <textarea
@@ -93,15 +136,20 @@
               rows="3"
               class="w-full px-4 py-3 bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg text-[var(--color-text)] placeholder-[var(--color-text-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
               :placeholder="$t('setup.descriptionPlaceholder')"
-            ></textarea>
+            />
           </div>
 
           <!-- Admin Account -->
           <div class="border-t border-[var(--color-border)] pt-6 mb-6">
-            <h3 class="text-lg font-medium text-[var(--color-text)] mb-4">{{ $t('setup.adminAccount') }}</h3>
+            <h3 class="text-lg font-medium text-[var(--color-text)] mb-4">
+              {{ $t('setup.adminAccount') }}
+            </h3>
 
             <div class="mb-4">
-              <label for="adminUsername" class="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
+              <label
+                for="adminUsername"
+                class="block text-sm font-medium text-[var(--color-text-secondary)] mb-2"
+              >
                 {{ $t('setup.username') }}
               </label>
               <input
@@ -115,7 +163,10 @@
             </div>
 
             <div class="mb-4">
-              <label for="adminEmail" class="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
+              <label
+                for="adminEmail"
+                class="block text-sm font-medium text-[var(--color-text-secondary)] mb-2"
+              >
                 {{ $t('setup.email') }}
               </label>
               <input
@@ -129,7 +180,10 @@
             </div>
 
             <div class="mb-4">
-              <label for="adminDisplayName" class="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
+              <label
+                for="adminDisplayName"
+                class="block text-sm font-medium text-[var(--color-text-secondary)] mb-2"
+              >
                 {{ $t('setup.displayName') }}
               </label>
               <input
@@ -142,7 +196,10 @@
             </div>
 
             <div class="mb-4">
-              <label for="adminPassword" class="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
+              <label
+                for="adminPassword"
+                class="block text-sm font-medium text-[var(--color-text-secondary)] mb-2"
+              >
                 {{ $t('setup.password') }}
               </label>
               <div class="relative">
@@ -160,9 +217,9 @@
                 />
                 <button
                   type="button"
-                  @click="showPassword = !showPassword"
                   class="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
                   tabindex="-1"
+                  @click="showPassword = !showPassword"
                 >
                   <EyeSlashIcon v-if="showPassword" class="w-5 h-5" />
                   <EyeIcon v-else class="w-5 h-5" />
@@ -171,7 +228,10 @@
             </div>
 
             <div class="mb-4">
-              <label for="adminPasswordConfirm" class="block text-sm font-medium text-[var(--color-text-secondary)] mb-2">
+              <label
+                for="adminPasswordConfirm"
+                class="block text-sm font-medium text-[var(--color-text-secondary)] mb-2"
+              >
                 {{ $t('setup.passwordConfirm') }}
               </label>
               <div class="relative">
@@ -189,19 +249,28 @@
                 />
                 <button
                   type="button"
-                  @click="showPasswordConfirm = !showPasswordConfirm"
                   class="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
                   tabindex="-1"
+                  @click="showPasswordConfirm = !showPasswordConfirm"
                 >
                   <EyeSlashIcon v-if="showPasswordConfirm" class="w-5 h-5" />
                   <EyeIcon v-else class="w-5 h-5" />
                 </button>
               </div>
-              <div v-if="isCapsLockOn" class="flex items-center gap-1.5 text-[var(--color-warning-text)] text-xs mt-1">
+              <div
+                v-if="isCapsLockOn"
+                class="flex items-center gap-1.5 text-[var(--color-warning-text)] text-xs mt-1"
+              >
                 <ExclamationTriangleIcon class="w-4 h-4 flex-shrink-0" />
                 {{ $t('auth.capsLockWarning') }}
               </div>
-              <div v-if="adminPasswordConfirm && form.adminPassword !== adminPasswordConfirm" class="flex items-center gap-1.5 text-[var(--color-danger-text)] text-xs mt-1">
+              <div
+                v-if="
+                  adminPasswordConfirm &&
+                  form.adminPassword !== adminPasswordConfirm
+                "
+                class="flex items-center gap-1.5 text-[var(--color-danger-text)] text-xs mt-1"
+              >
                 <ExclamationTriangleIcon class="w-4 h-4 flex-shrink-0" />
                 {{ $t('auth.passwordMismatch') }}
               </div>
@@ -209,13 +278,21 @@
           </div>
 
           <!-- Error Message -->
-          <div v-if="error" class="mb-6 p-4 bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] rounded-lg">
+          <div
+            v-if="error"
+            class="mb-6 p-4 bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] rounded-lg"
+          >
             <p class="text-[var(--color-danger-text)] text-sm">{{ error }}</p>
           </div>
 
           <!-- Success Message -->
-          <div v-if="success" class="mb-6 p-4 bg-[var(--color-success-bg)] border border-[var(--color-success-border)] rounded-lg">
-            <p class="text-[var(--color-success-text)] text-sm">{{ $t('setup.successMessage') }}</p>
+          <div
+            v-if="success"
+            class="mb-6 p-4 bg-[var(--color-success-bg)] border border-[var(--color-success-border)] rounded-lg"
+          >
+            <p class="text-[var(--color-success-text)] text-sm">
+              {{ $t('setup.successMessage') }}
+            </p>
           </div>
 
           <!-- Submit Button -->
@@ -290,7 +367,9 @@ onMounted(async () => {
 
   try {
     const config = useRuntimeConfig()
-    const response = await $fetch<SetupStatusResponse>(`${config.public.apiBase}/api/setup/status`)
+    const response = await $fetch<SetupStatusResponse>(
+      `${config.public.apiBase}/api/setup/status`,
+    )
 
     if (response.isSetupComplete) {
       // Already setup, redirect to home

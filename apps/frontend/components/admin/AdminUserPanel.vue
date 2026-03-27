@@ -1,10 +1,16 @@
 <template>
   <div class="space-y-6">
     <!-- Success/Error Messages -->
-    <div v-if="successMessage" class="bg-[var(--color-success-bg)] border border-[var(--color-success-border)] rounded-lg p-4">
+    <div
+      v-if="successMessage"
+      class="bg-[var(--color-success-bg)] border border-[var(--color-success-border)] rounded-lg p-4"
+    >
       <p class="text-[var(--color-success-text)]">{{ successMessage }}</p>
     </div>
-    <div v-if="submitError" class="bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] rounded-lg p-4">
+    <div
+      v-if="submitError"
+      class="bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] rounded-lg p-4"
+    >
       <p class="text-[var(--color-danger-text)]">{{ submitError }}</p>
     </div>
 
@@ -13,7 +19,9 @@
       <div class="flex flex-col md:flex-row gap-4">
         <!-- Status filter -->
         <div class="flex-1">
-          <label class="block text-sm font-medium mb-2">{{ $t('admin.status') }}</label>
+          <label class="block text-sm font-medium mb-2">{{
+            $t('admin.status')
+          }}</label>
           <select
             v-model="userFilters.status"
             class="w-full px-3 py-2 bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
@@ -29,7 +37,9 @@
 
         <!-- Location filter (Local/Remote) -->
         <div class="flex-1">
-          <label class="block text-sm font-medium mb-2">{{ $t('admin.userType') }}</label>
+          <label class="block text-sm font-medium mb-2">{{
+            $t('admin.userType')
+          }}</label>
           <select
             v-model="userFilters.location"
             class="w-full px-3 py-2 bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]"
@@ -43,7 +53,9 @@
 
         <!-- Search filter -->
         <div class="flex-1">
-          <label class="block text-sm font-medium mb-2">{{ $t('search.title') }}</label>
+          <label class="block text-sm font-medium mb-2">{{
+            $t('search.title')
+          }}</label>
           <input
             v-model="userFilters.search"
             type="text"
@@ -55,42 +67,79 @@
       </div>
 
       <!-- Stats -->
-      <div class="mt-4 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 text-sm">
+      <div
+        class="mt-4 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 text-sm"
+      >
         <div>
-          <span class="text-[var(--color-text-secondary)]">{{ $t('admin.total') }}:</span>
+          <span class="text-[var(--color-text-secondary)]"
+            >{{ $t('admin.total') }}:</span
+          >
           <span class="ml-2 font-medium">{{ userStats.total }}</span>
         </div>
         <div>
-          <span class="text-[var(--color-text-secondary)]">{{ $t('admin.local') }}:</span>
-          <span class="ml-2 font-medium text-[var(--color-text)]">{{ userStats.local }}</span>
+          <span class="text-[var(--color-text-secondary)]"
+            >{{ $t('admin.local') }}:</span
+          >
+          <span class="ml-2 font-medium text-[var(--color-text)]">{{
+            userStats.local
+          }}</span>
         </div>
         <div>
-          <span class="text-[var(--color-text-secondary)]">{{ $t('admin.remote') }}:</span>
-          <span class="ml-2 font-medium text-[var(--color-badge-remote-text)]">{{ userStats.remote }}</span>
+          <span class="text-[var(--color-text-secondary)]"
+            >{{ $t('admin.remote') }}:</span
+          >
+          <span
+            class="ml-2 font-medium text-[var(--color-badge-remote-text)]"
+            >{{ userStats.remote }}</span
+          >
         </div>
         <div>
-          <span class="text-[var(--color-text-secondary)]">{{ $t('admin.pending') }}:</span>
-          <span class="ml-2 font-medium text-[var(--color-badge-pending-text)]">{{ userStats.pending }}</span>
+          <span class="text-[var(--color-text-secondary)]"
+            >{{ $t('admin.pending') }}:</span
+          >
+          <span
+            class="ml-2 font-medium text-[var(--color-badge-pending-text)]"
+            >{{ userStats.pending }}</span
+          >
         </div>
         <div>
-          <span class="text-[var(--color-text-secondary)]">{{ $t('admin.active') }}:</span>
-          <span class="ml-2 font-medium text-[var(--color-badge-active-text)]">{{ userStats.active }}</span>
+          <span class="text-[var(--color-text-secondary)]"
+            >{{ $t('admin.active') }}:</span
+          >
+          <span
+            class="ml-2 font-medium text-[var(--color-badge-active-text)]"
+            >{{ userStats.active }}</span
+          >
         </div>
         <div>
-          <span class="text-[var(--color-text-secondary)]">{{ $t('admin.suspended') }}:</span>
-          <span class="ml-2 font-medium text-[var(--color-badge-suspended-text)]">{{ userStats.suspended }}</span>
+          <span class="text-[var(--color-text-secondary)]"
+            >{{ $t('admin.suspended') }}:</span
+          >
+          <span
+            class="ml-2 font-medium text-[var(--color-badge-suspended-text)]"
+            >{{ userStats.suspended }}</span
+          >
         </div>
         <div>
-          <span class="text-[var(--color-text-secondary)]">{{ $t('admin.rejected') }}:</span>
-          <span class="ml-2 font-medium text-[var(--color-badge-rejected-text)]">{{ userStats.rejected }}</span>
+          <span class="text-[var(--color-text-secondary)]"
+            >{{ $t('admin.rejected') }}:</span
+          >
+          <span
+            class="ml-2 font-medium text-[var(--color-badge-rejected-text)]"
+            >{{ userStats.rejected }}</span
+          >
         </div>
       </div>
     </div>
 
     <!-- User List -->
     <div v-if="usersLoading" class="text-center py-8">
-      <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[var(--color-border)] border-t-[var(--color-primary)]"></div>
-      <p class="mt-4 text-[var(--color-text-muted)]">{{ $t('common.loading') }}</p>
+      <div
+        class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[var(--color-border)] border-t-[var(--color-primary)]"
+      />
+      <p class="mt-4 text-[var(--color-text-muted)]">
+        {{ $t('common.loading') }}
+      </p>
     </div>
 
     <div v-else-if="users.length === 0" class="text-center py-8">
@@ -117,7 +166,10 @@
               v-else
               class="w-16 h-16 rounded-full bg-[var(--color-surface-secondary)] flex items-center justify-center text-2xl"
             >
-              <Icon name="UserCircle" class="w-10 h-10 text-[var(--color-text-muted)]" />
+              <Icon
+                name="UserCircle"
+                class="w-10 h-10 text-[var(--color-text-muted)]"
+              />
             </div>
           </NuxtLink>
 
@@ -135,7 +187,7 @@
               <span
                 :class="[
                   'px-2 py-0.5 text-xs rounded-full',
-                  getUserStatusClass(user)
+                  getUserStatusClass(user),
                 ]"
               >
                 {{ getUserStatusText(user) }}
@@ -162,7 +214,10 @@
               @{{ user.username }}{{ user.domain ? `@${user.domain}` : '' }}
             </p>
 
-            <p v-if="user.bio" class="text-sm text-[var(--color-text-secondary)] line-clamp-2 mb-2">
+            <p
+              v-if="user.bio"
+              class="text-sm text-[var(--color-text-secondary)] line-clamp-2 mb-2"
+            >
               {{ user.bio }}
             </p>
 
@@ -197,9 +252,19 @@
 
             <!-- User stats -->
             <div class="flex gap-4 text-sm text-[var(--color-text-secondary)]">
-              <span>{{ $t('admin.artworksCount', { count: user._count?.artworks || 0 }) }}</span>
-              <span>{{ $t('admin.followersCount', { count: user._count?.followers || 0 }) }}</span>
-              <span>{{ $t('admin.followingCount', { count: user._count?.following || 0 }) }}</span>
+              <span>{{
+                $t('admin.artworksCount', { count: user._count?.artworks || 0 })
+              }}</span>
+              <span>{{
+                $t('admin.followersCount', {
+                  count: user._count?.followers || 0,
+                })
+              }}</span>
+              <span>{{
+                $t('admin.followingCount', {
+                  count: user._count?.following || 0,
+                })
+              }}</span>
             </div>
           </div>
 
@@ -208,8 +273,8 @@
             <!-- Approve button (pending users) -->
             <button
               v-if="isPending(user)"
-              @click="openModerationModal('approve', user)"
               class="px-4 py-2 bg-[var(--color-success-bg)] text-[var(--color-success-text)] border border-[var(--color-success-border)] hover:bg-[var(--color-button-success)] hover:text-white hover:border-[var(--color-button-success)] rounded-lg text-sm whitespace-nowrap"
+              @click="openModerationModal('approve', user)"
             >
               {{ $t('admin.approve') }}
             </button>
@@ -217,8 +282,8 @@
             <!-- Reject button (pending users) -->
             <button
               v-if="isPending(user)"
-              @click="openModerationModal('reject', user)"
               class="px-4 py-2 bg-[var(--color-danger-bg)] text-[var(--color-danger-text)] hover:bg-[var(--color-danger-hover-bg)] hover:text-[var(--color-danger-hover-text)] rounded-lg text-sm whitespace-nowrap"
+              @click="openModerationModal('reject', user)"
             >
               {{ $t('admin.reject') }}
             </button>
@@ -226,8 +291,8 @@
             <!-- Suspend button (active users) -->
             <button
               v-if="isActive(user) && user.role !== 'ADMIN'"
-              @click="openModerationModal('suspend', user)"
               class="px-4 py-2 bg-[var(--color-warning-bg)] text-[var(--color-warning-text)] border border-[var(--color-warning-text)] hover:bg-[var(--color-button-warning)] hover:text-white hover:border-[var(--color-button-warning)] rounded-lg text-sm whitespace-nowrap"
+              @click="openModerationModal('suspend', user)"
             >
               {{ $t('admin.suspend') }}
             </button>
@@ -235,8 +300,8 @@
             <!-- Activate button (suspended users) -->
             <button
               v-if="isSuspended(user)"
-              @click="openModerationModal('activate', user)"
               class="px-4 py-2 bg-[var(--color-success-bg)] text-[var(--color-success-text)] border border-[var(--color-success-border)] hover:bg-[var(--color-button-success)] hover:text-white hover:border-[var(--color-button-success)] rounded-lg text-sm whitespace-nowrap"
+              @click="openModerationModal('activate', user)"
             >
               {{ $t('admin.activate') }}
             </button>
@@ -244,8 +309,8 @@
             <!-- Set Tier button (all local users except admins) -->
             <button
               v-if="user.role !== 'ADMIN'"
-              @click="openTierModal(user)"
               class="px-4 py-2 bg-[var(--color-surface)] text-[var(--color-primary)] border border-[var(--color-primary)] hover:bg-[var(--color-primary)] hover:text-white rounded-lg text-sm whitespace-nowrap"
+              @click="openTierModal(user)"
             >
               {{ $t('admin.setTier') }}
             </button>
@@ -253,7 +318,9 @@
 
           <!-- Remote user info -->
           <div v-else class="flex flex-col gap-1 shrink-0 text-right">
-            <span class="text-xs text-[var(--color-text-muted)]">{{ $t('admin.remoteUser') }}</span>
+            <span class="text-xs text-[var(--color-text-muted)]">{{
+              $t('admin.remoteUser')
+            }}</span>
             <a
               :href="`https://${user.domain}/@${user.username}`"
               target="_blank"
@@ -272,13 +339,13 @@
       <button
         v-for="page in totalPages"
         :key="page"
-        @click="goToPage(page)"
         :class="[
           'px-4 py-2 rounded-lg',
           currentPage === page
             ? 'bg-[var(--color-primary)] text-[var(--color-primary-text)]'
-            : 'bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-surface-secondary)]'
+            : 'bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-surface-secondary)]',
         ]"
+        @click="goToPage(page)"
       >
         {{ page }}
       </button>
@@ -308,7 +375,8 @@
 import type { UserInfo } from '~/composables/useUserModeration'
 
 const { t } = useI18n()
-const { getAllUsers, approveUser, rejectUser, suspendUser, activateUser } = useUserModeration()
+const { getAllUsers, approveUser, rejectUser, suspendUser, activateUser } =
+  useUserModeration()
 const { getSignedUrl } = useSignedImageUrlOnce()
 const { getUserPathFromUser } = useUsername()
 const api = useApi()
@@ -321,8 +389,14 @@ const fetchSignedArtworkUrls = async (userList: UserInfo[]) => {
   for (const user of userList) {
     if (user.artworks) {
       for (const artwork of user.artworks) {
-        if (artwork.images?.[0]?.id && !signedArtworkUrls.value.has(artwork.id)) {
-          artworkImages.push({ artworkId: artwork.id, imageId: artwork.images[0].id })
+        if (
+          artwork.images?.[0]?.id &&
+          !signedArtworkUrls.value.has(artwork.id)
+        ) {
+          artworkImages.push({
+            artworkId: artwork.id,
+            imageId: artwork.images[0].id,
+          })
         }
       }
     }
@@ -334,14 +408,24 @@ const fetchSignedArtworkUrls = async (userList: UserInfo[]) => {
         const signedUrl = await getSignedUrl(imageId, true)
         signedArtworkUrls.value.set(artworkId, signedUrl)
       } catch (error) {
-        console.error(`Failed to get signed URL for artwork ${artworkId}:`, error)
+        console.error(
+          `Failed to get signed URL for artwork ${artworkId}:`,
+          error,
+        )
       }
-    })
+    }),
   )
 }
 
-const getArtworkThumbnailUrl = (artwork: { id: string; images?: { id?: string; thumbnailUrl: string }[] }) => {
-  return signedArtworkUrls.value.get(artwork.id) || artwork.images?.[0]?.thumbnailUrl || ''
+const getArtworkThumbnailUrl = (artwork: {
+  id: string
+  images?: { id?: string; thumbnailUrl: string }[]
+}) => {
+  return (
+    signedArtworkUrls.value.get(artwork.id) ||
+    artwork.images?.[0]?.thumbnailUrl ||
+    ''
+  )
 }
 
 const successMessage = ref<string | null>(null)
@@ -367,23 +451,22 @@ const userStats = ref({
 const userFilters = reactive({
   status: 'all' as 'all' | 'pending' | 'active' | 'suspended' | 'rejected',
   location: 'all' as 'all' | 'local' | 'remote',
-  search: ''
+  search: '',
 })
 
 const moderationModal = reactive({
   show: false,
   action: 'approve' as 'approve' | 'reject' | 'suspend' | 'activate',
   userId: '',
-  username: ''
+  username: '',
 })
 
 const tierModal = reactive({
   show: false,
   userId: '',
   username: '',
-  currentTier: 'NONE' as 'NONE' | 'TIER_1' | 'TIER_2' | 'TIER_3'
+  currentTier: 'NONE' as 'NONE' | 'TIER_1' | 'TIER_2' | 'TIER_3',
 })
-
 
 const usersEmptyMessage = computed(() => {
   if (userFilters.status === 'pending') return t('admin.noPendingUsers')
@@ -396,20 +479,21 @@ const usersEmptyMessage = computed(() => {
 const isPending = (user: UserInfo) =>
   !user.isActive && !user.approvedAt && !user.rejectedAt
 
-const isActive = (user: UserInfo) =>
-  user.isActive && !user.suspendedAt
+const isActive = (user: UserInfo) => user.isActive && !user.suspendedAt
 
-const isSuspended = (user: UserInfo) =>
-  !!user.suspendedAt
+const isSuspended = (user: UserInfo) => !!user.suspendedAt
 
-const isRejected = (user: UserInfo) =>
-  !!user.rejectedAt
+const isRejected = (user: UserInfo) => !!user.rejectedAt
 
 const getUserStatusClass = (user: UserInfo) => {
-  if (isPending(user)) return 'bg-[var(--color-badge-pending-bg)] text-[var(--color-badge-pending-text)]'
-  if (isActive(user)) return 'bg-[var(--color-badge-active-bg)] text-[var(--color-badge-active-text)]'
-  if (isSuspended(user)) return 'bg-[var(--color-badge-suspended-bg)] text-[var(--color-badge-suspended-text)]'
-  if (isRejected(user)) return 'bg-[var(--color-badge-rejected-bg)] text-[var(--color-badge-rejected-text)]'
+  if (isPending(user))
+    return 'bg-[var(--color-badge-pending-bg)] text-[var(--color-badge-pending-text)]'
+  if (isActive(user))
+    return 'bg-[var(--color-badge-active-bg)] text-[var(--color-badge-active-text)]'
+  if (isSuspended(user))
+    return 'bg-[var(--color-badge-suspended-bg)] text-[var(--color-badge-suspended-text)]'
+  if (isRejected(user))
+    return 'bg-[var(--color-badge-rejected-bg)] text-[var(--color-badge-rejected-text)]'
   return 'bg-[var(--color-surface-secondary)] text-[var(--color-text-muted)]'
 }
 
@@ -428,7 +512,7 @@ const loadUsers = async () => {
     const response = await getAllUsers({
       ...userFilters,
       page: currentPage.value,
-      limit: 20
+      limit: 20,
     })
 
     users.value = response.users
@@ -462,7 +546,10 @@ const goToPage = (page: number) => {
   loadUsers()
 }
 
-const openModerationModal = (action: typeof moderationModal.action, user: UserInfo) => {
+const openModerationModal = (
+  action: typeof moderationModal.action,
+  user: UserInfo,
+) => {
   moderationModal.show = true
   moderationModal.action = action
   moderationModal.userId = user.id
@@ -528,7 +615,10 @@ const handleTierChange = async (tier: string, password: string) => {
 
     await api.post(`/api/admin/users/${userId}/set-tier`, { tier, password })
 
-    successMessage.value = t('admin.userTierChanged', { username, tier: t(`supporter.${tier.toLowerCase()}`) })
+    successMessage.value = t('admin.userTierChanged', {
+      username,
+      tier: t(`supporter.${tier.toLowerCase()}`),
+    })
     closeTierModal()
     await loadUsers()
 

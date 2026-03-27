@@ -6,8 +6,10 @@
     <div v-if="loading" class="text-center py-12">
       <div
         class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[var(--color-border)] border-t-[var(--color-primary)]"
-      ></div>
-      <p class="mt-4 text-[var(--color-text-muted)]">{{ $t('common.loading') }}</p>
+      />
+      <p class="mt-4 text-[var(--color-text-muted)]">
+        {{ $t('common.loading') }}
+      </p>
     </div>
 
     <!-- Error State -->
@@ -24,7 +26,7 @@
     </div>
 
     <!-- Edit Form -->
-    <form v-else @submit.prevent="handleSubmit" class="space-y-6">
+    <form v-else class="space-y-6" @submit.prevent="handleSubmit">
       <!-- Error Message -->
       <div
         v-if="submitError"
@@ -35,7 +37,9 @@
 
       <!-- Image Management (First, same as upload.vue) -->
       <div class="bg-[var(--color-surface)] rounded-lg p-6">
-        <label class="block text-sm font-medium mb-2">{{ $t('upload.images') }}</label>
+        <label class="block text-sm font-medium mb-2">{{
+          $t('upload.images')
+        }}</label>
         <p class="text-sm text-[var(--color-text-muted)] mb-4">
           {{ $t('artwork.imageReorderHint') }}
         </p>
@@ -57,13 +61,18 @@
                 v-if="!element.isNew && !imageLoadState[element.tempId]"
                 class="absolute inset-0 flex items-center justify-center bg-[var(--color-surface-secondary)]"
               >
-                <div class="w-6 h-6 border-2 border-[var(--color-border)] border-t-[var(--color-primary)] rounded-full animate-spin" />
+                <div
+                  class="w-6 h-6 border-2 border-[var(--color-border)] border-t-[var(--color-primary)] rounded-full animate-spin"
+                />
               </div>
               <img
                 :src="getThumbnailUrl(element)"
                 :alt="`画像 ${index + 1}`"
                 class="w-full h-full object-cover"
-                :class="{ 'opacity-0': !element.isNew && !imageLoadState[element.tempId] }"
+                :class="{
+                  'opacity-0':
+                    !element.isNew && !imageLoadState[element.tempId],
+                }"
                 @load="onImageLoaded(element.tempId)"
                 @error="onImageLoaded(element.tempId)"
               />
@@ -76,8 +85,8 @@
               <!-- Delete Button -->
               <button
                 type="button"
-                @click="removeImage(element)"
                 class="absolute top-2 right-2 bg-[var(--color-danger)] hover:bg-[var(--color-danger-hover-bg)] text-white p-1.5 rounded opacity-0 group-hover:opacity-100 transition-opacity"
+                @click="removeImage(element)"
               >
                 <XMarkIcon class="w-4 h-4" />
               </button>
@@ -109,9 +118,15 @@
           @dragover.prevent
           @drop.prevent="handleFileDrop"
         >
-          <PlusIcon class="w-8 h-8 mx-auto mb-2 text-[var(--color-text-muted)]" />
-          <p class="text-[var(--color-text-muted)]">{{ $t('artwork.addImages') }}</p>
-          <p class="text-xs text-[var(--color-text-muted)] opacity-70 mt-1">{{ $t('artwork.imageLimit') }}</p>
+          <PlusIcon
+            class="w-8 h-8 mx-auto mb-2 text-[var(--color-text-muted)]"
+          />
+          <p class="text-[var(--color-text-muted)]">
+            {{ $t('artwork.addImages') }}
+          </p>
+          <p class="text-xs text-[var(--color-text-muted)] opacity-70 mt-1">
+            {{ $t('artwork.imageLimit') }}
+          </p>
         </div>
         <input
           ref="fileInput"
@@ -124,24 +139,23 @@
       </div>
 
       <!-- Form Fields Component (Second, same as upload.vue) -->
-      <ArtworkFormFields
-        v-model="form"
-        v-model:tags-input="tagsInput"
-      />
+      <ArtworkFormFields v-model="form" v-model:tags-input="tagsInput" />
 
       <!-- Link Card (Third, same as upload.vue) -->
       <div class="bg-[var(--color-surface)] rounded-lg p-6">
         <label class="block text-sm font-medium mb-2">
           {{ $t('linkCard.title') }}
-          <span class="text-sm font-normal text-[var(--color-text-muted)]">（{{ $t('linkCard.optional') }}）</span>
+          <span class="text-sm font-normal text-[var(--color-text-muted)]"
+            >（{{ $t('linkCard.optional') }}）</span
+          >
         </label>
         <p class="text-sm text-[var(--color-text-muted)] mb-4">
           {{ $t('linkCard.description') }}
         </p>
         <LinkCardUploader
-          :image-source="firstImage"
           v-model:blur="linkCardBlur"
           v-model:crop-coordinates="linkCardCropCoordinates"
+          :image-source="firstImage"
           :age-rating="form.ageRating"
           :original-width="firstImageOriginalWidth"
           :original-height="firstImageOriginalHeight"
@@ -149,13 +163,12 @@
       </div>
 
       <!-- Upload Progress -->
-      <div
-        v-if="isSubmitting"
-        class="bg-[var(--color-surface)] rounded-lg p-6"
-      >
+      <div v-if="isSubmitting" class="bg-[var(--color-surface)] rounded-lg p-6">
         <div class="flex justify-between items-center mb-2">
           <span class="font-medium">{{ $t('upload.uploading') }}</span>
-          <span class="font-semibold text-[var(--color-primary)]">{{ uploadProgress }}%</span>
+          <span class="font-semibold text-[var(--color-primary)]"
+            >{{ uploadProgress }}%</span
+          >
         </div>
         <div class="h-2 bg-[var(--color-border)] rounded-full overflow-hidden">
           <div
@@ -171,7 +184,10 @@
       <!-- Download Section -->
       <div class="bg-[var(--color-surface)] rounded-lg p-6">
         <div class="flex items-center gap-2 mb-3">
-          <Icon name="ArrowDownTray" class="w-5 h-5 text-[var(--color-primary)]" />
+          <Icon
+            name="ArrowDownTray"
+            class="w-5 h-5 text-[var(--color-primary)]"
+          />
           <h3 class="font-medium">{{ $t('artwork.downloadSection') }}</h3>
         </div>
         <p class="text-sm text-[var(--color-text-muted)] mb-4">
@@ -181,12 +197,19 @@
           variant="outline"
           size="md"
           shape="rounded"
-          :disabled="isDownloading || managedImages.filter(img => !img.isNew).length === 0"
+          :disabled="
+            isDownloading ||
+            managedImages.filter((img) => !img.isNew).length === 0
+          "
           :loading="isDownloading"
           @click="handleDownload"
         >
           <Icon name="ArrowDownTray" class="w-5 h-5 mr-2" />
-          {{ managedImages.filter(img => !img.isNew).length > 1 ? $t('artwork.downloadAll') : $t('artwork.downloadOriginal') }}
+          {{
+            managedImages.filter((img) => !img.isNew).length > 1
+              ? $t('artwork.downloadAll')
+              : $t('artwork.downloadOriginal')
+          }}
         </BaseButton>
       </div>
 
@@ -337,10 +360,13 @@ watch(
         const url = await getSignedUrl(first.id, false, false) // standard version
         firstImageUrl.value = url
         // Find original dimensions from artwork data
-        const imgData = artwork.value?.images?.find((img: any) => img.id === first.id)
+        const imgData = artwork.value?.images?.find(
+          (img: any) => img.id === first.id,
+        )
         if (imgData) {
           firstImageOriginalWidth.value = imgData.originalWidth || imgData.width
-          firstImageOriginalHeight.value = imgData.originalHeight || imgData.height
+          firstImageOriginalHeight.value =
+            imgData.originalHeight || imgData.height
         }
       } catch (e) {
         console.error('Failed to get signed URL for first image:', e)
@@ -445,12 +471,15 @@ const fetchArtwork = async () => {
       copyrightHolder: data.copyrightHolder || '',
       copyrightNote: data.copyrightNote || '',
       originalCreatorId: data.originalCreatorId || undefined,
-      originalCreator: data.originalCreator ? {
-        id: data.originalCreator.id,
-        username: data.originalCreator.username,
-        displayName: data.originalCreator.displayName || data.originalCreator.username,
-        avatarUrl: data.originalCreator.avatarUrl,
-      } : undefined,
+      originalCreator: data.originalCreator
+        ? {
+            id: data.originalCreator.id,
+            username: data.originalCreator.username,
+            displayName:
+              data.originalCreator.displayName || data.originalCreator.username,
+            avatarUrl: data.originalCreator.avatarUrl,
+          }
+        : undefined,
       originalCreatorAllowDownload: data.originalCreatorAllowDownload ?? false,
     }
 
@@ -459,7 +488,12 @@ const fetchArtwork = async () => {
     // Initialize link card state
     linkCardBlur.value = data.ogCardBlur || false
     // Load existing crop coordinates if present
-    if (data.ogCardCropX != null && data.ogCardCropY != null && data.ogCardCropWidth != null && data.ogCardCropHeight != null) {
+    if (
+      data.ogCardCropX != null &&
+      data.ogCardCropY != null &&
+      data.ogCardCropWidth != null &&
+      data.ogCardCropHeight != null
+    ) {
       linkCardCropCoordinates.value = {
         x: data.ogCardCropX,
         y: data.ogCardCropY,
@@ -491,7 +525,7 @@ const fetchArtwork = async () => {
 // Remove image
 const removeImage = (image: ManagedImage) => {
   managedImages.value = managedImages.value.filter(
-    (img) => img.tempId !== image.tempId
+    (img) => img.tempId !== image.tempId,
   )
 }
 
@@ -553,13 +587,15 @@ const addFiles = (files: File[]) => {
 
 // Build imageOperations array for API
 const buildImageOperations = () => {
-  const operations: { type: 'keep' | 'delete' | 'add'; id?: string; order: number }[] = []
+  const operations: {
+    type: 'keep' | 'delete' | 'add'
+    id?: string
+    order: number
+  }[] = []
 
   // Find deleted images
   for (const originalId of originalImageIds.value) {
-    const stillExists = managedImages.value.some(
-      (img) => img.id === originalId
-    )
+    const stillExists = managedImages.value.some((img) => img.id === originalId)
     if (!stillExists) {
       operations.push({ type: 'delete', id: originalId, order: -1 })
     }
@@ -614,8 +650,14 @@ const handleSubmit = async () => {
     if (form.value.creationDate) {
       formData.append('creationDate', form.value.creationDate)
     }
-    if (form.value.creationPeriodValue !== null && form.value.creationPeriodUnit) {
-      formData.append('creationPeriodValue', String(form.value.creationPeriodValue))
+    if (
+      form.value.creationPeriodValue !== null &&
+      form.value.creationPeriodUnit
+    ) {
+      formData.append(
+        'creationPeriodValue',
+        String(form.value.creationPeriodValue),
+      )
       formData.append('creationPeriodUnit', form.value.creationPeriodUnit)
     }
     formData.append('isCommission', String(form.value.isCommission))
@@ -649,7 +691,10 @@ const handleSubmit = async () => {
       formData.append('originalCreatorId', form.value.originalCreatorId)
     }
     if (form.value.originalCreatorAllowDownload) {
-      formData.append('originalCreatorAllowDownload', String(form.value.originalCreatorAllowDownload))
+      formData.append(
+        'originalCreatorAllowDownload',
+        String(form.value.originalCreatorAllowDownload),
+      )
     }
     // Add new image files
     for (const img of managedImages.value) {
@@ -662,8 +707,14 @@ const handleSubmit = async () => {
     if (linkCardCropCoordinates.value) {
       formData.append('ogCardCropX', String(linkCardCropCoordinates.value.x))
       formData.append('ogCardCropY', String(linkCardCropCoordinates.value.y))
-      formData.append('ogCardCropWidth', String(linkCardCropCoordinates.value.width))
-      formData.append('ogCardCropHeight', String(linkCardCropCoordinates.value.height))
+      formData.append(
+        'ogCardCropWidth',
+        String(linkCardCropCoordinates.value.width),
+      )
+      formData.append(
+        'ogCardCropHeight',
+        String(linkCardCropCoordinates.value.height),
+      )
     }
     formData.append('ogCardBlur', String(linkCardBlur.value))
 
@@ -672,7 +723,7 @@ const handleSubmit = async () => {
       formData,
       (percent) => {
         uploadProgress.value = percent
-      }
+      },
     )
 
     // OGカード生成/削除
@@ -683,7 +734,9 @@ const handleSubmit = async () => {
     if (firstImg?.isNew) {
       // 新規画像の場合、更新後のartworkからimageIdを取得
       try {
-        const updatedArtwork = await api.get<any>(`/api/artworks/${artworkId.value}`)
+        const updatedArtwork = await api.get<any>(
+          `/api/artworks/${artworkId.value}`,
+        )
         firstImageId = updatedArtwork.images?.[0]?.id || null
       } catch (e) {
         console.error('Failed to fetch updated artwork:', e)
@@ -730,9 +783,9 @@ const handleDownload = async () => {
     isDownloading.value = true
 
     // Fetch download info from API
-    const downloadInfos = await api.get<Array<{ imageId: string; url: string; filename: string }>>(
-      `/api/artworks/${artworkId.value}/download`
-    )
+    const downloadInfos = await api.get<
+      Array<{ imageId: string; url: string; filename: string }>
+    >(`/api/artworks/${artworkId.value}/download`)
 
     // Download each image
     for (const info of downloadInfos) {

@@ -25,12 +25,12 @@
       </div>
 
       <div v-else class="image-grid">
-        <div
-          v-for="(image, index) in images"
-          :key="index"
-          class="image-item"
-        >
-          <img :src="image.preview" :alt="`Image ${index + 1}`" class="preview-image" />
+        <div v-for="(image, index) in images" :key="index" class="image-item">
+          <img
+            :src="image.preview"
+            :alt="`Image ${index + 1}`"
+            class="preview-image"
+          />
           <button
             type="button"
             class="remove-button"
@@ -41,7 +41,11 @@
           <div class="image-order">{{ index + 1 }}</div>
         </div>
 
-        <div v-if="images.length < MAX_FILES" class="add-more" @click.stop="triggerFileInput">
+        <div
+          v-if="images.length < MAX_FILES"
+          class="add-more"
+          @click.stop="triggerFileInput"
+        >
           <Icon name="Plus" class="add-icon" />
         </div>
       </div>
@@ -110,10 +114,10 @@ const validateFiles = (files: File[]): boolean => {
     }
   }
 
-  const totalSize = [...images.value, ...files.map(file => ({ file, preview: '' }))].reduce(
-    (sum, img) => sum + img.file.size,
-    0
-  )
+  const totalSize = [
+    ...images.value,
+    ...files.map((file) => ({ file, preview: '' })),
+  ].reduce((sum, img) => sum + img.file.size, 0)
 
   if (totalSize > MAX_TOTAL_SIZE) {
     errorMessage.value = t('upload.totalSizeError')
@@ -126,13 +130,16 @@ const validateFiles = (files: File[]): boolean => {
 const addFiles = (files: File[]) => {
   if (!validateFiles(files)) return
 
-  const newImages: ImageData[] = files.map(file => ({
+  const newImages: ImageData[] = files.map((file) => ({
     file,
     preview: URL.createObjectURL(file),
   }))
 
   images.value.push(...newImages)
-  emit('update:images', images.value.map(img => img.file))
+  emit(
+    'update:images',
+    images.value.map((img) => img.file),
+  )
 }
 
 const handleFileSelect = (event: Event) => {
@@ -153,11 +160,14 @@ const handleDrop = (event: DragEvent) => {
 const removeImage = (index: number) => {
   URL.revokeObjectURL(images.value[index].preview)
   images.value.splice(index, 1)
-  emit('update:images', images.value.map(img => img.file))
+  emit(
+    'update:images',
+    images.value.map((img) => img.file),
+  )
 }
 
 onBeforeUnmount(() => {
-  images.value.forEach(img => URL.revokeObjectURL(img.preview))
+  images.value.forEach((img) => URL.revokeObjectURL(img.preview))
 })
 </script>
 

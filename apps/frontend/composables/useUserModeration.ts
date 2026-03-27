@@ -57,12 +57,16 @@ export const useUserModeration = () => {
   const loading = ref(false)
   const error = ref<string | null>(null)
 
-  const getAllUsers = async (filters: UserModerationFilters = {}): Promise<UserListResponse> => {
+  const getAllUsers = async (
+    filters: UserModerationFilters = {},
+  ): Promise<UserListResponse> => {
     loading.value = true
     error.value = null
 
     try {
-      const response = await api.get<UserListResponse>('/api/admin/users', { params: filters })
+      const response = await api.get<UserListResponse>('/api/admin/users', {
+        params: filters,
+      })
       return response
     } catch (err: any) {
       error.value = err.message || 'ユーザーの取得に失敗しました'
@@ -72,7 +76,10 @@ export const useUserModeration = () => {
     }
   }
 
-  const approveUser = async (userId: string, password: string): Promise<void> => {
+  const approveUser = async (
+    userId: string,
+    password: string,
+  ): Promise<void> => {
     loading.value = true
     error.value = null
 
@@ -86,7 +93,11 @@ export const useUserModeration = () => {
     }
   }
 
-  const rejectUser = async (userId: string, password: string, reason: string): Promise<void> => {
+  const rejectUser = async (
+    userId: string,
+    password: string,
+    reason: string,
+  ): Promise<void> => {
     loading.value = true
     error.value = null
 
@@ -100,7 +111,11 @@ export const useUserModeration = () => {
     }
   }
 
-  const suspendUser = async (userId: string, password: string, reason: string): Promise<void> => {
+  const suspendUser = async (
+    userId: string,
+    password: string,
+    reason: string,
+  ): Promise<void> => {
     loading.value = true
     error.value = null
 
@@ -114,7 +129,10 @@ export const useUserModeration = () => {
     }
   }
 
-  const activateUser = async (userId: string, password: string): Promise<void> => {
+  const activateUser = async (
+    userId: string,
+    password: string,
+  ): Promise<void> => {
     loading.value = true
     error.value = null
 

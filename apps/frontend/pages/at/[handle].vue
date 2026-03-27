@@ -4,7 +4,10 @@
       <p class="text-[var(--color-text-muted)]">{{ $t('common.loading') }}</p>
     </div>
     <div v-else-if="error" class="text-center">
-      <Icon name="ExclamationTriangle" class="w-16 h-16 text-[var(--color-text-muted)] mx-auto mb-4" />
+      <Icon
+        name="ExclamationTriangle"
+        class="w-16 h-16 text-[var(--color-text-muted)] mx-auto mb-4"
+      />
       <h1 class="text-2xl font-bold mb-2">{{ $t('user.userNotFound') }}</h1>
       <p class="text-[var(--color-text-muted)] mb-4">{{ error }}</p>
       <BaseButton variant="primary" @click="navigateTo('/')">
@@ -33,11 +36,14 @@ onMounted(async () => {
 
     // Fetch user by Bluesky handle
     const baseURL = config.public.apiBase || ''
-    const response = await fetch(`${baseURL}/api/users/by-bluesky/${encodeURIComponent(handle)}`, {
-      headers: {
-        Accept: 'application/json',
+    const response = await fetch(
+      `${baseURL}/api/users/by-bluesky/${encodeURIComponent(handle)}`,
+      {
+        headers: {
+          Accept: 'application/json',
+        },
       },
-    })
+    )
 
     if (!response.ok) {
       if (response.status === 404) {

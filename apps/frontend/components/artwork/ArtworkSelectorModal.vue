@@ -7,7 +7,9 @@
       class="bg-[var(--color-surface)] rounded-xl shadow-xl w-full max-w-3xl max-h-[80vh] flex flex-col"
     >
       <!-- Header -->
-      <div class="flex items-center justify-between p-4 border-b border-[var(--color-border)]">
+      <div
+        class="flex items-center justify-between p-4 border-b border-[var(--color-border)]"
+      >
         <h2 class="text-lg font-semibold text-[var(--color-text)]">
           {{ title }}
         </h2>
@@ -43,7 +45,7 @@
         <div v-if="isLoading" class="flex justify-center py-8">
           <div
             class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[var(--color-border)] border-t-[var(--color-primary)]"
-          ></div>
+          />
         </div>
 
         <!-- Artworks Grid -->
@@ -84,10 +86,7 @@
         </div>
 
         <!-- Load More -->
-        <div
-          v-if="hasMore && !isLoading"
-          class="flex justify-center mt-4"
-        >
+        <div v-if="hasMore && !isLoading" class="flex justify-center mt-4">
           <BaseButton
             variant="outline"
             size="sm"
@@ -101,7 +100,9 @@
       </div>
 
       <!-- Footer -->
-      <div class="flex justify-end gap-3 p-4 border-t border-[var(--color-border)]">
+      <div
+        class="flex justify-end gap-3 p-4 border-t border-[var(--color-border)]"
+      >
         <BaseButton
           variant="outline"
           size="md"
@@ -186,7 +187,10 @@ const fetchSignedUrls = async (artworkList: Artwork[]) => {
     } catch {
       // Fall back to raw URL
       const firstImage = artwork.images[0]
-      signedUrlCache.value.set(imageId, firstImage.thumbnailUrl || firstImage.url || '')
+      signedUrlCache.value.set(
+        imageId,
+        firstImage.thumbnailUrl || firstImage.url || '',
+      )
     }
   }
 }
@@ -194,7 +198,12 @@ const fetchSignedUrls = async (artworkList: Artwork[]) => {
 const getArtworkThumbnail = (artwork: Artwork): string => {
   if (!artwork.images?.length) return ''
   const imageId = artwork.images[0].id
-  return signedUrlCache.value.get(imageId) || artwork.images[0].thumbnailUrl || artwork.images[0].url || ''
+  return (
+    signedUrlCache.value.get(imageId) ||
+    artwork.images[0].thumbnailUrl ||
+    artwork.images[0].url ||
+    ''
+  )
 }
 
 const fetchArtworks = async (append = false) => {
@@ -216,7 +225,9 @@ const fetchArtworks = async (append = false) => {
       params.search = searchQuery.value.trim()
     }
 
-    const response = await api.get<ArtworksResponse>('/api/artworks', { params })
+    const response = await api.get<ArtworksResponse>('/api/artworks', {
+      params,
+    })
 
     // Filter out excluded IDs
     let filtered = response.artworks

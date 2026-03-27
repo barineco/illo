@@ -1,15 +1,15 @@
 <template>
-  <div class="relative w-full" v-click-outside="closeDropdown">
+  <div v-click-outside="closeDropdown" class="relative w-full">
     <!-- 検索入力 -->
     <input
       ref="searchInput"
       v-model="query"
-      @input="handleInput"
-      @keydown="handleKeydown"
-      @focus="isOpen = true"
       type="search"
       :placeholder="$t('search.placeholder')"
       class="w-full px-4 py-2 bg-[var(--color-background)] rounded-full border border-[var(--color-border)] focus:border-[var(--color-primary)] focus:outline-none transition-colors"
+      @input="handleInput"
+      @keydown="handleKeydown"
+      @focus="isOpen = true"
     />
 
     <!-- ドロップダウン結果 -->
@@ -31,18 +31,20 @@
         <!-- リモートオプション（パターン検出時） -->
         <button
           v-if="results.remoteOption"
-          @click="handleRemoteOptionClick"
           :class="[
             'w-full px-4 py-3 text-left hover:bg-[var(--color-hover)] transition-colors border-b border-[var(--color-border)] flex items-center gap-3',
             { 'bg-[var(--color-surface-secondary)]': selectedIndex === -1 },
           ]"
+          @click="handleRemoteOptionClick"
         >
           <Icon name="GlobeAlt" class="w-6 h-6" />
           <div class="flex-1">
             <div class="font-medium text-[var(--color-primary)]">
               {{ results.remoteOption.label }}
             </div>
-            <div class="text-sm text-[var(--color-text-muted)]">{{ $t('search.showRemoteContent') }}</div>
+            <div class="text-sm text-[var(--color-text-muted)]">
+              {{ $t('search.showRemoteContent') }}
+            </div>
           </div>
         </button>
 
@@ -56,11 +58,13 @@
           <button
             v-for="(user, index) in results.users.users"
             :key="user.id"
-            @click="selectUser(user)"
             :class="[
               'w-full px-4 py-3 text-left hover:bg-[var(--color-hover)] transition-colors flex items-center gap-3',
-              { 'bg-[var(--color-surface-secondary)]': selectedIndex === index },
+              {
+                'bg-[var(--color-surface-secondary)]': selectedIndex === index,
+              },
             ]"
+            @click="selectUser(user)"
           >
             <img
               :src="user.avatarUrl || '/default-avatar.png'"
@@ -71,7 +75,9 @@
               <div class="font-medium truncate">
                 {{ user.displayName || user.username }}
               </div>
-              <div class="text-sm text-[var(--color-text-muted)] truncate">{{ user.handle }}</div>
+              <div class="text-sm text-[var(--color-text-muted)] truncate">
+                {{ user.handle }}
+              </div>
             </div>
           </button>
         </div>
@@ -86,7 +92,6 @@
           <button
             v-for="(artwork, index) in results.artworks.artworks"
             :key="artwork.id"
-            @click="selectArtwork(artwork)"
             :class="[
               'w-full px-4 py-3 text-left hover:bg-[var(--color-hover)] transition-colors flex items-center gap-3',
               {
@@ -94,6 +99,7 @@
                   selectedIndex === (results.users?.users.length || 0) + index,
               },
             ]"
+            @click="selectArtwork(artwork)"
           >
             <img
               :src="artwork.thumbnailUrl"
@@ -246,7 +252,11 @@ const handleRemoteOptionClick = async () => {
         closeDropdown()
         query.value = ''
       } else {
-        alert(t('search.remoteUserFailed', { error: data.error || t('common.error') }))
+        alert(
+          t('search.remoteUserFailed', {
+            error: data.error || t('common.error'),
+          }),
+        )
       }
     } else {
       // その他のリモートコンテンツ（作品、ドメインなど）

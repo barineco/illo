@@ -3,10 +3,10 @@
 definePageMeta({
   middleware: () => {
     return navigateTo('/settings')
-  }
+  },
 })
 </script>
 
 <template>
-  <div></div>
+  <div />
 </template>

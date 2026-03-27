@@ -163,6 +163,14 @@ model User {
   resetPasswordToken  String?  @unique @db.VarChar(255)
   resetPasswordExpires DateTime?
 
+  // Email change
+  pendingEmail         String?  @db.VarChar(255)
+  emailChangeToken     String?  @unique @db.VarChar(255)
+  emailChangeExpires   DateTime?
+
+  // Password setup tracking
+  hasSetPassword       Boolean  @default(false)
+
   // User moderation (admin actions)
   approvedAt         DateTime?
   approvedBy         String?   @db.VarChar(30)  // userId of admin who approved

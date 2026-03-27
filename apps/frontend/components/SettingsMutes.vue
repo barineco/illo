@@ -27,15 +27,27 @@
                 :alt="mute.muted.displayName || mute.muted.username"
                 class="w-10 h-10 rounded-full object-cover"
               />
-              <div v-else class="w-10 h-10 rounded-full bg-[var(--color-surface-secondary)] flex items-center justify-center">
-                <Icon name="UserCircle" class="w-6 h-6 text-[var(--color-text-muted)]" />
+              <div
+                v-else
+                class="w-10 h-10 rounded-full bg-[var(--color-surface-secondary)] flex items-center justify-center"
+              >
+                <Icon
+                  name="UserCircle"
+                  class="w-6 h-6 text-[var(--color-text-muted)]"
+                />
               </div>
               <div>
-                <p class="font-medium">{{ mute.muted.displayName || mute.muted.username }}</p>
-                <p class="text-sm text-[var(--color-text-muted)]">
-                  @{{ mute.muted.username }}{{ mute.muted.domain ? `@${mute.muted.domain}` : '' }}
+                <p class="font-medium">
+                  {{ mute.muted.displayName || mute.muted.username }}
                 </p>
-                <p v-if="mute.expiresAt" class="text-xs text-[var(--color-text-muted)]">
+                <p class="text-sm text-[var(--color-text-muted)]">
+                  @{{ mute.muted.username
+                  }}{{ mute.muted.domain ? `@${mute.muted.domain}` : '' }}
+                </p>
+                <p
+                  v-if="mute.expiresAt"
+                  class="text-xs text-[var(--color-text-muted)]"
+                >
                   {{ $t('mutes.expiresAt') }}: {{ formatDate(mute.expiresAt) }}
                 </p>
               </div>
@@ -68,10 +80,14 @@
       </p>
 
       <!-- Add Word Mute Form -->
-      <div class="mb-6 p-4 bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg">
+      <div
+        class="mb-6 p-4 bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg"
+      >
         <div class="space-y-4">
           <div>
-            <label class="block text-sm font-medium mb-2">{{ $t('mutes.keyword') }}</label>
+            <label class="block text-sm font-medium mb-2">{{
+              $t('mutes.keyword')
+            }}</label>
             <input
               v-model="newWordMute.keyword"
               type="text"
@@ -82,15 +98,27 @@
 
           <div class="flex flex-wrap gap-4">
             <label class="flex items-center gap-2 cursor-pointer">
-              <input v-model="newWordMute.wholeWord" type="checkbox" class="rounded" />
+              <input
+                v-model="newWordMute.wholeWord"
+                type="checkbox"
+                class="rounded"
+              />
               <span class="text-sm">{{ $t('mutes.wholeWord') }}</span>
             </label>
             <label class="flex items-center gap-2 cursor-pointer">
-              <input v-model="newWordMute.regex" type="checkbox" class="rounded" />
+              <input
+                v-model="newWordMute.regex"
+                type="checkbox"
+                class="rounded"
+              />
               <span class="text-sm">{{ $t('mutes.useRegex') }}</span>
             </label>
             <label class="flex items-center gap-2 cursor-pointer">
-              <input v-model="newWordMute.caseSensitive" type="checkbox" class="rounded" />
+              <input
+                v-model="newWordMute.caseSensitive"
+                type="checkbox"
+                class="rounded"
+              />
               <span class="text-sm">{{ $t('mutes.caseSensitive') }}</span>
             </label>
           </div>
@@ -124,17 +152,29 @@
             <div>
               <p class="font-medium font-mono">{{ mute.keyword }}</p>
               <div class="flex flex-wrap gap-2 mt-1">
-                <span v-if="mute.wholeWord" class="text-xs px-2 py-0.5 bg-[var(--color-surface-secondary)] rounded">
+                <span
+                  v-if="mute.wholeWord"
+                  class="text-xs px-2 py-0.5 bg-[var(--color-surface-secondary)] rounded"
+                >
                   {{ $t('mutes.wholeWord') }}
                 </span>
-                <span v-if="mute.regex" class="text-xs px-2 py-0.5 bg-[var(--color-surface-secondary)] rounded">
+                <span
+                  v-if="mute.regex"
+                  class="text-xs px-2 py-0.5 bg-[var(--color-surface-secondary)] rounded"
+                >
                   {{ $t('mutes.regex') }}
                 </span>
-                <span v-if="mute.caseSensitive" class="text-xs px-2 py-0.5 bg-[var(--color-surface-secondary)] rounded">
+                <span
+                  v-if="mute.caseSensitive"
+                  class="text-xs px-2 py-0.5 bg-[var(--color-surface-secondary)] rounded"
+                >
                   {{ $t('mutes.caseSensitive') }}
                 </span>
               </div>
-              <p v-if="mute.expiresAt" class="text-xs text-[var(--color-text-muted)] mt-1">
+              <p
+                v-if="mute.expiresAt"
+                class="text-xs text-[var(--color-text-muted)] mt-1"
+              >
                 {{ $t('mutes.expiresAt') }}: {{ formatDate(mute.expiresAt) }}
               </p>
             </div>
@@ -166,12 +206,19 @@
       </p>
 
       <!-- Add Tag Mute Form -->
-      <div class="mb-6 p-4 bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg">
+      <div
+        class="mb-6 p-4 bg-[var(--color-background)] border border-[var(--color-border)] rounded-lg"
+      >
         <div class="flex gap-4">
           <div class="flex-1">
-            <label class="block text-sm font-medium mb-2">{{ $t('mutes.tagName') }}</label>
+            <label class="block text-sm font-medium mb-2">{{
+              $t('mutes.tagName')
+            }}</label>
             <div class="flex gap-2">
-              <span class="px-4 py-2 bg-[var(--color-surface-secondary)] rounded-lg text-[var(--color-text-muted)]">#</span>
+              <span
+                class="px-4 py-2 bg-[var(--color-surface-secondary)] rounded-lg text-[var(--color-text-muted)]"
+                >#</span
+              >
               <input
                 v-model="newTagMute"
                 type="text"
@@ -227,7 +274,10 @@
     </div>
 
     <!-- Error Message -->
-    <div v-if="error" class="bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] rounded-lg p-4">
+    <div
+      v-if="error"
+      class="bg-[var(--color-danger-bg)] border border-[var(--color-danger-border)] rounded-lg p-4"
+    >
       <p class="text-[var(--color-danger-text)]">{{ error }}</p>
     </div>
   </div>
@@ -318,7 +368,12 @@ const addWordMute = async () => {
       caseSensitive: newWordMute.value.caseSensitive,
     })
     toast.success(t('mutes.wordMuteAdded'))
-    newWordMute.value = { keyword: '', wholeWord: false, regex: false, caseSensitive: false }
+    newWordMute.value = {
+      keyword: '',
+      wholeWord: false,
+      regex: false,
+      caseSensitive: false,
+    }
     await fetchWordMutes()
   } catch (err: any) {
     error.value = err.message || t('mutes.addWordMuteFailed')
@@ -360,7 +415,10 @@ const addTagMute = async () => {
   addingTagMute.value = true
   error.value = ''
   try {
-    await api.post(`/api/mutes/tags/${encodeURIComponent(newTagMute.value)}`, {})
+    await api.post(
+      `/api/mutes/tags/${encodeURIComponent(newTagMute.value)}`,
+      {},
+    )
     toast.success(t('mutes.tagMuteAdded'))
     newTagMute.value = ''
     await fetchTagMutes()

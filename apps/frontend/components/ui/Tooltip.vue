@@ -24,7 +24,10 @@
         class="absolute z-50 px-3 py-2 text-sm bg-[var(--color-scrim)] text-white rounded-lg shadow-lg whitespace-normal max-w-xs"
       >
         <slot>{{ content }}</slot>
-        <div :class="arrowClasses" class="absolute w-2 h-2 bg-[var(--color-scrim)] rotate-45" />
+        <div
+          :class="arrowClasses"
+          class="absolute w-2 h-2 bg-[var(--color-scrim)] rotate-45"
+        />
       </div>
     </Transition>
   </div>

@@ -1,8 +1,8 @@
 // Instance mode enum (matches Prisma schema)
 export enum InstanceMode {
-  PERSONAL = 'PERSONAL',           // 個人用: adminユーザーページがホーム
+  PERSONAL = 'PERSONAL', // 個人用: adminユーザーページがホーム
   FEDERATION_ONLY = 'FEDERATION_ONLY', // illo連合のみ
-  FULL_FEDIVERSE = 'FULL_FEDIVERSE',  // フルFediverse連合（将来用）
+  FULL_FEDIVERSE = 'FULL_FEDIVERSE', // フルFediverse連合（将来用）
 }
 
 // Instance settings entity

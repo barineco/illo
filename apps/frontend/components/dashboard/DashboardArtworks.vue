@@ -3,33 +3,56 @@
     <!-- Stats Cards -->
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
       <div class="bg-[var(--color-surface)] rounded-lg p-4">
-        <p class="text-sm text-[var(--color-text-muted)]">{{ $t('dashboard.stats.artworks') }}</p>
+        <p class="text-sm text-[var(--color-text-muted)]">
+          {{ $t('dashboard.stats.artworks') }}
+        </p>
         <p class="text-2xl font-bold mt-1">{{ stats.artworks?.count || 0 }}</p>
       </div>
       <div class="bg-[var(--color-surface)] rounded-lg p-4">
-        <p class="text-sm text-[var(--color-text-muted)]">{{ $t('dashboard.stats.totalViews') }}</p>
-        <p class="text-2xl font-bold mt-1">{{ formatNumber(stats.artworks?.totalViews || 0) }}</p>
+        <p class="text-sm text-[var(--color-text-muted)]">
+          {{ $t('dashboard.stats.totalViews') }}
+        </p>
+        <p class="text-2xl font-bold mt-1">
+          {{ formatNumber(stats.artworks?.totalViews || 0) }}
+        </p>
       </div>
       <div class="bg-[var(--color-surface)] rounded-lg p-4">
-        <p class="text-sm text-[var(--color-text-muted)]">{{ $t('dashboard.stats.totalLikes') }}</p>
-        <p class="text-2xl font-bold mt-1">{{ formatNumber(stats.artworks?.totalLikes || 0) }}</p>
+        <p class="text-sm text-[var(--color-text-muted)]">
+          {{ $t('dashboard.stats.totalLikes') }}
+        </p>
+        <p class="text-2xl font-bold mt-1">
+          {{ formatNumber(stats.artworks?.totalLikes || 0) }}
+        </p>
       </div>
       <div class="bg-[var(--color-surface)] rounded-lg p-4">
-        <p class="text-sm text-[var(--color-text-muted)]">{{ $t('dashboard.stats.followers') }}</p>
-        <p class="text-2xl font-bold mt-1">{{ formatNumber(stats.followers || 0) }}</p>
+        <p class="text-sm text-[var(--color-text-muted)]">
+          {{ $t('dashboard.stats.followers') }}
+        </p>
+        <p class="text-2xl font-bold mt-1">
+          {{ formatNumber(stats.followers || 0) }}
+        </p>
       </div>
     </div>
 
     <!-- Loading State -->
     <div v-if="loading" class="text-center py-12">
-      <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[var(--color-border)] border-t-[var(--color-primary)]"></div>
-      <p class="mt-4 text-[var(--color-text-muted)]">{{ $t('common.loading') }}</p>
+      <div
+        class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-[var(--color-border)] border-t-[var(--color-primary)]"
+      />
+      <p class="mt-4 text-[var(--color-text-muted)]">
+        {{ $t('common.loading') }}
+      </p>
     </div>
 
     <!-- Empty State -->
     <div v-else-if="artworks.length === 0" class="text-center py-12">
-      <Icon name="Photo" class="w-16 h-16 mx-auto mb-4 text-[var(--color-text-muted)]" />
-      <p class="text-[var(--color-text-muted)] mb-4">{{ $t('dashboard.artworks.empty') }}</p>
+      <Icon
+        name="Photo"
+        class="w-16 h-16 mx-auto mb-4 text-[var(--color-text-muted)]"
+      />
+      <p class="text-[var(--color-text-muted)] mb-4">
+        {{ $t('dashboard.artworks.empty') }}
+      </p>
       <BaseButton
         variant="primary"
         size="lg"
@@ -45,43 +68,89 @@
       <table class="w-full">
         <thead class="bg-[var(--color-surface-secondary)]">
           <tr>
-            <th class="text-left px-4 py-3 text-sm font-medium">{{ $t('dashboard.artworks.artwork') }}</th>
-            <th class="text-center px-4 py-3 text-sm font-medium hidden md:table-cell">{{ $t('dashboard.artworks.views') }}</th>
-            <th class="text-center px-4 py-3 text-sm font-medium hidden md:table-cell">{{ $t('dashboard.artworks.likes') }}</th>
-            <th class="text-center px-4 py-3 text-sm font-medium hidden sm:table-cell">{{ $t('dashboard.artworks.visibility') }}</th>
-            <th class="text-right px-4 py-3 text-sm font-medium">{{ $t('dashboard.artworks.actions') }}</th>
+            <th class="text-left px-4 py-3 text-sm font-medium">
+              {{ $t('dashboard.artworks.artwork') }}
+            </th>
+            <th
+              class="text-center px-4 py-3 text-sm font-medium hidden md:table-cell"
+            >
+              {{ $t('dashboard.artworks.views') }}
+            </th>
+            <th
+              class="text-center px-4 py-3 text-sm font-medium hidden md:table-cell"
+            >
+              {{ $t('dashboard.artworks.likes') }}
+            </th>
+            <th
+              class="text-center px-4 py-3 text-sm font-medium hidden sm:table-cell"
+            >
+              {{ $t('dashboard.artworks.visibility') }}
+            </th>
+            <th class="text-right px-4 py-3 text-sm font-medium">
+              {{ $t('dashboard.artworks.actions') }}
+            </th>
           </tr>
         </thead>
         <tbody class="divide-y divide-[var(--color-border)]">
-          <tr v-for="artwork in artworks" :key="artwork.id" class="hover:bg-[var(--color-hover)] transition-colors">
+          <tr
+            v-for="artwork in artworks"
+            :key="artwork.id"
+            class="hover:bg-[var(--color-hover)] transition-colors"
+          >
             <td class="px-4 py-3">
-              <NuxtLink :to="`/artworks/${artwork.id}`" class="flex items-center gap-3 hover:opacity-80">
-                <div class="w-12 h-12 rounded bg-[var(--color-surface-tertiary)] overflow-hidden flex-shrink-0">
+              <NuxtLink
+                :to="`/artworks/${artwork.id}`"
+                class="flex items-center gap-3 hover:opacity-80"
+              >
+                <div
+                  class="w-12 h-12 rounded bg-[var(--color-surface-tertiary)] overflow-hidden flex-shrink-0"
+                >
                   <img
-                    v-if="artwork.signedThumbnailUrl || artwork.images?.[0]?.thumbnailUrl"
-                    :src="artwork.signedThumbnailUrl || artwork.images?.[0]?.thumbnailUrl"
+                    v-if="
+                      artwork.signedThumbnailUrl ||
+                      artwork.images?.[0]?.thumbnailUrl
+                    "
+                    :src="
+                      artwork.signedThumbnailUrl ||
+                      artwork.images?.[0]?.thumbnailUrl
+                    "
                     :alt="artwork.title"
                     class="w-full h-full object-cover"
                   />
                 </div>
-                <span class="font-medium truncate max-w-[200px]">{{ artwork.title }}</span>
+                <span class="font-medium truncate max-w-[200px]">{{
+                  artwork.title
+                }}</span>
               </NuxtLink>
             </td>
             <td class="text-center px-4 py-3 hidden md:table-cell">
               <span class="flex items-center justify-center gap-1 text-sm">
-                <Icon name="Eye" class="w-4 h-4 text-[var(--color-text-muted)]" />
+                <Icon
+                  name="Eye"
+                  class="w-4 h-4 text-[var(--color-text-muted)]"
+                />
                 {{ formatNumber(artwork.viewCount) }}
               </span>
             </td>
             <td class="text-center px-4 py-3 hidden md:table-cell">
               <span class="flex items-center justify-center gap-1 text-sm">
-                <Icon name="Heart" class="w-4 h-4 text-[var(--color-text-muted)]" />
+                <Icon
+                  name="Heart"
+                  class="w-4 h-4 text-[var(--color-text-muted)]"
+                />
                 {{ formatNumber(artwork.likeCount) }}
               </span>
             </td>
             <td class="text-center px-4 py-3 hidden sm:table-cell">
-              <span class="text-xs px-2 py-1 rounded-full" :class="getVisibilityClass(artwork.visibility)">
-                {{ $t(`upload.visibility${artwork.visibility.charAt(0) + artwork.visibility.slice(1).toLowerCase()}`) }}
+              <span
+                class="text-xs px-2 py-1 rounded-full"
+                :class="getVisibilityClass(artwork.visibility)"
+              >
+                {{
+                  $t(
+                    `upload.visibility${artwork.visibility.charAt(0) + artwork.visibility.slice(1).toLowerCase()}`,
+                  )
+                }}
               </span>
             </td>
             <td class="text-right px-4 py-3">
@@ -170,7 +239,9 @@ const fetchSignedThumbnailUrl = async (artwork: Artwork): Promise<string> => {
 const fetchArtworks = async () => {
   loading.value = true
   try {
-    const data = await api.get<{ artworks: Artwork[] }>('/api/users/me/artworks')
+    const data = await api.get<{ artworks: Artwork[] }>(
+      '/api/users/me/artworks',
+    )
     artworks.value = data.artworks
 
     // Fetch signed URLs for all artworks (client-side only)
@@ -178,7 +249,7 @@ const fetchArtworks = async () => {
       await Promise.all(
         artworks.value.map(async (artwork) => {
           artwork.signedThumbnailUrl = await fetchSignedThumbnailUrl(artwork)
-        })
+        }),
       )
     }
   } catch (error) {

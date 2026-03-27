@@ -1,7 +1,4 @@
-import {
-  startRegistration,
-  startAuthentication,
-} from '@simplewebauthn/browser'
+import { startRegistration, startAuthentication } from '@simplewebauthn/browser'
 import type {
   PublicKeyCredentialCreationOptionsJSON,
   PublicKeyCredentialRequestOptionsJSON,
@@ -96,7 +93,10 @@ export const usePasskey = () => {
 
     // 4. Store tokens and user
     setTokensWithRememberMe(
-      { accessToken: response.accessToken, refreshToken: response.refreshToken },
+      {
+        accessToken: response.accessToken,
+        refreshToken: response.refreshToken,
+      },
       rememberMe,
     )
     user.value = response.user

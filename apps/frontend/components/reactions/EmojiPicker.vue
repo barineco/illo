@@ -47,22 +47,28 @@ const handleCustomSubmit = () => {
 
 const handleClickOutside = (event: MouseEvent) => {
   const target = event.target as HTMLElement
-  if (target.closest('.emoji-picker') || target.closest('.reaction-add-button')) {
+  if (
+    target.closest('.emoji-picker') ||
+    target.closest('.reaction-add-button')
+  ) {
     return
   }
   emit('close')
 }
 
-watch(() => props.visible, (visible) => {
-  if (visible) {
-    setTimeout(() => {
-      document.addEventListener('click', handleClickOutside)
-    }, 0)
-  } else {
-    document.removeEventListener('click', handleClickOutside)
-    customEmojiInput.value = ''
-  }
-})
+watch(
+  () => props.visible,
+  (visible) => {
+    if (visible) {
+      setTimeout(() => {
+        document.addEventListener('click', handleClickOutside)
+      }, 0)
+    } else {
+      document.removeEventListener('click', handleClickOutside)
+      customEmojiInput.value = ''
+    }
+  },
+)
 
 // Cleanup on unmount
 onUnmounted(() => {
@@ -244,7 +250,9 @@ onUnmounted(() => {
 /* Transition */
 .picker-fade-enter-active,
 .picker-fade-leave-active {
-  transition: opacity 0.15s ease, transform 0.15s ease;
+  transition:
+    opacity 0.15s ease,
+    transform 0.15s ease;
 }
 
 .picker-fade-enter-from,

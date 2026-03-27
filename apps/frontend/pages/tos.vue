@@ -5,8 +5,8 @@
       <div class="mb-4">
         <button
           type="button"
-          @click="goBack"
           class="inline-flex items-center gap-2 text-[var(--color-text-muted)] hover:text-[var(--color-text)]"
+          @click="goBack"
         >
           <Icon name="ArrowLeft" class="w-5 h-5" />
           {{ $t('common.back') }}
@@ -18,18 +18,20 @@
         v-if="htmlContent"
         class="bg-[var(--color-surface)] rounded-xl p-6 md:p-8 shadow-sm"
       >
-        <div class="prose prose-sm md:prose max-w-none text-[var(--color-text)]">
+        <div
+          class="prose prose-sm md:prose max-w-none text-[var(--color-text)]"
+        >
           <!-- eslint-disable-next-line vue/no-v-html -->
-          <div v-html="htmlContent"></div>
+          <div v-html="htmlContent" />
         </div>
       </div>
 
       <!-- Not Available -->
-      <div
-        v-else
-        class="bg-[var(--color-surface)] rounded-xl p-8 text-center"
-      >
-        <Icon name="DocumentText" class="w-16 h-16 mx-auto text-[var(--color-text-muted)] mb-4" />
+      <div v-else class="bg-[var(--color-surface)] rounded-xl p-8 text-center">
+        <Icon
+          name="DocumentText"
+          class="w-16 h-16 mx-auto text-[var(--color-text-muted)] mb-4"
+        />
         <p class="text-[var(--color-text-muted)]">
           {{ $t('tos.notConfigured') }}
         </p>

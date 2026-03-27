@@ -14,7 +14,11 @@ export default defineNuxtRouteMiddleware(async (to) => {
     // Note: Server-side環境変数はprocess.envから直接読む（Nuxtのビルド時に固定されないように）
     let apiBase = ''
     if (import.meta.server) {
-      apiBase = process.env.API_BASE_SERVER || config.apiBaseServer || config.public.apiBase || ''
+      apiBase =
+        process.env.API_BASE_SERVER ||
+        config.apiBaseServer ||
+        config.public.apiBase ||
+        ''
     } else {
       apiBase = config.public.apiBase || ''
     }

@@ -41,7 +41,10 @@ export function useEmoji() {
   const saveRecentEmojis = () => {
     if (import.meta.client) {
       try {
-        localStorage.setItem(RECENT_EMOJIS_KEY, JSON.stringify(recentEmojis.value))
+        localStorage.setItem(
+          RECENT_EMOJIS_KEY,
+          JSON.stringify(recentEmojis.value),
+        )
       } catch {
         // Ignore storage errors
       }
@@ -64,7 +67,7 @@ export function useEmoji() {
   }
 
   const quickReactions = computed<EmojiItem[]>(() => {
-    return DEFAULT_QUICK_REACTIONS.map(emoji => ({
+    return DEFAULT_QUICK_REACTIONS.map((emoji) => ({
       shortcode: emoji,
       emoji,
       type: 'unicode' as const,
@@ -79,7 +82,7 @@ export function useEmoji() {
         id: 'recent',
         title: '最近使用',
         icon: '🕐',
-        emojis: recentEmojis.value.map(emoji => ({
+        emojis: recentEmojis.value.map((emoji) => ({
           shortcode: emoji,
           emoji,
           type: 'recent' as const,
@@ -92,7 +95,7 @@ export function useEmoji() {
         id: category.id,
         title: category.name,
         icon: category.icon,
-        emojis: category.emojis.map(emoji => ({
+        emojis: category.emojis.map((emoji) => ({
           shortcode: emoji,
           emoji,
           type: 'unicode' as const,
@@ -107,20 +110,26 @@ export function useEmoji() {
     if (!query.trim()) return []
 
     const results = searchEmojis(query)
-    return results.map(emoji => ({
+    return results.map((emoji) => ({
       shortcode: emoji,
       emoji,
       type: 'unicode' as const,
     }))
   }
 
-  const categories = computed<Array<{ id: string; name: string; icon: string }>>(() => {
+  const categories = computed<
+    Array<{ id: string; name: string; icon: string }>
+  >(() => {
     const cats = [
       { id: 'recent', name: '最近使用', icon: '🕐' },
-      ...EMOJI_CATEGORIES.map(c => ({ id: c.id, name: c.name, icon: c.icon })),
+      ...EMOJI_CATEGORIES.map((c) => ({
+        id: c.id,
+        name: c.name,
+        icon: c.icon,
+      })),
     ]
     if (recentEmojis.value.length === 0) {
-      return cats.filter(c => c.id !== 'recent')
+      return cats.filter((c) => c.id !== 'recent')
     }
     return cats
   })

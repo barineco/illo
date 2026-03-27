@@ -13,7 +13,9 @@
             v-if="user.avatarUrl && !avatarLoadState[user.id || user.username]"
             class="absolute inset-0 flex items-center justify-center rounded-full bg-[var(--color-surface-secondary)]"
           >
-            <div class="w-6 h-6 border-2 border-[var(--color-border)] border-t-[var(--color-primary)] rounded-full animate-spin" />
+            <div
+              class="w-6 h-6 border-2 border-[var(--color-border)] border-t-[var(--color-primary)] rounded-full animate-spin"
+            />
           </div>
           <img
             v-if="user.avatarUrl"
@@ -28,7 +30,10 @@
             v-else
             class="w-12 h-12 rounded-full bg-[var(--color-surface-secondary)] flex items-center justify-center"
           >
-            <Icon name="UserCircle" class="w-8 h-8 text-[var(--color-text-muted)]" />
+            <Icon
+              name="UserCircle"
+              class="w-8 h-8 text-[var(--color-text-muted)]"
+            />
           </div>
         </div>
       </NuxtLink>
@@ -41,15 +46,24 @@
         >
           {{ user.displayName || user.username }}
         </NuxtLink>
-        <div class="text-sm text-[var(--color-text-muted)] truncate">{{ formatUserHandle(user) }}</div>
-        <p v-if="user.bio" class="text-sm text-[var(--color-text)] mt-1 line-clamp-2">
+        <div class="text-sm text-[var(--color-text-muted)] truncate">
+          {{ formatUserHandle(user) }}
+        </div>
+        <p
+          v-if="user.bio"
+          class="text-sm text-[var(--color-text)] mt-1 line-clamp-2"
+        >
           {{ user.bio }}
         </p>
       </div>
 
       <!-- Artwork Previews -->
       <div
-        v-if="artworkDisplayStyle !== 'hidden' && user.artworks && user.artworks.length > 0"
+        v-if="
+          artworkDisplayStyle !== 'hidden' &&
+          user.artworks &&
+          user.artworks.length > 0
+        "
         class="flex-shrink-0 ml-4"
       >
         <div
@@ -57,7 +71,7 @@
             'grid gap-1',
             artworkDisplayStyle === 'small'
               ? 'grid-cols-4 w-32'
-              : 'grid-cols-4 gap-2 w-64'
+              : 'grid-cols-4 gap-2 w-64',
           ]"
         >
           <NuxtLink
@@ -66,7 +80,7 @@
             :to="`/artworks/${artwork.id}`"
             :class="[
               'aspect-square overflow-hidden rounded bg-[var(--color-surface-secondary)]',
-              artworkDisplayStyle === 'small' ? 'h-8' : ''
+              artworkDisplayStyle === 'small' ? 'h-8' : '',
             ]"
           >
             <img
@@ -76,7 +90,7 @@
               loading="lazy"
               :class="[
                 'w-full h-full object-cover hover:scale-110 transition-transform duration-200',
-                artworkDisplayStyle === 'small' ? 'h-8' : ''
+                artworkDisplayStyle === 'small' ? 'h-8' : '',
               ]"
             />
           </NuxtLink>
@@ -84,30 +98,50 @@
       </div>
 
       <!-- Follow Button (only show if not own profile and user is authenticated) -->
-      <div v-if="showFollowButton && currentUser && currentUser.username !== user.username" class="flex-shrink-0">
+      <div
+        v-if="
+          showFollowButton &&
+          currentUser &&
+          currentUser.username !== user.username
+        "
+        class="flex-shrink-0"
+      >
         <IconButton
           :variant="isUserFollowing(user) ? 'secondary' : 'primary'"
           size="md"
           shape="circle"
           :disabled="isFollowLoading(user.username)"
-          :aria-label="isUserFollowing(user) ? $t('user.unfollow') : $t('user.follow')"
-          :title="isUserFollowing(user) ? $t('user.unfollow') : $t('user.follow')"
+          :aria-label="
+            isUserFollowing(user) ? $t('user.unfollow') : $t('user.follow')
+          "
+          :title="
+            isUserFollowing(user) ? $t('user.unfollow') : $t('user.follow')
+          "
           @click.stop="handleFollowToggle(user)"
         >
-          <Icon :name="isUserFollowing(user) ? 'UserMinus' : 'UserPlus'" class="w-4 h-4" />
+          <Icon
+            :name="isUserFollowing(user) ? 'UserMinus' : 'UserPlus'"
+            class="w-4 h-4"
+          />
         </IconButton>
       </div>
     </div>
 
     <!-- Empty State -->
     <div v-if="users.length === 0 && !loading" class="text-center py-12">
-      <p class="text-[var(--color-text-muted)]">{{ emptyMessage || $t('user.noUsersFound') }}</p>
+      <p class="text-[var(--color-text-muted)]">
+        {{ emptyMessage || $t('user.noUsersFound') }}
+      </p>
     </div>
 
     <!-- Loading State -->
     <div v-if="loading" class="text-center py-12">
-      <div class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[var(--color-border)] border-t-[var(--color-primary)]"></div>
-      <p class="mt-4 text-[var(--color-text-muted)]">{{ $t('common.loading') }}</p>
+      <div
+        class="inline-block animate-spin rounded-full h-8 w-8 border-4 border-[var(--color-border)] border-t-[var(--color-primary)]"
+      />
+      <p class="mt-4 text-[var(--color-text-muted)]">
+        {{ $t('common.loading') }}
+      </p>
     </div>
   </div>
 </template>
@@ -126,7 +160,7 @@ const props = withDefaults(
     emptyMessage: 'ユーザーがいません',
     showFollowButton: true,
     artworkDisplayStyle: 'normal',
-  }
+  },
 )
 
 const emit = defineEmits<{
@@ -148,8 +182,14 @@ const fetchSignedArtworkUrls = async (userList: any[]) => {
   for (const user of userList) {
     if (user.artworks) {
       for (const artwork of user.artworks) {
-        if (artwork.images?.[0]?.id && !signedArtworkUrls.value.has(artwork.id)) {
-          artworkImages.push({ artworkId: artwork.id, imageId: artwork.images[0].id })
+        if (
+          artwork.images?.[0]?.id &&
+          !signedArtworkUrls.value.has(artwork.id)
+        ) {
+          artworkImages.push({
+            artworkId: artwork.id,
+            imageId: artwork.images[0].id,
+          })
         }
       }
     }
@@ -162,15 +202,25 @@ const fetchSignedArtworkUrls = async (userList: any[]) => {
         const signedUrl = await getSignedUrl(imageId, true)
         signedArtworkUrls.value.set(artworkId, signedUrl)
       } catch (error) {
-        console.error(`Failed to get signed URL for artwork ${artworkId}:`, error)
+        console.error(
+          `Failed to get signed URL for artwork ${artworkId}:`,
+          error,
+        )
       }
-    })
+    }),
   )
 }
 
 // Get signed URL for artwork thumbnail
-const getArtworkThumbnailUrl = (artwork: { id: string; images?: { id: string; thumbnailUrl: string }[] }) => {
-  return signedArtworkUrls.value.get(artwork.id) || artwork.images?.[0]?.thumbnailUrl || ''
+const getArtworkThumbnailUrl = (artwork: {
+  id: string
+  images?: { id: string; thumbnailUrl: string }[]
+}) => {
+  return (
+    signedArtworkUrls.value.get(artwork.id) ||
+    artwork.images?.[0]?.thumbnailUrl ||
+    ''
+  )
 }
 
 const onAvatarLoaded = (id: string) => {
@@ -210,7 +260,7 @@ watch(
     // Fetch signed URLs for new users
     await fetchSignedArtworkUrls(newUsers)
   },
-  { deep: true }
+  { deep: true },
 )
 
 const isUserFollowing = (user: any) => {

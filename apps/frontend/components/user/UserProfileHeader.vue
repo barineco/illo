@@ -15,14 +15,20 @@
     <!-- Profile Header -->
     <div class="flex items-start gap-6 mb-8">
       <!-- Avatar -->
-      <div class="w-32 h-32 rounded-full bg-[var(--color-surface-secondary)] -mt-16 border-4 border-[var(--color-background)] flex-shrink-0 overflow-hidden relative z-10 flex items-center justify-center">
+      <div
+        class="w-32 h-32 rounded-full bg-[var(--color-surface-secondary)] -mt-16 border-4 border-[var(--color-background)] flex-shrink-0 overflow-hidden relative z-10 flex items-center justify-center"
+      >
         <img
           v-if="user.avatarUrl"
           :src="user.avatarUrl"
           :alt="user.username"
           class="w-full h-full object-cover"
         />
-        <Icon v-else name="UserCircle" class="w-20 h-20 text-[var(--color-text-muted)]" />
+        <Icon
+          v-else
+          name="UserCircle"
+          class="w-20 h-20 text-[var(--color-text-muted)]"
+        />
       </div>
 
       <!-- User Info -->
@@ -39,13 +45,22 @@
             {{ $t('user.remote') }}
           </span>
         </div>
-        <div class="text-[var(--color-text-muted)] mb-4">{{ formatUserHandle(user) }}</div>
+        <div class="text-[var(--color-text-muted)] mb-4">
+          {{ formatUserHandle(user) }}
+        </div>
 
         <!-- eslint-disable-next-line vue/no-v-html -->
-        <p v-if="user.bio" class="text-[var(--color-text)] mb-4 max-w-2xl whitespace-pre-wrap bio-links" v-html="linkify(user.bio)"></p>
+        <p
+          v-if="user.bio"
+          class="text-[var(--color-text)] mb-4 max-w-2xl whitespace-pre-wrap bio-links"
+          v-html="linkify(user.bio)"
+        />
 
         <!-- Social Links -->
-        <div v-if="hasSocialLinks" class="flex flex-wrap items-center gap-3 mb-4">
+        <div
+          v-if="hasSocialLinks"
+          class="flex flex-wrap items-center gap-3 mb-4"
+        >
           <!-- Bluesky -->
           <a
             v-if="user.socialLinks?.bluesky || user.blueskyHandle"
@@ -53,11 +68,18 @@
             target="_blank"
             rel="noopener noreferrer"
             class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--color-surface)] hover:bg-[var(--color-hover)] rounded-full text-sm transition-colors"
-            :title="user.blueskyVerified ? $t('user.blueskyVerified') : 'Bluesky'"
+            :title="
+              user.blueskyVerified ? $t('user.blueskyVerified') : 'Bluesky'
+            "
           >
             <BlueskyIcon class="w-4 h-4 text-[var(--color-bluesky)]" />
             <span>{{ user.blueskyHandle || user.socialLinks?.bluesky }}</span>
-            <Icon v-if="user.blueskyVerified" name="CheckBadge" solid class="w-4 h-4 text-[var(--color-bluesky)]" />
+            <Icon
+              v-if="user.blueskyVerified"
+              name="CheckBadge"
+              solid
+              class="w-4 h-4 text-[var(--color-bluesky)]"
+            />
           </a>
 
           <!-- Custom Links -->
@@ -110,39 +132,73 @@
         <div class="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm">
           <button
             v-if="isOwnProfile"
-            @click="$emit('selectTab', 'artworks')"
             class="hover:text-[var(--color-primary)] transition-colors"
+            @click="$emit('selectTab', 'artworks')"
           >
             <span class="font-bold">{{ user.artworksCount }}</span>
-            <span class="text-[var(--color-text-muted)] ml-1">{{ $t('user.works') }}</span>
+            <span class="text-[var(--color-text-muted)] ml-1">{{
+              $t('user.works')
+            }}</span>
           </button>
           <div v-else>
             <span class="font-bold">{{ user.artworksCount }}</span>
-            <span class="text-[var(--color-text-muted)] ml-1">{{ $t('user.works') }}</span>
+            <span class="text-[var(--color-text-muted)] ml-1">{{
+              $t('user.works')
+            }}</span>
           </div>
 
           <button
-            @click="$emit('selectStat', 'followers')"
             class="transition-colors"
-            :class="activeStat === 'followers' ? 'text-[var(--color-primary)]' : 'hover:text-[var(--color-primary)]'"
+            :class="
+              activeStat === 'followers'
+                ? 'text-[var(--color-primary)]'
+                : 'hover:text-[var(--color-primary)]'
+            "
+            @click="$emit('selectStat', 'followers')"
           >
-            <span class="font-bold">{{ formatCount(user.followersCount) }}</span>
-            <span class="ml-1" :class="activeStat === 'followers' ? 'text-[var(--color-primary)]' : 'text-[var(--color-text-muted)]'">{{ $t('user.followers') }}</span>
+            <span class="font-bold">{{
+              formatCount(user.followersCount)
+            }}</span>
+            <span
+              class="ml-1"
+              :class="
+                activeStat === 'followers'
+                  ? 'text-[var(--color-primary)]'
+                  : 'text-[var(--color-text-muted)]'
+              "
+              >{{ $t('user.followers') }}</span
+            >
           </button>
 
           <button
-            @click="$emit('selectStat', 'following')"
             class="transition-colors"
-            :class="activeStat === 'following' ? 'text-[var(--color-primary)]' : 'hover:text-[var(--color-primary)]'"
+            :class="
+              activeStat === 'following'
+                ? 'text-[var(--color-primary)]'
+                : 'hover:text-[var(--color-primary)]'
+            "
+            @click="$emit('selectStat', 'following')"
           >
-            <span class="font-bold">{{ formatCount(user.followingCount) }}</span>
-            <span class="ml-1" :class="activeStat === 'following' ? 'text-[var(--color-primary)]' : 'text-[var(--color-text-muted)]'">{{ $t('user.following') }}</span>
+            <span class="font-bold">{{
+              formatCount(user.followingCount)
+            }}</span>
+            <span
+              class="ml-1"
+              :class="
+                activeStat === 'following'
+                  ? 'text-[var(--color-primary)]'
+                  : 'text-[var(--color-text-muted)]'
+              "
+              >{{ $t('user.following') }}</span
+            >
           </button>
 
           <!-- Registration Date -->
           <div class="flex items-center gap-1 text-[var(--color-text-muted)]">
             <Icon name="Calendar" class="w-4 h-4" />
-            <span>{{ $t('user.joinedOn') }}: {{ formatDate(user.createdAt) }}</span>
+            <span
+              >{{ $t('user.joinedOn') }}: {{ formatDate(user.createdAt) }}</span
+            >
           </div>
 
           <!-- Remote Instance Info -->

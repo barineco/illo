@@ -11,13 +11,8 @@ interface Props {
 
 const props = defineProps<Props>()
 
-const {
-  reactions,
-  isLoading,
-  fetchReactions,
-  toggleReaction,
-  addReaction,
-} = useReactions(props.artworkId)
+const { reactions, isLoading, fetchReactions, toggleReaction, addReaction } =
+  useReactions(props.artworkId)
 
 const { recordEmojiUsage } = useEmoji()
 

@@ -3,6 +3,7 @@ import {
   Logger,
   OnModuleInit,
   UnauthorizedException,
+  BadRequestException,
 } from '@nestjs/common'
 import { ConfigService } from '@nestjs/config'
 import { JwtService } from '@nestjs/jwt'
@@ -432,6 +433,17 @@ export class BlueskyOAuthService implements OnModuleInit {
    * Unlink a Bluesky account from a user
    */
   async unlinkBlueskyAccount(userId: string): Promise<void> {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { email: true, isEmailVerified: true },
+    })
+
+    if (!user?.email || !user.isEmailVerified) {
+      throw new BadRequestException(
+        'Please set and verify your email address before unlinking your Bluesky account',
+      )
+    }
+
     await this.prisma.user.update({
       where: { id: userId },
       data: {
