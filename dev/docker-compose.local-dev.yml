@@ -20,6 +20,26 @@ services:
     networks:
       - illo-localdev
 
+  # Test Database
+  db-test:
+    image: postgres:16-alpine
+    container_name: illo-localdev-db-test
+    environment:
+      POSTGRES_USER: illo_test
+      POSTGRES_PASSWORD: illo_test
+      POSTGRES_DB: illo_test
+    ports:
+      - "5433:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U illo_test"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - illo-localdev
+
   # Redis Cache
   redis-localdev:
     image: redis:7-alpine

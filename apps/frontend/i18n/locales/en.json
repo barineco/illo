@@ -309,6 +309,7 @@
   "common": {
     "loading": "Loading...",
     "error": "An error occurred",
+    "success": "Success",
     "retry": "Retry",
     "save": "Save",
     "saving": "Saving...",

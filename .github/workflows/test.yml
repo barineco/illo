@@ -1,0 +1,60 @@
+name: Test
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: illo_test
+          POSTGRES_PASSWORD: illo_test
+          POSTGRES_DB: illo_test
+        ports:
+          - 5433:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    env:
+      DATABASE_URL: postgresql://illo_test:illo_test@localhost:5433/illo_test
+      JWT_SECRET: test-jwt-secret-key
+      JWT_REFRESH_SECRET: test-jwt-refresh-secret-key
+      INSTANCE_URL: http://localhost:3000
+      FRONTEND_URL: http://localhost:3000
+      INSTANCE_NAME: illo-test
+      BASE_URL: http://localhost:3000
+      ENCRYPTION_KEY: a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4e5f6a1b2
+      SMTP_HOST: localhost
+      SMTP_PORT: "1025"
+      STORAGE_TYPE: local
+      STORAGE_LOCAL_PATH: /tmp/illo-test-storage
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'pnpm'
+      - run: pnpm install --frozen-lockfile
+      - run: cd packages/shared && pnpm build
+      - run: cd apps/backend && npx prisma generate
+      - run: cd apps/backend && npx prisma migrate deploy
+        env:
+          DATABASE_URL: postgresql://illo_test:illo_test@localhost:5433/illo_test
+      - name: Backend unit tests
+        run: cd apps/backend && pnpm test
+      - name: Backend integration tests
+        run: cd apps/backend && pnpm test:integration
+      - name: Frontend unit tests
+        run: cd apps/frontend && pnpm test
